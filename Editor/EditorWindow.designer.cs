@@ -38,8 +38,8 @@ namespace ARdevKit
             this.btn_editor_scene_delete = new System.Windows.Forms.Button();
             this.pnl_editor_scenes = new System.Windows.Forms.Panel();
             this.pnl_editor_properties = new System.Windows.Forms.Panel();
-            this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             this.cmb_editor_properties_objectSelection = new System.Windows.Forms.ComboBox();
+            this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             this.mst_editor_menu = new System.Windows.Forms.MenuStrip();
             this.tsm_editor_menu_file = new System.Windows.Forms.ToolStripMenuItem();
             this.tsm_editor_menu_file_new = new System.Windows.Forms.ToolStripMenuItem();
@@ -175,14 +175,6 @@ namespace ARdevKit
             this.pnl_editor_properties.Size = new System.Drawing.Size(200, 673);
             this.pnl_editor_properties.TabIndex = 2;
             // 
-            // propertyGrid1
-            // 
-            this.propertyGrid1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
-            this.propertyGrid1.Location = new System.Drawing.Point(-1, 20);
-            this.propertyGrid1.Name = "propertyGrid1";
-            this.propertyGrid1.Size = new System.Drawing.Size(199, 647);
-            this.propertyGrid1.TabIndex = 2;
-            // 
             // cmb_editor_properties_objectSelection
             // 
             this.cmb_editor_properties_objectSelection.Dock = System.Windows.Forms.DockStyle.Right;
@@ -195,6 +187,14 @@ namespace ARdevKit
             this.cmb_editor_properties_objectSelection.Sorted = true;
             this.cmb_editor_properties_objectSelection.TabIndex = 1;
             this.cmb_editor_properties_objectSelection.SelectedIndexChanged += new System.EventHandler(this.cmb_editor_properties_objectSelection_SelectedIndexChanged);
+            // 
+            // propertyGrid1
+            // 
+            this.propertyGrid1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+            this.propertyGrid1.Location = new System.Drawing.Point(-1, 20);
+            this.propertyGrid1.Name = "propertyGrid1";
+            this.propertyGrid1.Size = new System.Drawing.Size(199, 647);
+            this.propertyGrid1.TabIndex = 2;
             // 
             // mst_editor_menu
             // 
@@ -453,9 +453,6 @@ namespace ARdevKit
             // pnl_editor_preview
             // 
             this.pnl_editor_preview.AllowDrop = true;
-            this.pnl_editor_preview.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.pnl_editor_preview.BackColor = System.Drawing.SystemColors.Control;
             this.pnl_editor_preview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnl_editor_preview.Controls.Add(this.menuStrip1);
@@ -492,6 +489,7 @@ namespace ARdevKit
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel1.AutoScroll = true;
+            this.panel1.AutoScrollMargin = new System.Drawing.Size(3, 3);
             this.panel1.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel1.Controls.Add(this.pnl_editor_preview);
