@@ -393,7 +393,7 @@ namespace ARdevKit
             if (this.project.Trackables.Count < 10)
             {
                 Button tempButton = new Button();
-                tempButton.Location = new System.Drawing.Point(54 + (52 * project.Trackables.Count), 34);
+                tempButton.Location = new System.Drawing.Point(54 + (52 * project.Trackables.Count), 4);
                 tempButton.Name = "btn_editor_scene_scene_" + (this.project.Trackables.Count + 1);
                 tempButton.Size = new System.Drawing.Size(46, 45);
                 tempButton.TabIndex = 1;
@@ -722,7 +722,7 @@ namespace ARdevKit
             for (int i = 0; i < this.project.Trackables.Count; i++)
             {
                 Button tempButton = new Button();
-                tempButton.Location = new System.Drawing.Point(54 + (i * 52), 34);
+                tempButton.Location = new System.Drawing.Point(54 + (i * 52), 4);
                 tempButton.Name = "btn_editor_scene_scene_" + (this.project.Trackables.Count + 1);
                 tempButton.Size = new System.Drawing.Size(46, 45);
                 tempButton.Text = Convert.ToString(i + 1);
@@ -752,7 +752,7 @@ namespace ARdevKit
             for (int i = 0; i < this.project.Trackables.Count; i++)
             {
                 Button tempButton = new Button();
-                tempButton.Location = new System.Drawing.Point(54 + (i * 52), 34);
+                tempButton.Location = new System.Drawing.Point(54 + (i * 52), 4);
                 tempButton.Name = "btn_editor_scene_scene_" + (this.project.Trackables.Count + 1);
                 tempButton.Size = new System.Drawing.Size(46, 45);
                 tempButton.Text = Convert.ToString(i + 1);

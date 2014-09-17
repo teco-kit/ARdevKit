@@ -30,9 +30,6 @@ namespace ARdevKit
         /// </summary>
         private void InitializeComponent()
         {
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.pnl_editor_preview = new System.Windows.Forms.Panel();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.pnl_editor_selection = new System.Windows.Forms.Panel();
             this.cmb_editor_selection_toolSelection = new System.Windows.Forms.ComboBox();
             this.pnl_editor_status = new System.Windows.Forms.Panel();
@@ -74,52 +71,23 @@ namespace ARdevKit
             this.tsm_editor_menu_help = new System.Windows.Forms.ToolStripMenuItem();
             this.tsm_editor_menu_help_help = new System.Windows.Forms.ToolStripMenuItem();
             this.tsm_editor_menu_help_info = new System.Windows.Forms.ToolStripMenuItem();
-            this.panel1.SuspendLayout();
-            this.pnl_editor_preview.SuspendLayout();
+            this.pnl_editor_preview = new System.Windows.Forms.Panel();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.miniToolStrip = new System.Windows.Forms.MenuStrip();
+            this.panel1 = new System.Windows.Forms.Panel();
             this.pnl_editor_selection.SuspendLayout();
             this.pnl_editor_status.SuspendLayout();
             this.pnl_editor_scenes.SuspendLayout();
             this.pnl_editor_properties.SuspendLayout();
             this.mst_editor_menu.SuspendLayout();
+            this.pnl_editor_preview.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // panel1
-            // 
-            this.panel1.AutoScroll = true;
-            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel1.Controls.Add(this.pnl_editor_preview);
-            this.panel1.Location = new System.Drawing.Point(141, 27);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(661, 553);
-            this.panel1.TabIndex = 4;
-            this.panel1.DragDrop += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragDrop);
-            this.panel1.DragEnter += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragEnter);
-            // 
-            // pnl_editor_preview
-            // 
-            this.pnl_editor_preview.AllowDrop = true;
-            this.pnl_editor_preview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pnl_editor_preview.Controls.Add(this.menuStrip1);
-            this.pnl_editor_preview.Location = new System.Drawing.Point(3, 3);
-            this.pnl_editor_preview.MinimumSize = new System.Drawing.Size(320, 240);
-            this.pnl_editor_preview.Name = "pnl_editor_preview";
-            this.pnl_editor_preview.Size = new System.Drawing.Size(653, 545);
-            this.pnl_editor_preview.TabIndex = 3;
-            this.pnl_editor_preview.SizeChanged += new System.EventHandler(this.pnl_editor_preview_SizeChanged);
-            this.pnl_editor_preview.Click += new System.EventHandler(this.pnl_editor_preview_Click);
-            this.pnl_editor_preview.DragDrop += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragDrop);
-            this.pnl_editor_preview.DragEnter += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragEnter);
-            // 
-            // menuStrip1
-            // 
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(651, 24);
-            this.menuStrip1.TabIndex = 0;
-            this.menuStrip1.Text = "menuStrip1";
             // 
             // pnl_editor_selection
             // 
+            this.pnl_editor_selection.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.pnl_editor_selection.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnl_editor_selection.Controls.Add(this.cmb_editor_selection_toolSelection);
             this.pnl_editor_selection.Location = new System.Drawing.Point(0, 27);
@@ -144,7 +112,8 @@ namespace ARdevKit
             // pnl_editor_status
             // 
             this.pnl_editor_status.Controls.Add(this.lbl_version);
-            this.pnl_editor_status.Location = new System.Drawing.Point(0, 706);
+            this.pnl_editor_status.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.pnl_editor_status.Location = new System.Drawing.Point(0, 707);
             this.pnl_editor_status.Name = "pnl_editor_status";
             this.pnl_editor_status.Size = new System.Drawing.Size(1008, 23);
             this.pnl_editor_status.TabIndex = 3;
@@ -162,9 +131,9 @@ namespace ARdevKit
             // btn_editor_scene_new
             // 
             this.btn_editor_scene_new.BackColor = System.Drawing.Color.DarkGray;
-            this.btn_editor_scene_new.Location = new System.Drawing.Point(3, 34);
+            this.btn_editor_scene_new.Location = new System.Drawing.Point(3, 3);
             this.btn_editor_scene_new.Name = "btn_editor_scene_new";
-            this.btn_editor_scene_new.Size = new System.Drawing.Size(45, 45);
+            this.btn_editor_scene_new.Size = new System.Drawing.Size(45, 46);
             this.btn_editor_scene_new.TabIndex = 0;
             this.btn_editor_scene_new.Text = "+";
             this.btn_editor_scene_new.UseVisualStyleBackColor = true;
@@ -172,9 +141,11 @@ namespace ARdevKit
             // 
             // btn_editor_scene_delete
             // 
-            this.btn_editor_scene_delete.Location = new System.Drawing.Point(611, 34);
+            this.btn_editor_scene_delete.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.btn_editor_scene_delete.Location = new System.Drawing.Point(611, 3);
             this.btn_editor_scene_delete.Name = "btn_editor_scene_delete";
-            this.btn_editor_scene_delete.Size = new System.Drawing.Size(45, 45);
+            this.btn_editor_scene_delete.Size = new System.Drawing.Size(45, 46);
             this.btn_editor_scene_delete.TabIndex = 2;
             this.btn_editor_scene_delete.Text = "-";
             this.btn_editor_scene_delete.UseVisualStyleBackColor = true;
@@ -182,19 +153,23 @@ namespace ARdevKit
             // 
             // pnl_editor_scenes
             // 
+            this.pnl_editor_scenes.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.pnl_editor_scenes.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnl_editor_scenes.Controls.Add(this.btn_editor_scene_delete);
             this.pnl_editor_scenes.Controls.Add(this.btn_editor_scene_new);
-            this.pnl_editor_scenes.Location = new System.Drawing.Point(141, 586);
+            this.pnl_editor_scenes.Location = new System.Drawing.Point(141, 645);
             this.pnl_editor_scenes.Name = "pnl_editor_scenes";
-            this.pnl_editor_scenes.Size = new System.Drawing.Size(661, 114);
+            this.pnl_editor_scenes.Size = new System.Drawing.Size(661, 55);
             this.pnl_editor_scenes.TabIndex = 2;
             // 
             // pnl_editor_properties
             // 
+            this.pnl_editor_properties.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.pnl_editor_properties.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pnl_editor_properties.Controls.Add(this.propertyGrid1);
             this.pnl_editor_properties.Controls.Add(this.cmb_editor_properties_objectSelection);
+            this.pnl_editor_properties.Controls.Add(this.propertyGrid1);
             this.pnl_editor_properties.Location = new System.Drawing.Point(808, 27);
             this.pnl_editor_properties.Name = "pnl_editor_properties";
             this.pnl_editor_properties.Size = new System.Drawing.Size(200, 673);
@@ -202,15 +177,15 @@ namespace ARdevKit
             // 
             // propertyGrid1
             // 
-            this.propertyGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.propertyGrid1.Location = new System.Drawing.Point(0, 21);
+            this.propertyGrid1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+            this.propertyGrid1.Location = new System.Drawing.Point(-1, 20);
             this.propertyGrid1.Name = "propertyGrid1";
-            this.propertyGrid1.Size = new System.Drawing.Size(198, 650);
+            this.propertyGrid1.Size = new System.Drawing.Size(199, 647);
             this.propertyGrid1.TabIndex = 2;
             // 
             // cmb_editor_properties_objectSelection
             // 
-            this.cmb_editor_properties_objectSelection.Dock = System.Windows.Forms.DockStyle.Top;
+            this.cmb_editor_properties_objectSelection.Dock = System.Windows.Forms.DockStyle.Right;
             this.cmb_editor_properties_objectSelection.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmb_editor_properties_objectSelection.FormattingEnabled = true;
             this.cmb_editor_properties_objectSelection.Location = new System.Drawing.Point(0, 0);
@@ -475,26 +450,75 @@ namespace ARdevKit
             this.tsm_editor_menu_help_info.Text = "Info";
             this.tsm_editor_menu_help_info.Click += new System.EventHandler(this.tsm_editor_menu_help_info_Click);
             // 
+            // pnl_editor_preview
+            // 
+            this.pnl_editor_preview.AllowDrop = true;
+            this.pnl_editor_preview.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pnl_editor_preview.BackColor = System.Drawing.SystemColors.Control;
+            this.pnl_editor_preview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnl_editor_preview.Controls.Add(this.menuStrip1);
+            this.pnl_editor_preview.Location = new System.Drawing.Point(3, 3);
+            this.pnl_editor_preview.MinimumSize = new System.Drawing.Size(320, 240);
+            this.pnl_editor_preview.Name = "pnl_editor_preview";
+            this.pnl_editor_preview.Size = new System.Drawing.Size(653, 604);
+            this.pnl_editor_preview.TabIndex = 3;
+            this.pnl_editor_preview.SizeChanged += new System.EventHandler(this.pnl_editor_preview_SizeChanged);
+            this.pnl_editor_preview.Click += new System.EventHandler(this.pnl_editor_preview_Click);
+            this.pnl_editor_preview.DragDrop += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragDrop);
+            this.pnl_editor_preview.DragEnter += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragEnter);
+            // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(651, 24);
+            this.menuStrip1.TabIndex = 0;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // miniToolStrip
+            // 
+            this.miniToolStrip.AutoSize = false;
+            this.miniToolStrip.Dock = System.Windows.Forms.DockStyle.None;
+            this.miniToolStrip.Location = new System.Drawing.Point(6, 2);
+            this.miniToolStrip.Name = "miniToolStrip";
+            this.miniToolStrip.Size = new System.Drawing.Size(651, 24);
+            this.miniToolStrip.TabIndex = 0;
+            // 
+            // panel1
+            // 
+            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panel1.AutoScroll = true;
+            this.panel1.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.pnl_editor_preview);
+            this.panel1.Location = new System.Drawing.Point(141, 27);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(661, 612);
+            this.panel1.TabIndex = 4;
+            this.panel1.DragDrop += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragDrop);
+            this.panel1.DragEnter += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragEnter);
+            // 
             // EditorWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1008, 729);
+            this.ClientSize = new System.Drawing.Size(1008, 730);
             this.Controls.Add(this.pnl_editor_status);
             this.Controls.Add(this.pnl_editor_scenes);
             this.Controls.Add(this.pnl_editor_properties);
             this.Controls.Add(this.pnl_editor_selection);
             this.Controls.Add(this.mst_editor_menu);
             this.Controls.Add(this.panel1);
-            this.MainMenuStrip = this.menuStrip1;
-            this.MaximumSize = new System.Drawing.Size(1024, 768);
-            this.MinimumSize = new System.Drawing.Size(1024, 726);
+            this.MainMenuStrip = this.miniToolStrip;
+            this.MaximumSize = new System.Drawing.Size(1920, 1080);
+            this.MinimumSize = new System.Drawing.Size(1024, 768);
             this.Name = "EditorWindow";
             this.Text = "ARdevKit";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.EditorWindow_FormClosing);
-            this.panel1.ResumeLayout(false);
-            this.pnl_editor_preview.ResumeLayout(false);
-            this.pnl_editor_preview.PerformLayout();
             this.pnl_editor_selection.ResumeLayout(false);
             this.pnl_editor_status.ResumeLayout(false);
             this.pnl_editor_status.PerformLayout();
@@ -502,6 +526,9 @@ namespace ARdevKit
             this.pnl_editor_properties.ResumeLayout(false);
             this.mst_editor_menu.ResumeLayout(false);
             this.mst_editor_menu.PerformLayout();
+            this.pnl_editor_preview.ResumeLayout(false);
+            this.pnl_editor_preview.PerformLayout();
+            this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -547,10 +574,7 @@ namespace ARdevKit
         private ToolStripMenuItem tsm_editor_menu_help_help;
         private ToolStripMenuItem tsm_editor_menu_help_info;
         private MenuStrip mst_editor_menu;
-        private Panel panel1;
-        private Panel pnl_editor_preview;
         private ToolStripMenuItem trackableDruckenToolStripMenuItem;
-        private MenuStrip menuStrip1;
         private ToolStripMenuItem tsm_editor_menu_edit_delete;
         private System.Windows.Forms.Button btn_editor_scene_scene_1;
         private ToolStripMenuItem sendProjectMenu;
@@ -559,6 +583,10 @@ namespace ARdevKit
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripMenuItem sendProject;
         private ToolStripMenuItem DeviceDebug;
+        private Panel pnl_editor_preview;
+        private MenuStrip menuStrip1;
+        private MenuStrip miniToolStrip;
+        private Panel panel1;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
