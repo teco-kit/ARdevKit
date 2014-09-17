@@ -87,6 +87,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controller\EditorController\HTMLPreviewController.cs" />
     <Compile Include="Controller\EditorController\ObjectCopier.cs" />
     <Compile Include="Controller\EditorController\ThumbCreator.cs" />
     <Compile Include="Controller\TestController\FrameExtractor.cs">

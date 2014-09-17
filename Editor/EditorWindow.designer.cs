@@ -75,6 +75,7 @@ namespace ARdevKit
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.miniToolStrip = new System.Windows.Forms.MenuStrip();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.html_preview = new System.Windows.Forms.WebBrowser();
             this.pnl_editor_selection.SuspendLayout();
             this.pnl_editor_status.SuspendLayout();
             this.pnl_editor_scenes.SuspendLayout();
@@ -459,7 +460,7 @@ namespace ARdevKit
             this.pnl_editor_preview.Location = new System.Drawing.Point(3, 3);
             this.pnl_editor_preview.MinimumSize = new System.Drawing.Size(320, 240);
             this.pnl_editor_preview.Name = "pnl_editor_preview";
-            this.pnl_editor_preview.Size = new System.Drawing.Size(653, 604);
+            this.pnl_editor_preview.Size = new System.Drawing.Size(320, 240);
             this.pnl_editor_preview.TabIndex = 3;
             this.pnl_editor_preview.SizeChanged += new System.EventHandler(this.pnl_editor_preview_SizeChanged);
             this.pnl_editor_preview.Click += new System.EventHandler(this.pnl_editor_preview_Click);
@@ -470,7 +471,7 @@ namespace ARdevKit
             // 
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(651, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(318, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -492,6 +493,7 @@ namespace ARdevKit
             this.panel1.AutoScrollMargin = new System.Drawing.Size(3, 3);
             this.panel1.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.html_preview);
             this.panel1.Controls.Add(this.pnl_editor_preview);
             this.panel1.Location = new System.Drawing.Point(141, 27);
             this.panel1.Name = "panel1";
@@ -499,6 +501,15 @@ namespace ARdevKit
             this.panel1.TabIndex = 4;
             this.panel1.DragDrop += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragDrop);
             this.panel1.DragEnter += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragEnter);
+            // 
+            // html_preview
+            // 
+            this.html_preview.Location = new System.Drawing.Point(3, 123);
+            this.html_preview.MinimumSize = new System.Drawing.Size(20, 20);
+            this.html_preview.Name = "html_preview";
+            this.html_preview.Size = new System.Drawing.Size(652, 352);
+            this.html_preview.TabIndex = 4;
+            this.html_preview.Url = new System.Uri("about:blank", System.UriKind.Absolute);
             // 
             // EditorWindow
             // 
@@ -585,6 +596,7 @@ namespace ARdevKit
         private MenuStrip menuStrip1;
         private MenuStrip miniToolStrip;
         private Panel panel1;
+        private WebBrowser html_preview;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
@@ -616,6 +628,22 @@ namespace ARdevKit
         {
             get { return pnl_editor_preview; }
             set { pnl_editor_preview = value; }
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// Gets or sets the HTMLPreview.
+        /// </summary>
+        ///
+        /// <value>
+        /// The HTMLPreview.
+        /// </value>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        public System.Windows.Forms.WebBrowser HTMLPreview
+        {
+            get { return html_preview; }
+            set { html_preview = value; }
         }
 
         /**
