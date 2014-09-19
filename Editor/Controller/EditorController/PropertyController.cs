@@ -218,10 +218,10 @@ namespace Controller.EditorController
                 else
                 {
                     ((PictureMarker)ew.CurrentElement).PicturePath = e.ChangedItem.Value.ToString();
-                    this.ew.Pnl_editor_preview.Controls.Remove(this.ew.PreviewController.findBox(this.ew.CurrentElement));
-                    this.ew.PreviewController.addPictureBox(this.ew.CurrentElement,
+                    this.ew.Pnl_editor_preview.Controls.Remove(this.ew.HTMLPreviewController.findBox(this.ew.CurrentElement));
+                    this.ew.HTMLPreviewController.addPictureBox(this.ew.CurrentElement,
                         new Vector3D(this.ew.Pnl_editor_preview.Width / 2, this.ew.Pnl_editor_preview.Height / 2, 0));
-                    PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
+                    PictureBox temp = this.ew.HTMLPreviewController.findBox(this.ew.CurrentElement);
                     temp.BorderStyle = BorderStyle.Fixed3D;
                     temp.BringToFront();
                 }
@@ -239,10 +239,10 @@ namespace Controller.EditorController
                 else
                 {
                     ((ImageTrackable)ew.CurrentElement).ImagePath = e.ChangedItem.Value.ToString();
-                    this.ew.Pnl_editor_preview.Controls.Remove(this.ew.PreviewController.findBox(this.ew.CurrentElement));
-                    this.ew.PreviewController.addPictureBox(this.ew.CurrentElement,
+                    this.ew.Pnl_editor_preview.Controls.Remove(this.ew.HTMLPreviewController.findBox(this.ew.CurrentElement));
+                    this.ew.HTMLPreviewController.addPictureBox(this.ew.CurrentElement,
                         new Vector3D(this.ew.Pnl_editor_preview.Width / 2, this.ew.Pnl_editor_preview.Height / 2, 0));
-                    PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
+                    PictureBox temp = this.ew.HTMLPreviewController.findBox(this.ew.CurrentElement);
                     temp.BorderStyle = BorderStyle.Fixed3D;
                     temp.BringToFront();
                 }
@@ -259,8 +259,8 @@ namespace Controller.EditorController
                 else
                 {
                     ((Abstract2DAugmentation)ew.CurrentElement).ResFilePath = e.ChangedItem.Value.ToString();
-                    this.ew.PreviewController.reloadPreviewable((AbstractAugmentation)this.ew.CurrentElement);
-                    PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
+                    this.ew.HTMLPreviewController.reloadPreviewable((AbstractAugmentation)this.ew.CurrentElement);
+                    PictureBox temp = this.ew.HTMLPreviewController.findBox(this.ew.CurrentElement);
                     temp.BorderStyle = BorderStyle.Fixed3D;
                     temp.BringToFront();
                 }
@@ -286,14 +286,14 @@ namespace Controller.EditorController
             {
                 if (string.Equals((string)e.ChangedItem.Value, "", StringComparison.Ordinal))
                 {
-                    (ew.PreviewController.findBox(ew.CurrentElement).ContextMenu).MenuItems[5].Enabled = false;
+                    (ew.HTMLPreviewController.findBox(ew.CurrentElement).ContextMenu).MenuItems[5].Enabled = false;
 
                     return;
                 }
 
                 if (e.OldValue == null || string.Equals(e.OldValue.ToString(), "", StringComparison.Ordinal))
                 {
-                    (ew.PreviewController.findBox(ew.CurrentElement).ContextMenu).MenuItems[5].Enabled = true;
+                    (ew.HTMLPreviewController.findBox(ew.CurrentElement).ContextMenu).MenuItems[5].Enabled = true;
 
                     return;
                 }
@@ -307,8 +307,8 @@ namespace Controller.EditorController
                 || String.Equals(e.ChangedItem.Label.ToString(), "Y", StringComparison.Ordinal))
                 && !(String.Equals(e.ChangedItem.Parent.Label.ToString(), "Rotating", StringComparison.Ordinal)))
             {
-                this.ew.PreviewController.reloadPreviewable((AbstractAugmentation)this.ew.CurrentElement);
-                PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
+                this.ew.HTMLPreviewController.reloadPreviewable((AbstractAugmentation)this.ew.CurrentElement);
+                PictureBox temp = this.ew.HTMLPreviewController.findBox(this.ew.CurrentElement);
                 temp.BorderStyle = BorderStyle.Fixed3D;
                 temp.BringToFront();
 
@@ -319,7 +319,7 @@ namespace Controller.EditorController
             if (String.Equals(e.ChangedItem.Label.ToString(), "Z", StringComparison.Ordinal)
                 && String.Equals(e.ChangedItem.Parent.Label.ToString(), "Rotation", StringComparison.Ordinal))
             {
-                ew.PreviewController.rotateAugmentation(this.ew.CurrentElement);
+                ew.HTMLPreviewController.rotateAugmentation(this.ew.CurrentElement);
 
                 return;
             }
@@ -330,8 +330,8 @@ namespace Controller.EditorController
                 if (string.Equals(e.ChangedItem.Label.ToString(), "Height", StringComparison.Ordinal)
                     || string.Equals(e.ChangedItem.Label.ToString(), "Width", StringComparison.Ordinal))
                 {
-                    this.ew.PreviewController.reloadPreviewable((AbstractAugmentation)this.ew.CurrentElement);
-                    PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
+                    this.ew.HTMLPreviewController.reloadPreviewable((AbstractAugmentation)this.ew.CurrentElement);
+                    PictureBox temp = this.ew.HTMLPreviewController.findBox(this.ew.CurrentElement);
                     temp.BorderStyle = BorderStyle.Fixed3D;
                     temp.BringToFront();
                     return;
@@ -341,7 +341,7 @@ namespace Controller.EditorController
             // Checks if the size of a trackable has been changed.
             if (string.Equals(e.ChangedItem.Label.ToString(), "Size", StringComparison.Ordinal))
             {
-                ew.PreviewController.reloadPreviewPanel(ew.PreviewController.index);
+                ew.HTMLPreviewController.reloadPreviewPanel(ew.HTMLPreviewController.index);
 
                 return;
             }
@@ -360,9 +360,9 @@ namespace Controller.EditorController
                     marker.MatrixID = ew.project.nextID();
                 }
                 IPreviewable temp = this.ew.CurrentElement;
-                this.ew.PreviewController.findBox(temp).Image = this.ew.PreviewController.scaleIPreviewable(temp);
-                this.ew.PreviewController.reloadPreviewPanel(this.ew.PreviewController.index);
-                this.ew.PreviewController.setCurrentElement(temp);
+                this.ew.HTMLPreviewController.findBox(temp).Image = this.ew.HTMLPreviewController.scaleIPreviewable(temp);
+                this.ew.HTMLPreviewController.reloadPreviewPanel(this.ew.HTMLPreviewController.index);
+                this.ew.HTMLPreviewController.setCurrentElement(temp);
                 return;
             }
         }

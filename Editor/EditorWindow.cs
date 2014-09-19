@@ -145,6 +145,20 @@ namespace ARdevKit
             set { previewController = value; }
         }
 
+        private HTMLPreviewController htmlPreviewController;
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>   Gets or sets the HTMLPreviewController. </summary>
+        ///
+        /// <value> The htmlPreviewController. </value>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        public HTMLPreviewController HTMLPreviewController
+        {
+            get { return htmlPreviewController; }
+            set { htmlPreviewController = value; }
+        }
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   Gets or sets the project. </summary>
         ///
@@ -361,13 +375,13 @@ namespace ARdevKit
             int temp = Convert.ToInt32(((Button)sender).Text);
             if (this.project.Trackables.Count > 1)
             {
-                this.previewController.reloadPreviewPanel(temp - 1);
+                this.htmlPreviewController.reloadPreviewPanel(temp - 1);
                 this.PropertyGrid1.SelectedObject = null;
 
             }
             else
             {
-                this.previewController.reloadPreviewPanel(0);
+                this.htmlPreviewController.reloadPreviewPanel(0);
                 this.PropertyGrid1.SelectedObject = null;
             }
 
@@ -405,7 +419,7 @@ namespace ARdevKit
                 tempButton.ContextMenu.MenuItems.Add("Duplicate", new EventHandler(this.pnl_editor_scene_duplicate));
 
                 this.pnl_editor_scenes.Controls.Add(tempButton);
-                this.previewController.reloadPreviewPanel(this.project.Trackables.Count);
+                this.htmlPreviewController.reloadPreviewPanel(this.project.Trackables.Count);
                 this.PropertyGrid1.SelectedObject = null;
                 this.resetButton();
                 this.setButton(tempButton.Text);
@@ -433,11 +447,11 @@ namespace ARdevKit
         {
             if (this.project.Trackables.Count > 1)
             {
-                this.project.Trackables.Remove(this.previewController.trackable);
-                this.previewController.trackable = this.project.Trackables[0];
+                this.project.Trackables.Remove(this.htmlPreviewController.trackable);
+                this.htmlPreviewController.trackable = this.project.Trackables[0];
                 this.reloadSelectionPanel();
-                this.previewController.index = -1;
-                this.previewController.reloadPreviewPanel(0);
+                this.htmlPreviewController.index = -1;
+                this.htmlPreviewController.reloadPreviewPanel(0);
                 if (!this.project.hasTrackable())
                 {
                     this.ElementSelectionController.setElementEnable(typeof(PictureMarker), true);
@@ -449,8 +463,8 @@ namespace ARdevKit
                 if (this.project.Trackables[0] != null)
                 {
                     this.project.Trackables[0] = null;
-                    this.previewController.currentMetaCategory = MetaCategory.Trackable;
-                    this.previewController.removePreviewable(this.previewController.trackable);
+                    this.htmlPreviewController.currentMetaCategory = MetaCategory.Trackable;
+                    this.htmlPreviewController.removePreviewable(this.htmlPreviewController.trackable);
                     if (!this.project.hasTrackable())
                     {
                         this.ElementSelectionController.setElementEnable(typeof(PictureMarker), true);
@@ -538,8 +552,8 @@ namespace ARdevKit
                 initializeLoadedProject(SaveLoadController.loadProject(openFileDialog1.FileName));
                 this.initializeControllers();
                 this.updatePanels();
-                previewController.index = -1;
-                previewController.reloadPreviewPanel(0);
+                htmlPreviewController.index = -1;
+                htmlPreviewController.reloadPreviewPanel(0);
                 this.updateSceneSelectionPanel();
                 this.updateScreenSize();
                 this.checksum = project.getChecksum();
@@ -694,7 +708,7 @@ namespace ARdevKit
 
         public void updatePreviewPanel()
         {
-            this.previewController.updatePreviewPanel();
+            this.htmlPreviewController.updatePreviewPanel();
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -794,7 +808,7 @@ namespace ARdevKit
         private void cmb_editor_selection_toolSelection_SelectedIndexChanged(object sender, EventArgs e)
         {
             elementSelectionController.updateElementSelectionPanel();
-            previewController.currentMetaCategory = ((SceneElementCategoryPanel)cmb_editor_selection_toolSelection.SelectedItem).Category.Category;
+            htmlPreviewController.currentMetaCategory = ((SceneElementCategoryPanel)cmb_editor_selection_toolSelection.SelectedItem).Category.Category;
         }
 
         /**
@@ -808,7 +822,7 @@ namespace ARdevKit
 
         private void pnl_editor_preview_DragEnter(object sender, DragEventArgs e)
         {
-            if (previewController.currentMetaCategory != MetaCategory.Source)
+            if (htmlPreviewController.currentMetaCategory != MetaCategory.Source)
             {
                 e.Effect = DragDropEffects.Move;
             }
@@ -825,7 +839,7 @@ namespace ARdevKit
 
         private void pnl_editor_preview_DragDrop(object sender, DragEventArgs e)
         {
-            if (previewController.currentMetaCategory != MetaCategory.Source)
+            if (htmlPreviewController.currentMetaCategory != MetaCategory.Source)
             {
                 if (((ElementIcon)e.Data.GetData(typeof(ElementIcon)) != null))
                 {
@@ -845,6 +859,7 @@ namespace ARdevKit
         {
             this.elementSelectionController = new ElementSelectionController(this);
             this.previewController = new PreviewController(this);
+            this.htmlPreviewController = new HTMLPreviewController(this);
             this.propertyController = new PropertyController(this);
             this.propertyGrid1.SelectedObject = null;
             this.deviceConnectionController = new DeviceConnectionController(this);
@@ -901,18 +916,18 @@ namespace ARdevKit
             {
                 this.project.Screensize.Width = MINSCREENWIDHT;
                 this.pnl_editor_preview.Size = new Size((int)project.Screensize.Width, (int)project.Screensize.Height);
-                this.previewController.rescalePreviewPanel();
+                this.htmlPreviewController.rescalePreviewPanel();
             }
             else if (project.Screensize.Height < MINSCREENHEIGHT)
             {
                 this.project.Screensize.Height = MINSCREENHEIGHT;
                 this.pnl_editor_preview.Size = new Size((int)project.Screensize.Width, (int)project.Screensize.Height);
-                this.previewController.rescalePreviewPanel();
+                this.htmlPreviewController.rescalePreviewPanel();
             }
             else
             {
                 this.pnl_editor_preview.Size = new Size((int)project.Screensize.Width, (int)project.Screensize.Height);
-                this.previewController.rescalePreviewPanel();
+                this.htmlPreviewController.rescalePreviewPanel();
             }
         }
 
@@ -1176,7 +1191,7 @@ namespace ARdevKit
                 {
                     IDMarker temp = (IDMarker)project.Trackables[trackablePCounter];
                     int dpi = (int)(Math.Sqrt(Math.Pow(e.PageSettings.PrinterResolution.X, 2) + Math.Pow(e.PageSettings.PrinterResolution.Y, 2)));
-                    e.Graphics.DrawImage(previewController.scaleBitmap(temp.getPreview(project.ProjectPath), (int)((dpi * temp.Size) / 254), (int)((dpi * temp.Size) / 254)), x, y);
+                    e.Graphics.DrawImage(htmlPreviewController.scaleBitmap(temp.getPreview(project.ProjectPath), (int)((dpi * temp.Size) / 254), (int)((dpi * temp.Size) / 254)), x, y);
                 }
                 else
                     e.Graphics.DrawImage(project.Trackables[trackablePCounter].getPreview(project.ProjectPath), x, y);
