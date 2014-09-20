@@ -397,7 +397,7 @@ public class PreviewController
                 this.ew.ElementSelectionController.setElementEnable(typeof(PictureMarker), false);
             }
         }
-        //if the scene is empty create a new empty scene
+        //if the scene is empty create a new empty scened
         else if (index >= this.ew.project.Trackables.Count)
         {
             this.index = index;

@@ -21,6 +21,12 @@ using System.Diagnostics;
 /// </summary>
 public class HTMLPreviewController
 {
+    #region static HTML expressions
+    static string blank = "<HTML></HTML>";
+
+    
+    #endregion
+
     #region fields with getters and setters
     private EditorWindow editorWindow;
     
@@ -109,9 +115,43 @@ public class HTMLPreviewController
         }
     }
 
-    internal void reloadPreviewPanel(int p)
+    internal void reloadPreviewPanel(int index)
     {
         throw new NotImplementedException();
+        if(index < this.editorWindow.project.Trackables.Count)
+        {
+            this.index = index;
+            this.trackable = this.editorWindow.project.Trackables[index];
+            if(trackable == null)
+            {
+                this.htmlPreview.DocumentText = blank;
+            }
+            else
+            {
+                this.buildPage(this.editorWindow.project.Trackables[index]);
+            }
+
+
+        }
+        else
+        {
+            this.index = index;
+            this.trackable = null;
+            this.htmlPreview.DocumentText = blank;
+            this.editorWindow.project.Trackables.Add(trackable);
+        }
+    }
+
+    private void buildPage(AbstractTrackable trackable)
+    {
+        throw new NotImplementedException();
+        if(trackable.Augmentations.Count > 0)
+        {
+            foreach (AbstractAugmentation aug in trackable.Augmentations)
+            {
+                
+            }
+        }
     }
 
     internal void removePreviewable(AbstractTrackable abstractTrackable)
@@ -129,32 +169,7 @@ public class HTMLPreviewController
         throw new NotImplementedException();
     }
 
-    internal void addPictureBox(IPreviewable previewable, Vector3D vector3D)
-    {
-        throw new NotImplementedException();
-    }
-
     internal PictureBox findBox(IPreviewable previewable)
-    {
-        throw new NotImplementedException();
-    }
-
-    internal void reloadPreviewable(AbstractAugmentation abstractAugmentation)
-    {
-        throw new NotImplementedException();
-    }
-
-    internal void rotateAugmentation(IPreviewable previewable)
-    {
-        throw new NotImplementedException();
-    }
-
-    internal void setCurrentElement(IPreviewable temp)
-    {
-        throw new NotImplementedException();
-    }
-
-    internal Image scaleIPreviewable(IPreviewable temp)
     {
         throw new NotImplementedException();
     }
