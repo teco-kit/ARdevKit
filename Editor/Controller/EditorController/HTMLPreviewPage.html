@@ -1,75 +1,33 @@
-﻿<!DOCTYPE html>
-
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+﻿<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <title>Scene No.X</title>
-    <style type="text/css">
-        .monkey {
-            width: 200px;
-            height: 200px;
-            border: 1px solid black;
-            position: absolute; /* we want to set an absolute position so the div can be moved in reference to the screen */
-            top: 50px; /* this sets the positioning of the element in reference to the top left of your window. it will space it 50 pixels from the top */
-            left: 50px; /* this will set the position of the element 50 pixels to right of the top left of your window. */
-            z-index: 5; /* this will position it above anything with a lower z-index, sort of like layers. So you could layer these divs using z-index and have them stack on each other. */
+    <meta charset="utf-8">
+    <title>jQuery UI Draggable - Default functionality</title>
+    <link rel="stylesheet" href="../../Resources/jquery-ui-1.11.2/jquery-ui.css">
+    <script src="../../Resources/jquery-2.1.1.js"></script>
+    <script src="../../Resources/jquery-ui-1.11.2/jquery-ui.js"></script>
+    <style>
+        #draggable {
+            width: 75px;
+            height: 75px;
+            padding: 0.5em;
         }
+         #containment-wrapper { 
+             width: 95%; 
+             height:150px;
+             border:2px solid #ccc;
+         }
     </style>
-    <script language="javascript">
-		var x;
-		var y;
-		var grabbedByX;
-		var grabbedByY;
-		var being_dragged = false;
-		var element;
-
-		function mouser(event){
-			if(event.offsetX || event.offsetY) { //For Internet Explorer
-				x=event.offsetX;
-				y=event.offsetY;
-			}
-			else { //For FireFox
-			    x = event.pageX - grabbedByX;
-			    y = event.pageY - grabbedByY;
-			}
-			if(being_dragged == true) {
-				//if(x + document.getElementById(element).offsetWidth < document.getElementById(container).width)
-			    //{
-					document.getElementById(element).style.left = x +'px';
-				//}
-				//if(y + document.getElementById(element).offsetHeight < document.getElementById(container).width)
-				//{
-					document.getElementById(element).style.top = y +'px';
-				//}
-			}
-		}
-
-		function mouse_down(event, ele_name) {
-			being_dragged = true;
-			element = ele_name;
-			grabbedByX = (event.pageX - document.getElementById(element).style.left);
-			grabbedByY = (event.pageY - document.getElementById(element).style.top);
-			document.getElementById(element).style.cursor = 'move';
-		}
-
-		function mouse_up() {
-			being_dragged = false;
-			document.getElementById(element).style.cursor = 'auto';
-			document.getElementById(element).style.top = y +'px';
-			document.getElementById(element).style.left = x + 'px';
-			grabbedByX = 0;
-			grabbedByY = 0;
-		}
+    <script>
+        $(function () {
+            $("#draggable").draggable({ containment: "#containment-wrapper", scroll: false });
+        });
     </script>
 </head>
-
-<body onmousemove="mouser(event)">
-    <div id="container" width="1000px" height="1000px" onmousemove="mouser(event)">
-        <div id="dragger"
-                class="monkey"
-                onmousedown="mouse_down(event, 'dragger')"
-                onmouseup="mouse_up()">
-            MONKEY!
+<body>
+    <div id="containment-wrapper">
+        <div id="draggable" class="ui-widget-content">
+            <p>Drag me around</p>
         </div>
     </div>
 </body>
