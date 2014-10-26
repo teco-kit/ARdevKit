@@ -1,4 +1,4 @@
-﻿<!doctype html>
+﻿<<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -7,27 +7,92 @@
     <script src="../../Resources/jquery-2.1.1.js"></script>
     <script src="../../Resources/jquery-ui-1.11.2/jquery-ui.js"></script>
     <style>
-        #draggable {
+        .augmentation {
             width: 75px;
             height: 75px;
-            padding: 0.5em;
+            background-image: url("../../Resources/ARMarker(normal).bmp");
+            background-size: 100% 100%;     
+        }
+        .trackable{
+            width: 75px;
+            height: 75px;
+            background-image: url("../../Resources/IDMarker/IDMarker001.jpg");
+            background-size: 100% 100%;    
         }
          #containment-wrapper { 
-             width: 95%; 
-             height:150px;
-             border:2px solid #ccc;
+             width: 860px; 
+             height:640px;
+             margin-left: -430px;
+             left: 50%;
+             margin-top: -320px;
+             top: 50%;
+             position:absolute;
+             border:2px solid #4cff00;
+             background: #ffffff;
          }
+         #containment-wrapper .ui-selected {
+             border: solid 2.5px #F39814; 
+             z-index: 100000
+         }
+         #containment-wrapper > div{
+            -moz-box-sizing:    border-box;
+            -webkit-box-sizing: border-box;
+            box-sizing:         border-box;
+         }
+         #page {
+             width: auto;
+             height: 100vh;
+             background: #000000;
+
+         }
+         .ui-selectable-helper {
+             position: absolute;
+             z-index: 100;
+             border:5px dotted black;
+         }
+
     </style>
-    <script>
-        $(function () {
-            $("#draggable").draggable({ containment: "#containment-wrapper", scroll: false });
+    <script type='text/javascript'>
+        //<![CDATA[
+        $(window).load(function () {
+            //make divs which are from class augmentation draggable within the borders
+            //and call methods to instruct the c# program to update
+            $(".augmentation").draggable({
+                stop: function (ev, ui) {
+                    var position = this.position();
+                    window.external.ChangePositionOfTo(this.attr('id'), position.left, position.right);
+                },
+                containment: "#containment-wrapper" });
+            // manually trigger the "select" of clicked elements 
+            //and call methods to instruct the c# program to update
+            $("#containment-wrapper > div").on("mousedown", function (event) {
+                switch(event.which) {
+                    case 1:
+                        $(this).addClass("ui-selected").siblings().removeClass("ui-selected");
+                        window.external.ChangeCurrentElementTo(this.attr('id'));
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        $(this).addClass("ui-selected").siblings().removeClass("ui-selected");
+                        window.external.ShowContextMenuFor(this.attr('id'));
+                        break;
+                    default:
+                } 
+            });
         });
+        //]]>
     </script>
 </head>
 <body>
-    <div id="containment-wrapper">
-        <div id="draggable" class="ui-widget-content">
-            <p>Drag me around</p>
+    <div id="page">
+        <div id="containment-wrapper">
+            <div id="picture1" class="ui-widget-content augmentation">
+            </div>
+            <div id="picture2" class="ui-widget-content augmentation">
+            </div>
+            <div id="IDMARKER" class="ui-widget-content trackable">
+            </div>
         </div>
     </div>
 </body>

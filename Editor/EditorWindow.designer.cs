@@ -510,6 +510,7 @@ namespace ARdevKit
             this.html_preview.Size = new System.Drawing.Size(652, 352);
             this.html_preview.TabIndex = 4;
             this.html_preview.Url = new System.Uri("about:blank", System.UriKind.Absolute);
+            this.html_preview.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.html_preview_DocumentCompleted);
             // 
             // EditorWindow
             // 

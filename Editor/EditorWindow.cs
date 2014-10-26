@@ -1424,5 +1424,10 @@ namespace ARdevKit
             }
         }
 
+        private void html_preview_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+
+        }
+
     }
 }
