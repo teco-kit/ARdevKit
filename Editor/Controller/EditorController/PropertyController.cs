@@ -289,14 +289,14 @@ namespace Controller.EditorController
             {
                 if (string.Equals((string)e.ChangedItem.Value, "", StringComparison.Ordinal))
                 {
-                    (ew.HTMLPreviewController.findBox(ew.CurrentElement).ContextMenu).MenuItems[5].Enabled = false;
+                    //(ew.HTMLPreviewController.findBox(ew.CurrentElement).ContextMenu).MenuItems[5].Enabled = false;
 
                     return;
                 }
 
                 if (e.OldValue == null || string.Equals(e.OldValue.ToString(), "", StringComparison.Ordinal))
                 {
-                    (ew.HTMLPreviewController.findBox(ew.CurrentElement).ContextMenu).MenuItems[5].Enabled = true;
+                    //(ew.HTMLPreviewController.findBox(ew.CurrentElement).ContextMenu).MenuItems[5].Enabled = true;
 
                     return;
                 }

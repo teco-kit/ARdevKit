@@ -47,6 +47,7 @@ public class HTMLPreviewController
         // TODO: Complete member initialization
         this.editorWindow = editorWindow;
         this.htmlPreview = this.editorWindow.HTMLPreview;
+        this.htmlPreview.AllowWebBrowserDrop = true;
         this.currentMetaCategory = new MetaCategory();
         this.index = 0;
         this.trackable = null;
@@ -89,7 +90,7 @@ public class HTMLPreviewController
         {
             this.editorWindow.Tsm_editor_menu_edit_delete.Enabled = true;
             Vector3D center = new Vector3D(0, 0, 0);
-            center.Y = htmlPreview.Document.Body.ClientRectangle.Height / 2;
+            center.Y = htmlPreview.Document.Body.FirstChild.FirstChild.OffsetRectangle.Height;
             center.X = htmlPreview.Document.Body.ClientRectangle.Width / 2;
             while (true)
             {
@@ -144,7 +145,7 @@ public class HTMLPreviewController
                 ((AbstractAugmentation)currentElement).Trackable = this.trackable;
 
                 //set the new box to the front
-                this.findElement(currentElement).SetAttribute("z-index", Int16.MaxValue.ToString());
+                //this.findElement(currentElement).SetAttribute("z-index", Int16.MaxValue.ToString());
                 setCurrentElement(currentElement);
             }
         }
@@ -171,24 +172,113 @@ public class HTMLPreviewController
         return null;           
     }
 
-    private void setCoordinates(IPreviewable currentElement, Vector3D v)
+    private void setCoordinates(IPreviewable prev, Vector3D newV)
     {
         throw new NotImplementedException();
+        if (prev == null)
+            throw new ArgumentException("parameter prev was null.");
+        if (newV == null)
+            throw new ArgumentException("parameter newV was null.");
+
+        if (prev is Chart)
+        {
+            ((Chart)prev).Positioning.Left = (int)newV.X;
+            ((Chart)prev).Positioning.Top = (int)newV.Y;
+
+            Vector3D result = new Vector3D(0, 0, 0);
+            result.X = (int)((newV.X - Convert.ToInt32(htmlPreview.Document.GetElementById("containment-wrapper").GetAttribute("width")) / 2));
+            result.Y = (int)((Convert.ToInt32(htmlPreview.Document.GetElementById("containment-wrapper").GetAttribute("height")) / 2 - newV.Y));
+            ((AbstractAugmentation)prev).Translation = result;
+        }
+        else
+        {
+            Vector3D result = new Vector3D(0, 0, 0);
+            result.X = (int)((newV.X - editorWindow.project.Screensize.Width / 2) / scale / 1.6);
+            result.Y = (int)((editorWindow.project.Screensize.Height / 2 - newV.Y) / scale / 1.6);
+            ((AbstractAugmentation)prev).Translation = result;
+        }
     }
 
     private void addHTMLElement(IPreviewable currentElement, Vector3D center)
     {
         throw new NotImplementedException();
+        if (currentElement is Abstract2DTrackable)
+        {
+            Abstract2DTrackable trackable = ((Abstract2DTrackable)currentElement);
+            HtmlElement htmlTrackable = htmlPreview.Document.CreateElement("div");
+            int height, width;
+
+            htmlTrackable.Id = trackable.SensorCosID;
+            htmlTrackable.SetAttribute("class", "ui-widget-content augmentation");
+            if(trackable.Size == 0)
+            {
+                height = trackable.HeightMM;
+                width = trackable.HeightMM;
+            } else {
+                height = width = trackable.Size;
+            }
+            htmlTrackable.Style = String.Format("background-size: 100% 100%; width: {0}; height: {1}; left: {3}; top: {4}; background-image:{5}; z-index: {6}",
+            width, height, 
+            editorWindow.project.Screensize.Width / 2, editorWindow.project.Screensize.Height / 2, 
+            trackable.getPreview(editorWindow.project.ProjectPath), Int16.MinValue);
+            htmlPreview.Document.GetElementById("containment-wrapper").AppendChild(htmlTrackable);
+        }
+        else if (currentElement is Chart)
+        {
+            Chart chart = ((Chart) currentElement);
+            HtmlElement htmlChart = htmlPreview.Document.CreateElement("div");
+            htmlChart.Id = chart.ID;
+            htmlChart.SetAttribute("class", "ui-widget-content augmentation");
+            htmlChart.Style = String.Format("width: {0}; height: {1}; left: {3}; top: {4}", chart.Width, chart.Height, chart.Positioning.Left, chart.Positioning.Top);
+            htmlPreview.Document.GetElementById("containment-wrapper").AppendChild(htmlChart);
+        }else if (currentElement is Abstract2DAugmentation)
+        {
+            Abstract2DAugmentation augmentation = ((Abstract2DAugmentation)currentElement);
+            HtmlElement htmlAugmentation = htmlPreview.Document.CreateElement("div");
+            Vector3D htmlCoordinate = nativeToHtmlCoordinates(augmentation.Translation);
+            htmlAugmentation.Id = augmentation.ID;
+            htmlAugmentation.SetAttribute("class", "ui-widget-content augmentation");
+            htmlAugmentation.Style = String.Format("background-size: 100% 100%; width: {0}; height: {1}; left: {3}; top: {4}; background-image:{5}; z-index: {6}",
+                augmentation.Width, augmentation.Height,
+                htmlCoordinate.X, htmlCoordinate.Y,
+                trackable.getPreview(editorWindow.project.ProjectPath), htmlCoordinate.Y);
+            htmlPreview.Document.GetElementById("containment-wrapper").AppendChild(htmlAugmentation);
+        } else
+        {
+            throw new NotSupportedException("Other then Abstract2DAugmention/Abstract2DTrackable not yet supported");
+        }
     }
 
+    private Vector3D nativeToHtmlCoordinates(Vector3D native)
+    {
+        if(native == null)
+        {
+            throw new ArgumentNullException();
+        }
+        Vector3D result = new Vector3D(0, 0, native.Z);
+        result.X = (int)((native.X + editorWindow.project.Screensize.Width / 2));
+        result.Y = (int)((editorWindow.project.Screensize.Height / 2 + native.Y));
+        return result;
+    }
+
+    private Vector3D htmlToNativeCoordinates(Vector3D html)
+    {
+        if (html == null)
+        {
+            throw new ArgumentNullException();
+        }
+        Vector3D result = new Vector3D(0, 0, html.Z);
+        result.X = (int)((html.X - editorWindow.project.Screensize.Width / 2));
+        result.Y = (int)((editorWindow.project.Screensize.Height / 2 - html.Y));
+        return result;
+    }
     public void setCurrentElement(IPreviewable currentElement)
     {
-        //if there is a currentElement we musst set the box of the actual currentElement to normal
-        //the box of the new currentElement will be set to the new Borderstyle.
         if (currentElement != null)
         {
             if (this.editorWindow.CurrentElement != currentElement)
             {
+                //reset the z-index: property of the elements in the htmlPreview
                 if (this.editorWindow.CurrentElement is AbstractAugmentation)
                 {
                     findElement(this.editorWindow.CurrentElement).SetAttribute("z-index", ((AbstractAugmentation)this.editorWindow.CurrentElement).Translation.Z.ToString());
@@ -204,6 +294,7 @@ public class HTMLPreviewController
                     findElement(this.editorWindow.CurrentElement).SetAttribute("z-index", ((AbstractSource)this.editorWindow.CurrentElement).Augmentation.Translation.Z.ToString());
                 }
                 
+                //reset the current element in the EditorWindow
                 if (currentElement is AbstractSource)
                 {
                     this.editorWindow.CurrentElement = ((AbstractSource)currentElement).Augmentation;
@@ -213,6 +304,7 @@ public class HTMLPreviewController
                     this.editorWindow.CurrentElement = currentElement;
                 }
 
+                //enable the possibilty to copy the augmentation, and disable to copy a trackable 
                 if (this.editorWindow.CurrentElement is AbstractAugmentation)
                 {
                     this.editorWindow.Tsm_editor_menu_edit_copie.Enabled = true;
@@ -222,20 +314,20 @@ public class HTMLPreviewController
                     this.editorWindow.Tsm_editor_menu_edit_copie.Enabled = false;
                 }
 
-                foreach (Control comp in this.panel.Controls)
-                {
-                    if (((PictureBox)comp).BorderStyle == BorderStyle.Fixed3D)
-                    {
-                        ((PictureBox)comp).BorderStyle = BorderStyle.None;
-                        ((PictureBox)comp).Refresh();
-                    }
-                }
-                findBox(this.editorWindow.CurrentElement).BorderStyle = BorderStyle.Fixed3D;
-                findBox(this.editorWindow.CurrentElement).Refresh();
-                if (typeof(AbstractAugmentation).IsAssignableFrom(this.editorWindow.CurrentElement.GetType()))
-                {
-                    findBox(this.editorWindow.CurrentElement).BringToFront();
-                }
+                //foreach (Control comp in this.panel.Controls)
+                //{
+                //    if (((PictureBox)comp).BorderStyle == BorderStyle.Fixed3D)
+                //    {
+                //        ((PictureBox)comp).BorderStyle = BorderStyle.None;
+                //        ((PictureBox)comp).Refresh();
+                //    }
+                //}
+                //findBox(this.editorWindow.CurrentElement).BorderStyle = BorderStyle.Fixed3D;
+                //findBox(this.editorWindow.CurrentElement).Refresh();
+                //if (typeof(AbstractAugmentation).IsAssignableFrom(this.editorWindow.CurrentElement.GetType()))
+                //{
+                //    findBox(this.editorWindow.CurrentElement).BringToFront();
+                //}
             }
             editorWindow.PropertyGrid1.SelectedObject = currentElement;
         }
@@ -243,14 +335,14 @@ public class HTMLPreviewController
         else
         {
             this.editorWindow.CurrentElement = null;
-            foreach (Control comp in this.panel.Controls)
-            {
-                if (((PictureBox)comp).BorderStyle == BorderStyle.Fixed3D)
-                {
-                    ((PictureBox)comp).BorderStyle = BorderStyle.None;
-                    ((PictureBox)comp).Refresh();
-                }
-            }
+            //foreach (Control comp in this.panel.Controls)
+            //{
+            //    if (((PictureBox)comp).BorderStyle == BorderStyle.Fixed3D)
+            //    {
+            //        ((PictureBox)comp).BorderStyle = BorderStyle.None;
+            //        ((PictureBox)comp).Refresh();
+            //    }
+            //}
             this.editorWindow.Tsm_editor_menu_edit_copie.Enabled = false;
         }
         updateElementCombobox(trackable);
