@@ -88,6 +88,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controller\EditorController\HTMLPreviewController.cs" />
+    <Compile Include="View\HTMLView.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controller\EditorController\ObjectCopier.cs" />
     <Compile Include="Controller\EditorController\ThumbCreator.cs" />
     <Compile Include="Controller\TestController\FrameExtractor.cs">
@@ -101,6 +104,9 @@
     <Compile Include="Model\Project\Event\OnTouchEndedEvent.cs" />
     <Compile Include="Model\Project\File\EventFile.cs" />
     <Compile Include="Model\Project\Event\OnTouchStartedEvent.cs" />
+    <Compile Include="View\TransparentPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="View\EventTypeEditor.cs" />
     <Compile Include="View\ProcessVideoWindow.cs">
       <SubType>Form</SubType>
@@ -238,7 +244,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ARdevKit.ico" />
-    <Content Include="Controller\EditorController\HTMLPreviewPage.html" />
+    <Content Include="Resources\HTMLPreviewPage.html" />
     <Content Include="Resources\IDMarker\IDMarker001.jpg" />
     <Content Include="Resources\IDMarker\IDMarker002.jpg" />
     <Content Include="Resources\IDMarker\IDMarker003.jpg" />

@@ -23,7 +23,6 @@ public class HTMLPreviewController
 {
     #region static HTML expressions
     static string blank = "<HTML></HTML>";
-
     
     #endregion
 
@@ -47,7 +46,7 @@ public class HTMLPreviewController
         // TODO: Complete member initialization
         this.editorWindow = editorWindow;
         this.htmlPreview = this.editorWindow.HTMLPreview;
-        this.htmlPreview.AllowWebBrowserDrop = true;
+        this.htmlPreview.DocumentText = ARdevKit.Properties.Resources.HTMLPreviewPage;
         this.currentMetaCategory = new MetaCategory();
         this.index = 0;
         this.trackable = null;
