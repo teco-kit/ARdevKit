@@ -844,10 +844,10 @@ namespace ARdevKit
                 if (((ElementIcon)e.Data.GetData(typeof(ElementIcon)) != null))
                 {
                     ElementIcon icon = (ElementIcon)e.Data.GetData(typeof(ElementIcon));
-                    Point p = pnl_editor_preview.PointToClient(Cursor.Position);
+                    Point p = html_preview.PointToClient(Cursor.Position);
 
                     IPreviewable element = (IPreviewable)icon.Element.Prototype.Clone();
-                    icon.EditorWindow.PreviewController.addPreviewable(element, new Vector3D(p.X, p.Y, 0));
+                    icon.EditorWindow.htmlPreviewController.addPreviewable(element, new Vector3D(p.X, p.Y, 0));
                 }
             }
         }
@@ -1423,11 +1423,5 @@ namespace ARdevKit
                 MessageBox.Show("Es ist kein Gerät verfügbar, nutzen sie die Aktualisierungsfunktion und stellen sie sicher, dass die Geräte mit dem netzwerk verbunden sind");
             }
         }
-
-        private void html_preview_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
-        {
-
-        }
-
     }
 }

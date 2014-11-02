@@ -23,7 +23,6 @@ public class HTMLPreviewController
 {
     #region static HTML expressions
     static string blank = "<HTML></HTML>";
-
     
     #endregion
 
@@ -47,6 +46,7 @@ public class HTMLPreviewController
         // TODO: Complete member initialization
         this.editorWindow = editorWindow;
         this.htmlPreview = this.editorWindow.HTMLPreview;
+        this.htmlPreview.DocumentText = ARdevKit.Properties.Resources.HTMLPreviewPage;
         this.currentMetaCategory = new MetaCategory();
         this.index = 0;
         this.trackable = null;
@@ -222,20 +222,20 @@ public class HTMLPreviewController
                     this.editorWindow.Tsm_editor_menu_edit_copie.Enabled = false;
                 }
 
-                foreach (Control comp in this.panel.Controls)
-                {
-                    if (((PictureBox)comp).BorderStyle == BorderStyle.Fixed3D)
-                    {
-                        ((PictureBox)comp).BorderStyle = BorderStyle.None;
-                        ((PictureBox)comp).Refresh();
-                    }
-                }
-                findBox(this.editorWindow.CurrentElement).BorderStyle = BorderStyle.Fixed3D;
-                findBox(this.editorWindow.CurrentElement).Refresh();
-                if (typeof(AbstractAugmentation).IsAssignableFrom(this.editorWindow.CurrentElement.GetType()))
-                {
-                    findBox(this.editorWindow.CurrentElement).BringToFront();
-                }
+                //foreach (Control comp in this.panel.Controls)
+                //{
+                //    if (((PictureBox)comp).BorderStyle == BorderStyle.Fixed3D)
+                //    {
+                //        ((PictureBox)comp).BorderStyle = BorderStyle.None;
+                //        ((PictureBox)comp).Refresh();
+                //    }
+                //}
+                //findBox(this.editorWindow.CurrentElement).BorderStyle = BorderStyle.Fixed3D;
+                //findBox(this.editorWindow.CurrentElement).Refresh();
+                //if (typeof(AbstractAugmentation).IsAssignableFrom(this.editorWindow.CurrentElement.GetType()))
+                //{
+                //    findBox(this.editorWindow.CurrentElement).BringToFront();
+                //}
             }
             editorWindow.PropertyGrid1.SelectedObject = currentElement;
         }
@@ -243,14 +243,14 @@ public class HTMLPreviewController
         else
         {
             this.editorWindow.CurrentElement = null;
-            foreach (Control comp in this.panel.Controls)
-            {
-                if (((PictureBox)comp).BorderStyle == BorderStyle.Fixed3D)
-                {
-                    ((PictureBox)comp).BorderStyle = BorderStyle.None;
-                    ((PictureBox)comp).Refresh();
-                }
-            }
+            //foreach (Control comp in this.panel.Controls)
+            //{
+            //    if (((PictureBox)comp).BorderStyle == BorderStyle.Fixed3D)
+            //    {
+            //        ((PictureBox)comp).BorderStyle = BorderStyle.None;
+            //        ((PictureBox)comp).Refresh();
+            //    }
+            //}
             this.editorWindow.Tsm_editor_menu_edit_copie.Enabled = false;
         }
         updateElementCombobox(trackable);
