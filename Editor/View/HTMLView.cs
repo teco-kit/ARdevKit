@@ -11,7 +11,6 @@ namespace ARdevKit.View
     {
         public HTMLView()
         {
-
         }
         //new Eventhandler to trigger Events through calls from other classes
         public void triggerClick(object sender, EventArgs e)

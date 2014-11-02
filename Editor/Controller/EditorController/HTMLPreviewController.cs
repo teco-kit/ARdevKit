@@ -46,14 +46,26 @@ public class HTMLPreviewController
         // TODO: Complete member initialization
         this.editorWindow = editorWindow;
         this.htmlPreview = this.editorWindow.HTMLPreview;
-        this.htmlPreview.DocumentText = ARdevKit.Properties.Resources.HTMLPreviewPage;
+        //this.htmlPreview.DocumentText = "<HTML></HTML>";
+        //this.htmlPreview.Navigate(new Uri(System.Reflection.Assembly.GetExecutingAssembly().Location + "\\..\\..\\Resources\\HTMLPreviewPage.html"));
+        //this.htmlPreview.Document.Write(ARdevKit.Properties.Resources.HTMLPreviewPage);
+        //HtmlElement test = this.htmlPreview.Document.CreateElement("h1");
+        //test.InnerText = "TESTESTESTESTEST";
+        //this.htmlPreview.Document.Body.AppendChild(test);
+        this.htmlPreview.Navigate("about:blank");
+        HtmlDocument doc = this.htmlPreview.Document;
+        doc.Write(String.Empty);
+        this.htmlPreview.DocumentText = "";
+        htmlPreview.Url = new Uri(System.Reflection.Assembly.GetExecutingAssembly().Location + "\\..\\..\\Resources\\HTMLPreviewPage.html");
+        htmlPreview.Navigate(new Uri(System.Reflection.Assembly.GetExecutingAssembly().Location + "\\res\\HTMLPreview\\HTMLPreviewPage.html"));
+        this.htmlPreview.Refresh();
         this.currentMetaCategory = new MetaCategory();
         this.index = 0;
         this.trackable = null;
         this.editorWindow.project.Trackables.Add(trackable);
         this.editorWindow.Tsm_editor_menu_edit_paste.Click += new System.EventHandler(this.paste_augmentation_center);
         this.editorWindow.Tsm_editor_menu_edit_copie.Click += new System.EventHandler(this.copy_augmentation);
-        this.editorWindow.Tsm_editor_menu_edit_delete.Click += new System.EventHandler(this.delete_current_element);
+        this.editorWindow.Tsm_editor_menu_edit_delete.Click += new System.EventHandler(this.delete_current_element);    
     }
 
     #region Eventhandler

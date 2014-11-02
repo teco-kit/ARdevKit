@@ -224,6 +224,15 @@ namespace ARdevKit
         public EditorWindow()
         {
             InitializeComponent();
+            this.panel2.Click += new System.EventHandler(this.html_preview.triggerClick);
+            this.panel2.DoubleClick += new System.EventHandler(this.html_preview.triggerDoubleClick);
+            this.panel2.MouseLeave += new System.EventHandler(this.html_preview.triggerMouseLeave);
+            this.panel2.Enter += new System.EventHandler(this.html_preview.triggerMouseEnter);
+            this.panel2.MouseClick += new System.Windows.Forms.MouseEventHandler(this.html_preview.triggerMouseClick);
+            this.panel2.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.html_preview.triggerMouseDoubleClick);
+            this.panel2.MouseDown += new System.Windows.Forms.MouseEventHandler(this.html_preview.triggerMouseDown);
+            this.panel2.MouseUp += new System.Windows.Forms.MouseEventHandler(this.html_preview.triggerMouseUp);
+            this.panel2.MouseMove += new System.Windows.Forms.MouseEventHandler(this.html_preview.triggerMouseMove);
             createNewProject("");
         }
 

@@ -11,7 +11,6 @@ namespace ARdevKit.View
     {
         public TransparentPanel()
         {
-            this.AllowDrop = true;
         }
         
         protected override CreateParams CreateParams

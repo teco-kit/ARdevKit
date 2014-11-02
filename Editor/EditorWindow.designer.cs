@@ -84,7 +84,6 @@ namespace ARdevKit
             this.mst_editor_menu.SuspendLayout();
             this.pnl_editor_preview.SuspendLayout();
             this.panel1.SuspendLayout();
-            this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnl_editor_selection
@@ -497,6 +496,7 @@ namespace ARdevKit
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel1.Controls.Add(this.panel2);
             this.panel1.Controls.Add(this.pnl_editor_preview);
+            this.panel1.Controls.Add(this.html_preview);
             this.panel1.Location = new System.Drawing.Point(141, 27);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(661, 612);
@@ -507,22 +507,21 @@ namespace ARdevKit
             // panel2
             // 
             this.panel2.AllowDrop = true;
-            this.panel2.Controls.Add(this.html_preview);
-            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(0, 0);
+            this.panel2.Location = new System.Drawing.Point(-1, 0);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(659, 610);
+            this.panel2.Size = new System.Drawing.Size(657, 607);
             this.panel2.TabIndex = 5;
             this.panel2.DragDrop += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragDrop);
             this.panel2.DragEnter += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragEnter);
             // 
             // html_preview
             // 
-            this.html_preview.Location = new System.Drawing.Point(4, 3);
+            this.html_preview.IsWebBrowserContextMenuEnabled = false;
+            this.html_preview.Location = new System.Drawing.Point(188, 267);
             this.html_preview.MinimumSize = new System.Drawing.Size(20, 20);
             this.html_preview.Name = "html_preview";
             this.html_preview.ScrollBarsEnabled = false;
-            this.html_preview.Size = new System.Drawing.Size(652, 604);
+            this.html_preview.Size = new System.Drawing.Size(398, 282);
             this.html_preview.TabIndex = 4;
             this.html_preview.WebBrowserShortcutsEnabled = false;
             // 
@@ -553,7 +552,6 @@ namespace ARdevKit
             this.pnl_editor_preview.ResumeLayout(false);
             this.pnl_editor_preview.PerformLayout();
             this.panel1.ResumeLayout(false);
-            this.panel2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
