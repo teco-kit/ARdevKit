@@ -4,22 +4,30 @@
     <meta charset="utf-8">
     <title>HTMLPreviewPage</title>
     <link rel="stylesheet" href="jquery-ui-1.11.2/jquery-ui.css">
-    <script src="jquery-1.11.1.js"></script>
+    <script src="jquery-2.1.1.js"></script>
     <script src="jquery-ui-1.11.2/jquery-ui.js"></script>
     <style>
         .augmentation {     
         }
-        #trackable{
+        .trackable{
             width: 75px;
             height: 75px;
-            background-image: url("idmarker001.jpg");
+            background-image: url("IDMarker/IDMarker001.jpg");
             background-size: 100% 100%;
         }
-		body{
-			background: #000000;
-		}
-        #containment-wrapper .ui-selected {
-             border: solid 2.5px #f39814; 
+         #containment-wrapper { 
+             width: 320px; 
+             height:240px;
+             margin-left: -430px;
+             left: 50%;
+             margin-top: -320px;
+             top: 50%;
+             position:absolute;
+             border:2px solid #4cff00;
+             background: #ffffff;
+         }
+         #containment-wrapper .ui-selected {
+             border: solid 2.5px #F39814; 
              z-index: 100000
          }
          #containment-wrapper > div{
@@ -27,14 +35,29 @@
             -webkit-box-sizing: border-box;
             box-sizing:         border-box;
          }
+         #page {
+             width: auto;
+             height: 100vh;
+             background: #000000;
+
+         }
+         .ui-selectable-helper {
+             position: absolute;
+             z-index: 100;
+             border:5px dotted black;
+         }
 
     </style>
-	<script type='text/javascript'>
+    <script type='text/javascript'>
         //<![CDATA[
         $(window).load(function () {
             //make divs which are from class augmentation draggable within the borders
             //and call methods to instruct the c# program to update
             $(".augmentation").draggable({
+                stop: function (ev, ui) {
+                    var position = this.position();
+                    window.external.ChangePositionOfTo(this.attr('id'), position.left, position.right);
+                },
                 containment: "#containment-wrapper" });
             // manually trigger the "select" of clicked elements 
             //and call methods to instruct the c# program to update
@@ -42,11 +65,13 @@
                 switch(event.which) {
                     case 1:
                         $(this).addClass("ui-selected").siblings().removeClass("ui-selected");
+                        window.external.ChangeCurrentElementTo(this.attr('id'));
                         break;
                     case 2:
                         break;
                     case 3:
                         $(this).addClass("ui-selected").siblings().removeClass("ui-selected");
+                        window.external.ShowContextMenuFor(this.attr('id'));
                         break;
                     default:
                 } 
@@ -56,7 +81,10 @@
     </script>
 </head>
 <body>
-	<div id="containment-wrapper">
-	</div>
+    <h1>TESTESTESTEST</h1>
+       <div id="page">
+        <div id="containment-wrapper">
+        </div>
+    </div>
 </body>
 </html>

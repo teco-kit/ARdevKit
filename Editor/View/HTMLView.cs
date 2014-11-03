@@ -15,41 +15,41 @@ namespace ARdevKit.View
         //new Eventhandler to trigger Events through calls from other classes
         public void triggerClick(object sender, EventArgs e)
         {
-            base.OnClick(e);
+            this.OnClick(e);
         }
         public void triggerDoubleClick(object sender, EventArgs e)
         {
-            base.OnDoubleClick(e);
+            this.OnDoubleClick(e);
         }
        
-        public void triggerMouseEnter(object sender, EventArgs e)
-        {
-            base.OnMouseEnter(e);
-        }
-        //new Eventhandler to trigger MouseEvents through calls from other classes
-        public void triggerMouseLeave(object sender, EventArgs e)
-        {
-            base.OnMouseLeave(e);
-        }
+        //public void triggerMouseEnter(object sender, EventArgs e)
+        //{
+        //    base.OnMouseEnter(e);
+        //}
+        ////new Eventhandler to trigger MouseEvents through calls from other classes
+        //public void triggerMouseLeave(object sender, EventArgs e)
+        //{
+        //    base.OnMouseLeave(e);
+        //}
         public void triggerMouseClick(object sender, MouseEventArgs e)
         {
-            base.OnMouseClick(e);
+            this.OnMouseClick(e);
         }
         public void triggerMouseDoubleClick(object sender, MouseEventArgs e)
         {
-            base.OnMouseDoubleClick(e);
+            this.OnMouseDoubleClick(e);
         }
         public void triggerMouseMove(object sender, MouseEventArgs e)
         {
-            base.OnMouseMove(e);
+            this.OnMouseMove(e);
         }
         public void triggerMouseDown(object sender, MouseEventArgs e)
         {
-            base.OnMouseDown(e);
+            this.OnMouseDown(e);
         }
         public void triggerMouseUp(object sender, MouseEventArgs e)
         {
-            base.OnMouseUp(e);
+            this.OnMouseUp(e);
         }
     }
 }

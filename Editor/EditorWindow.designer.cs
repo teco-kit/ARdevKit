@@ -458,7 +458,7 @@ namespace ARdevKit
             this.pnl_editor_preview.BackColor = System.Drawing.SystemColors.Control;
             this.pnl_editor_preview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnl_editor_preview.Controls.Add(this.menuStrip1);
-            this.pnl_editor_preview.Location = new System.Drawing.Point(3, 3);
+            this.pnl_editor_preview.Location = new System.Drawing.Point(100, 100);
             this.pnl_editor_preview.MinimumSize = new System.Drawing.Size(320, 240);
             this.pnl_editor_preview.Name = "pnl_editor_preview";
             this.pnl_editor_preview.Size = new System.Drawing.Size(320, 240);
@@ -495,8 +495,8 @@ namespace ARdevKit
             this.panel1.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel1.Controls.Add(this.panel2);
-            this.panel1.Controls.Add(this.pnl_editor_preview);
             this.panel1.Controls.Add(this.html_preview);
+            this.panel1.Controls.Add(this.pnl_editor_preview);
             this.panel1.Location = new System.Drawing.Point(141, 27);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(661, 612);
@@ -511,17 +511,18 @@ namespace ARdevKit
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(657, 607);
             this.panel2.TabIndex = 5;
+            this.panel2.Visible = false;
             this.panel2.DragDrop += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragDrop);
             this.panel2.DragEnter += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragEnter);
+            this.panel2.DragLeave += new System.EventHandler(this.pnl_editor_preview_DragLeave);
             // 
             // html_preview
             // 
-            this.html_preview.IsWebBrowserContextMenuEnabled = false;
-            this.html_preview.Location = new System.Drawing.Point(188, 267);
+            this.html_preview.Location = new System.Drawing.Point(4, 4);
             this.html_preview.MinimumSize = new System.Drawing.Size(20, 20);
             this.html_preview.Name = "html_preview";
             this.html_preview.ScrollBarsEnabled = false;
-            this.html_preview.Size = new System.Drawing.Size(398, 282);
+            this.html_preview.Size = new System.Drawing.Size(649, 600);
             this.html_preview.TabIndex = 4;
             this.html_preview.WebBrowserShortcutsEnabled = false;
             // 

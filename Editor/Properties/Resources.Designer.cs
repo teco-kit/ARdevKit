@@ -111,6 +111,30 @@ namespace ARdevKit.Properties {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die &lt;!doctype html&gt;
+        ///&lt;html lang=&quot;en&quot;&gt;
+        ///&lt;head&gt;
+        ///    &lt;meta charset=&quot;utf-8&quot;&gt;
+        ///    &lt;title&gt;HTMLPreviewPage&lt;/title&gt;
+        ///    &lt;link rel=&quot;stylesheet&quot; href=&quot;jquery-ui-1.11.2/jquery-ui.css&quot;&gt;
+        ///    &lt;script src=&quot;jquery-2.1.1.js&quot;&gt;&lt;/script&gt;
+        ///    &lt;script src=&quot;jquery-ui-1.11.2/jquery-ui.js&quot;&gt;&lt;/script&gt;
+        ///    &lt;style&gt;
+        ///        .augmentation {     
+        ///        }
+        ///        .trackable{
+        ///            width: 75px;
+        ///            height: 75px;
+        ///            background-image: url(&quot;IDMarker/IDMarker001.jpg&quot;);
+        ///            background-size: 100% 100%;    [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
+        /// </summary>
+        internal static string HTMLPreviewPage {
+            get {
+                return ResourceManager.GetString("HTMLPreviewPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap IDMarker_normal_ {

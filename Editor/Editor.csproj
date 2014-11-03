@@ -244,6 +244,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ARdevKit.ico" />
+    <None Include="Resources\HTMLPreviewPage.html" />
     <Content Include="Resources\IDMarker\IDMarker001.jpg" />
     <Content Include="Resources\IDMarker\IDMarker002.jpg" />
     <Content Include="Resources\IDMarker\IDMarker003.jpg" />

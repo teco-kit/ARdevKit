@@ -226,14 +226,42 @@ namespace ARdevKit
             InitializeComponent();
             this.panel2.Click += new System.EventHandler(this.html_preview.triggerClick);
             this.panel2.DoubleClick += new System.EventHandler(this.html_preview.triggerDoubleClick);
-            this.panel2.MouseLeave += new System.EventHandler(this.html_preview.triggerMouseLeave);
-            this.panel2.Enter += new System.EventHandler(this.html_preview.triggerMouseEnter);
+            //this.panel2.MouseLeave += delegate(System.Object o, System.EventArgs e)
+            //{ panel2.Visible = false; }; ;
+            //this.panel2.Enter += delegate(System.Object o, System.EventArgs e)
+            //{ panel2.Visible = true; }; ;
             this.panel2.MouseClick += new System.Windows.Forms.MouseEventHandler(this.html_preview.triggerMouseClick);
             this.panel2.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.html_preview.triggerMouseDoubleClick);
             this.panel2.MouseDown += new System.Windows.Forms.MouseEventHandler(this.html_preview.triggerMouseDown);
             this.panel2.MouseUp += new System.Windows.Forms.MouseEventHandler(this.html_preview.triggerMouseUp);
             this.panel2.MouseMove += new System.Windows.Forms.MouseEventHandler(this.html_preview.triggerMouseMove);
+            this.html_preview.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(html_preview_DocumentCompleted);
             createNewProject("");
+        }
+
+        private void html_preview_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+            HTMLView wb = sender as HTMLView;
+            HtmlElement conWrap = wb.Document.Body.FirstChild;
+            //conWrap.Id = "containment-wrapper";
+            conWrap.Style = string.Format(@"
+                 width: {0}px; 
+                 height:{1}px;
+                 left: {2}px;
+                 top:  {3}px;
+                 position:absolute;
+                 border:2px solid #4cff00;
+                 background: #ffffff", project.Screensize.Width, project.Screensize.Height, html_preview.Width / 2 - project.Screensize.Width / 2,
+                                     html_preview.Height / 2 - project.Screensize.Height / 2);
+            HtmlElement trackable = wb.Document.CreateElement("div");
+            trackable.Id = "trackable";
+            trackable.SetAttribute("class", "trackable augmentation");
+//            trackable.Style = @"
+//                width: 75px;
+//                height: 75px;
+//                background-image: url(""idmarker001.jpg"");
+//                background-size: 100% 100%";
+            wb.Document.Body.FirstChild.AppendChild(trackable);
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -831,6 +859,13 @@ namespace ARdevKit
 
         private void pnl_editor_preview_DragEnter(object sender, DragEventArgs e)
         {
+            if (sender != null)
+            {
+                if (sender is TransparentPanel)
+                {
+                    ((TransparentPanel)sender).Visible = true;
+                }
+            }
             if (htmlPreviewController.currentMetaCategory != MetaCategory.Source)
             {
                 e.Effect = DragDropEffects.Move;
@@ -857,6 +892,24 @@ namespace ARdevKit
 
                     IPreviewable element = (IPreviewable)icon.Element.Prototype.Clone();
                     icon.EditorWindow.htmlPreviewController.addPreviewable(element, new Vector3D(p.X, p.Y, 0));
+                }
+            }
+            if (sender != null)
+            {
+                if (sender is TransparentPanel)
+                {
+                    ((TransparentPanel)sender).Visible = false;
+                }
+            }
+        }
+
+        private void pnl_editor_preview_DragLeave(object sender, EventArgs e)
+        {
+            if (sender != null)
+            {
+                if (sender is TransparentPanel)
+                {
+                    ((TransparentPanel)sender).Visible = false;
                 }
             }
         }

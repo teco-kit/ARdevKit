@@ -46,19 +46,26 @@ public class HTMLPreviewController
         // TODO: Complete member initialization
         this.editorWindow = editorWindow;
         this.htmlPreview = this.editorWindow.HTMLPreview;
-        //this.htmlPreview.DocumentText = "<HTML></HTML>";
+        this.htmlPreview.Url = new System.Uri(System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location.ToString()) + "\\res\\HTMLPreview\\HTMLPreviewPage.html", System.UriKind.Absolute);
+        //this.htmlPreview.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(htmlPreview_DocumentCompleted);
         //this.htmlPreview.Navigate(new Uri(System.Reflection.Assembly.GetExecutingAssembly().Location + "\\..\\..\\Resources\\HTMLPreviewPage.html"));
         //this.htmlPreview.Document.Write(ARdevKit.Properties.Resources.HTMLPreviewPage);
         //HtmlElement test = this.htmlPreview.Document.CreateElement("h1");
         //test.InnerText = "TESTESTESTESTEST";
         //this.htmlPreview.Document.Body.AppendChild(test);
-        this.htmlPreview.Navigate("about:blank");
-        HtmlDocument doc = this.htmlPreview.Document;
-        doc.Write(String.Empty);
-        this.htmlPreview.DocumentText = "";
-        htmlPreview.Url = new Uri(System.Reflection.Assembly.GetExecutingAssembly().Location + "\\..\\..\\Resources\\HTMLPreviewPage.html");
-        htmlPreview.Navigate(new Uri(System.Reflection.Assembly.GetExecutingAssembly().Location + "\\res\\HTMLPreview\\HTMLPreviewPage.html"));
-        this.htmlPreview.Refresh();
+        //this.htmlPreview.Navigate("about:blank");
+        //HtmlDocument doc = this.htmlPreview.Document;
+        //doc.Write(String.Empty);
+        //this.htmlPreview.DocumentText = "";
+        //htmlPreview.Url = new Uri(System.Reflection.Assembly.GetExecutingAssembly().Location + "\\..\\..\\Resources\\HTMLPreviewPage.html");
+        //htmlPreview.Navigate(new Uri(System.Reflection.Assembly.GetExecutingAssembly().Location + "\\res\\HTMLPreview\\HTMLPreviewPage.html"));
+        
+        //HtmlElement page = htmlPreview.Document.CreateElement("div");
+        //page.Id = "page";
+        //htmlPreview.Document.Body.AppendChild(page);
+        //HtmlElement conwrap = htmlPreview.Document.CreateElement("div");
+        //conwrap.Id = "containment-wrapper";
+        //htmlPreview.Document.Body.FirstChild.AppendChild(conwrap);
         this.currentMetaCategory = new MetaCategory();
         this.index = 0;
         this.trackable = null;
@@ -69,6 +76,10 @@ public class HTMLPreviewController
     }
 
     #region Eventhandler
+    private void htmlPreview_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+    {
+        HTMLView htmlPreview = sender as HTMLView;
+    }
     private void delete_current_element(object sender, EventArgs e)
     {
  	    throw new NotImplementedException();
@@ -101,7 +112,7 @@ public class HTMLPreviewController
         {
             this.editorWindow.Tsm_editor_menu_edit_delete.Enabled = true;
             Vector3D center = new Vector3D(0, 0, 0);
-            center.Y = htmlPreview.Document.Body.FirstChild.FirstChild.OffsetRectangle.Height;
+            center.Y = htmlPreview.Document.All["containment-wrapper"].OffsetRectangle.Height;
             center.X = htmlPreview.Document.Body.ClientRectangle.Width / 2;
             while (true)
             {
@@ -212,7 +223,6 @@ public class HTMLPreviewController
 
     private void addHTMLElement(IPreviewable currentElement, Vector3D center)
     {
-        throw new NotImplementedException();
         if (currentElement is Abstract2DTrackable)
         {
             Abstract2DTrackable trackable = ((Abstract2DTrackable)currentElement);
@@ -220,7 +230,7 @@ public class HTMLPreviewController
             int height, width;
 
             htmlTrackable.Id = trackable.SensorCosID;
-            htmlTrackable.SetAttribute("class", "ui-widget-content augmentation");
+            htmlTrackable.SetAttribute("class", "trackable");
             if(trackable.Size == 0)
             {
                 height = trackable.HeightMM;
@@ -367,9 +377,9 @@ public class HTMLPreviewController
     internal void updatePreviewPanel()
     {
         //throw new NotImplementedException();
-        this.htmlPreview.DocumentText="";
-        this.editorWindow.project.Trackables.Add(trackable);
-        updateElementCombobox(trackable);
+        //this.htmlPreview.DocumentText="";
+        //this.editorWindow.project.Trackables.Add(trackable);
+        //updateElementCombobox(trackable);
         //ContextMenu cm = new ContextMenu();
         //cm.MenuItems.Add("einfügen", new EventHandler(this.paste_augmentation));
         //cm.MenuItems[0].Enabled = false;
