@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+    <title>chart</title>
+	<script type="text/javascript"> if (!window.console) console = {log: function() {}}; </script>
+	<script src="options.js"></script>
+	<script src="jquery-1.11.1.js"></script>
+	<script src="highcharts.js"></script>
+	<script src="query.js"></script>
+	<script type='text/javascript'>
+	//<![CDATA[
+	chart = 
+	{
+		id : "chart",
+		options : {}
+	}
+	function startChart(path) {
+		chart.options = init();
+		$('#chart').highcharts(init());
+		query(path, chart);
+	}//]]>
+	</script>
+</head>
+<body>
+	<div id = "chart"</div>
+</body>
+</html>

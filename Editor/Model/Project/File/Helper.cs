@@ -82,6 +82,10 @@ namespace ARdevKit.Model.Project.File
 
                 // Pop a directory
                 dir = stack.Pop();
+                if (!Directory.Exists(dir))
+                {
+                    return false;
+                }
 
                 files = Directory.GetFiles(dir);
                 foreach (string file in files)

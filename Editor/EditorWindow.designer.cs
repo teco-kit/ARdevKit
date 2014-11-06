@@ -453,6 +453,7 @@ namespace ARdevKit
             // pnl_editor_preview
             // 
             this.pnl_editor_preview.AllowDrop = true;
+            this.pnl_editor_preview.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.pnl_editor_preview.BackColor = System.Drawing.SystemColors.Control;
             this.pnl_editor_preview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pnl_editor_preview.Controls.Add(this.menuStrip1);

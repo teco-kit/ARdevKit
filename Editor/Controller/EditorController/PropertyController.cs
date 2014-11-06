@@ -205,9 +205,12 @@ namespace Controller.EditorController
                 if (string.Equals((string)e.ChangedItem.Value, "", StringComparison.Ordinal))
                 {
                     ((Chart)ew.CurrentElement).ResFilePath = e.OldValue.ToString();
-
                     return;
                 }
+                this.ew.PreviewController.reloadPreviewable((AbstractAugmentation)this.ew.CurrentElement);
+                PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
+                temp.BorderStyle = BorderStyle.Fixed3D;
+                temp.BringToFront();
             }
 
             // Checks if picturePath has been changed
@@ -272,8 +275,13 @@ namespace Controller.EditorController
                 if (string.Equals((string)e.ChangedItem.Value, "", StringComparison.Ordinal))
                 {
                     if (((Chart)ew.CurrentElement).Source is FileSource)
+                    {
                         ((FileSource)((Chart)ew.CurrentElement).Source).Data = e.OldValue.ToString();
-
+                        this.ew.PreviewController.reloadPreviewable((Chart)this.ew.CurrentElement);
+                        PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
+                        temp.BorderStyle = BorderStyle.Fixed3D;
+                        temp.BringToFront();
+                    }   
                     return;
                 }
             }
@@ -287,6 +295,10 @@ namespace Controller.EditorController
                 if (string.Equals((string)e.ChangedItem.Value, "", StringComparison.Ordinal))
                 {
                     (ew.PreviewController.findBox(ew.CurrentElement).ContextMenu).MenuItems[5].Enabled = false;
+                    this.ew.PreviewController.reloadPreviewable((Chart)this.ew.CurrentElement);
+                    PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
+                    temp.BorderStyle = BorderStyle.Fixed3D;
+                    temp.BringToFront();
 
                     return;
                 }
@@ -294,6 +306,10 @@ namespace Controller.EditorController
                 if (e.OldValue == null || string.Equals(e.OldValue.ToString(), "", StringComparison.Ordinal))
                 {
                     (ew.PreviewController.findBox(ew.CurrentElement).ContextMenu).MenuItems[5].Enabled = true;
+                    this.ew.PreviewController.reloadPreviewable((Chart)this.ew.CurrentElement);
+                    PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
+                    temp.BorderStyle = BorderStyle.Fixed3D;
+                    temp.BringToFront();
 
                     return;
                 }
