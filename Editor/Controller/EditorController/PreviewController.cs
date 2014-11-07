@@ -530,7 +530,23 @@ namespace ARdevKit.Controller.EditorController
                     tempBox.Controls.Add(wb);
                     wb.Location = new System.Drawing.Point(0, 0);
                     wb.Size = wb.Parent.Size;
-                    wb.DocumentCompleted += deactivateWebView;
+                    wb.DocumentCompleted += configurateChartWebView;
+                }
+                if (prev is HtmlElement)
+                {
+                    cm.MenuItems.Add("Öffne HTML", new EventHandler(this.openHTMLDiv));
+                    string newPath = Path.Combine(Environment.CurrentDirectory, "tmp", ((HTMLElement)prev).ID);
+
+                    initializeHTMLElementPreviewAt((HTMLElement)prev, newPath);
+                    WebBrowser wb = new WebBrowser();
+
+                    //modify wb and navigate to desired HTML
+                    wb.ScrollBarsEnabled = false;
+                    wb.Navigate(new Uri(Path.Combine(newPath, ((HTMLElement)prev).ID + ".html")));
+                    //add it to pictureBox
+                    tempBox.Controls.Add(wb);
+                    wb.Location = new System.Drawing.Point(0, 0);
+                    wb.Size = wb.Parent.Size;
                 }
             }
             tempBox.MouseClick += new MouseEventHandler(selectElement);
@@ -554,6 +570,25 @@ namespace ARdevKit.Controller.EditorController
             }
         }
 
+        private void openHTMLDiv(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void initializeHTMLElementPreviewAt(HTMLElement element, string newPath)
+        {
+            string res = Path.Combine(Environment.CurrentDirectory, "res");
+            if (!File.Exists(Path.Combine(newPath, element.ID +".html")))
+            {
+                Helper.Copy(Path.Combine(res, "templates", "element.html"), newPath, element.ID + ".html");
+            }
+            if (!File.Exists(Path.Combine(newPath, element.ID + ".js")))
+            {
+                Helper.Copy(Path.Combine(res, "templates", "element.js"), newPath, element.ID + ".js");
+            }
+        }
+
+        
         private void initializeChartPreviewAt(Chart chart, string newPath)
         {
             string res = Path.Combine(Environment.CurrentDirectory, "res");
@@ -646,7 +681,7 @@ namespace ARdevKit.Controller.EditorController
             }
         }
 
-        private void deactivateWebView(object sender, WebBrowserDocumentCompletedEventArgs e)
+        private void configurateChartWebView(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             WebBrowser wb = (WebBrowser)sender;
             if (wb.Parent.Tag is Chart)
@@ -1215,7 +1250,6 @@ namespace ARdevKit.Controller.EditorController
 
                 if (((Control)sender).Tag is AbstractAugmentation)
                 {
-
                     AbstractAugmentation aa;
                     aa = (AbstractAugmentation)((Control)sender).Tag;
                     this.setCoordinates(this.ew.CurrentElement, new Vector3D((int)((controlToMove.Location.X + e.Location.X)),

@@ -113,6 +113,16 @@ namespace ARdevKit.Properties {
         /// <summary>
         ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap HTMLElement {
+            get {
+                object obj = ResourceManager.GetObject("HTMLElement", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap IDMarker_normal_ {
             get {
                 object obj = ResourceManager.GetObject("IDMarker_normal_", resourceCulture);

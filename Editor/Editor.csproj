@@ -100,6 +100,7 @@
     <Compile Include="Model\Project\Event\OnTouchEndedEvent.cs" />
     <Compile Include="Model\Project\File\EventFile.cs" />
     <Compile Include="Model\Project\Event\OnTouchStartedEvent.cs" />
+    <Compile Include="Model\Project\HTMLElement.cs" />
     <Compile Include="View\EventTypeEditor.cs" />
     <Compile Include="View\ProcessVideoWindow.cs">
       <SubType>Form</SubType>
@@ -237,6 +238,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ARdevKit.ico" />
+    <None Include="Resources\HTMLElement.bmp" />
     <Content Include="Resources\IDMarker\IDMarker001.jpg" />
     <Content Include="Resources\IDMarker\IDMarker002.jpg" />
     <Content Include="Resources\IDMarker\IDMarker003.jpg" />

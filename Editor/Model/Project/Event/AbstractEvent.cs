@@ -57,7 +57,7 @@ namespace ARdevKit.Model.Project.Event
             }
             set
             {
-                if (augmentationID != value)
+                if (augmentationID != value && head != null)
                     head.Replace(augmentationID, value);
                 augmentationID = value;
             }
