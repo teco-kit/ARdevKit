@@ -250,7 +250,7 @@ namespace ARdevKit.Controller.EditorController
                                     Helper.Copy(Path.Combine(Environment.CurrentDirectory, "res","templates","chart(source).html"),newQueryPath,"chart.html");
                                 }
                             }
-                            this.setSourcePreview(currentElement);
+                            this.reloadPreviewable(currentElement);
                         }
                     }
                     else
@@ -275,7 +275,7 @@ namespace ARdevKit.Controller.EditorController
                             //add references in Augmentation, Picturebox + project.sources List.
                             ((AbstractDynamic2DAugmentation)currentElement).Source = source;
 
-                            this.setSourcePreview(currentElement);
+                            this.reloadPreviewable(currentElement);
                         }
 
 
@@ -466,10 +466,10 @@ namespace ARdevKit.Controller.EditorController
                 this.addPictureBox(prev, this.recalculateVector(prev.Translation));
             }
 
-            //if (typeof(AbstractDynamic2DAugmentation).IsAssignableFrom(prev.GetType()) && ((AbstractDynamic2DAugmentation)prev).Source != null)
-            //{
-            //    this.setSourcePreview(prev);
-            //}
+            if (typeof(AbstractDynamic2DAugmentation).IsAssignableFrom(prev.GetType()) && ((AbstractDynamic2DAugmentation)prev).Source != null)
+            {
+                this.setSourcePreview(prev);
+            }
         }
 
 
@@ -801,10 +801,6 @@ namespace ARdevKit.Controller.EditorController
         /// <param name="currentElement">The current element.</param>
         private void setSourcePreview(IPreviewable currentElement)
         {
-            if(currentElement is AbstractAugmentation)
-            {
-                reloadPreviewable((AbstractAugmentation)currentElement);
-            }
             PictureBox temp = this.findBox(currentElement);
             //Image image1 = this.getSizedBitmap(currentElement);
             //Image image2 = new Bitmap(ARdevKit.Properties.Resources.db_small);
@@ -1397,7 +1393,10 @@ namespace ARdevKit.Controller.EditorController
                 string path = ((AbstractDynamic2DAugmentation)this.ew.CurrentElement).Source.Query;
                 path = ew.project.ProjectPath == null ? path : Path.Combine(ew.project.ProjectPath, path);
                 TextEditorForm tef = new TextEditorForm(path);
-                tef.Show();
+                if (tef.ShowDialog() == DialogResult.OK)
+                {
+                    reloadPreviewable((Chart)this.ew.CurrentElement);
+                }
             }
             catch (Exception exception)
             {
@@ -1417,7 +1416,10 @@ namespace ARdevKit.Controller.EditorController
                 string path = ((FileSource)((AbstractDynamic2DAugmentation)this.ew.CurrentElement).Source).Data;
                 path = ew.project.ProjectPath == null ? path : Path.Combine(ew.project.ProjectPath, path);
                 TextEditorForm tef = new TextEditorForm(path);
-                tef.Show();
+                if (tef.ShowDialog() == DialogResult.OK)
+                {
+                    reloadPreviewable((Chart)this.ew.CurrentElement);
+                }
             }
             catch (Exception exception)
             {
@@ -1437,7 +1439,10 @@ namespace ARdevKit.Controller.EditorController
                 string path = ((Chart)this.ew.CurrentElement).ResFilePath;
                 path = ew.project.ProjectPath == null ? path : Path.Combine(ew.project.ProjectPath, path);
                 TextEditorForm tef = new TextEditorForm(path);
-                tef.Show();
+                if(tef.ShowDialog() == DialogResult.OK)
+                {
+                    reloadPreviewable((Chart)this.ew.CurrentElement);
+                }
             }
             catch (Exception exception)
             {
