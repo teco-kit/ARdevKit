@@ -38,7 +38,7 @@ namespace ARdevKit.Controller.EditorController
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   The PreviewPanel which we need to add Previewables. </summary>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        private Panel panel;
+        private WebBrowser htmlPreview;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   EditorWindow Instanz </summary>
@@ -61,6 +61,8 @@ namespace ARdevKit.Controller.EditorController
         /// </value>
         public AbstractAugmentation copy { get; set; }
 
+        private List<WebSiteHTMLManager> Websites;
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
         /// Constructor.
@@ -75,11 +77,13 @@ namespace ARdevKit.Controller.EditorController
                 throw new ArgumentException("parameter ew was null.");
 
             this.ew = ew;
-            this.panel = this.ew.Pnl_editor_preview;
+            this.htmlPreview = this.ew.Html_preview;
             this.currentMetaCategory = new MetaCategory();
             this.index = 0;
             this.trackable = null;
             this.ew.project.Trackables.Add(trackable);
+            this.Websites = new List<WebSiteHTMLManager>();
+
             this.ew.Tsm_editor_menu_edit_paste.Click += new System.EventHandler(this.paste_augmentation_center);
             this.ew.Tsm_editor_menu_edit_copie.Click += new System.EventHandler(this.copy_augmentation);
             this.ew.Tsm_editor_menu_edit_delete.Click += new System.EventHandler(this.delete_current_element);
@@ -127,8 +131,8 @@ namespace ARdevKit.Controller.EditorController
             {
                 this.ew.Tsm_editor_menu_edit_delete.Enabled = true;
                 Vector3D center = new Vector3D(0, 0, 0);
-                center.Y = panel.Size.Height / 2;
-                center.X = panel.Size.Width / 2;
+                center.Y = getMainContainerSize().Height / 2;
+                center.X = getMainContainerSize().Width / 2;
                 while (true)
                 {
                     //ask the user for the picture (if the trackable is a picturemarker)
@@ -1282,7 +1286,7 @@ namespace ARdevKit.Controller.EditorController
                 this.copy = (AbstractAugmentation)this.ew.CurrentElement.Clone();
                 this.panel.ContextMenu.MenuItems[0].Enabled = true;
                 this.ew.setPasteButtonEnabled();
-
+                //TODO enable contextmenu paste in MainContainer Conetextmenu
             }
         }
         /// <summary>
@@ -1486,6 +1490,16 @@ namespace ARdevKit.Controller.EditorController
         private void delete_current_element(object sender, EventArgs e)
         {
             this.removePreviewable(this.ew.CurrentElement);
+        }
+
+        internal ScreenSize getMainContainerSize()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void updateElement(IPreviewable previewable)
+        {
+            throw new NotImplementedException();
         }
     }
 }

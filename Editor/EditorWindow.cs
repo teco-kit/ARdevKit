@@ -830,7 +830,7 @@ namespace ARdevKit
                 if (((ElementIcon)e.Data.GetData(typeof(ElementIcon)) != null))
                 {
                     ElementIcon icon = (ElementIcon)e.Data.GetData(typeof(ElementIcon));
-                    Point p = pnl_editor_preview.PointToClient(Cursor.Position);
+                    Point p = html_preview.PointToClient(Cursor.Position);
 
                     IPreviewable element = (IPreviewable)icon.Element.Prototype.Clone();
                     icon.EditorWindow.PreviewController.addPreviewable(element, new Vector3D(p.X, p.Y, 0));
@@ -866,8 +866,7 @@ namespace ARdevKit
             this.exportVisitor = new ExportVisitor();
             this.currentElement = null;
             this.project.Screensize = new ScreenSize();
-            this.project.Screensize.Height = Convert.ToUInt32(pnl_editor_preview.Size.Height);
-            this.project.Screensize.Width = Convert.ToUInt32(pnl_editor_preview.Size.Width);
+            this.project.Screensize = previewController.getMainContainerSize();
             this.project.Screensize.SizeChanged += new System.EventHandler(this.pnl_editor_preview_SizeChanged);
             registerElements();
         }
@@ -904,20 +903,25 @@ namespace ARdevKit
             if (project.Screensize.Width < MINSCREENWIDHT)
             {
                 this.project.Screensize.Width = MINSCREENWIDHT;
-                this.pnl_editor_preview.Size = new Size((int)project.Screensize.Width, (int)project.Screensize.Height);
+                this.setMainContainerSize((int)project.Screensize.Width, (int)project.Screensize.Height);
                 this.previewController.rescalePreviewPanel();
             }
             else if (project.Screensize.Height < MINSCREENHEIGHT)
             {
                 this.project.Screensize.Height = MINSCREENHEIGHT;
-                this.pnl_editor_preview.Size = new Size((int)project.Screensize.Width, (int)project.Screensize.Height);
+                this.setMainContainerSize((int)project.Screensize.Width, (int)project.Screensize.Height);
                 this.previewController.rescalePreviewPanel();
             }
             else
             {
-                this.pnl_editor_preview.Size = new Size((int)project.Screensize.Width, (int)project.Screensize.Height);
+                this.setMainContainerSize((int)project.Screensize.Width, (int)project.Screensize.Height);
                 this.previewController.rescalePreviewPanel();
             }
+        }
+
+        private void setMainContainerSize(int p1, int p2)
+        {
+            throw new NotImplementedException();
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1057,7 +1061,7 @@ namespace ARdevKit
         public void setPasteButtonEnabled()
         {
             this.tsm_editor_menu_edit_paste.Enabled = true;
-            this.pnl_editor_preview.ContextMenu.MenuItems[0].Enabled = true;
+            //TODO enable contextmenu paste in MainContainer Conetextmenu
         }
 
         /// <summary>
@@ -1109,7 +1113,7 @@ namespace ARdevKit
                     }
                     if (!this.project.existTrackable(tempTrack))
                     {
-                        tempTrack.vector = new Vector3D(this.pnl_editor_preview.Size.Width / 2, this.pnl_editor_preview.Size.Height / 2, 0);
+                        tempTrack.vector = new Vector3D(previewController.getMainContainerSize().Width / 2, previewController.getMainContainerSize().Height / 2, 0);
                         this.project.Trackables.Add(tempTrack);
                         foreach (AbstractAugmentation a in tempTrack.Augmentations)
                         {

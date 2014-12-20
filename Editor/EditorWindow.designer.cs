@@ -73,17 +73,14 @@ namespace ARdevKit
             this.tsm_editor_menu_help_info = new System.Windows.Forms.ToolStripMenuItem();
             this.miniToolStrip = new System.Windows.Forms.MenuStrip();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.html_preview = new System.Windows.Forms.WebBrowser();
             this.pnl_preview_overlay = new ARdevKit.View.TransparentPanel();
-            this.pnl_editor_preview = new System.Windows.Forms.Panel();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.html_preview = new System.Windows.Forms.WebBrowser();
             this.pnl_editor_selection.SuspendLayout();
             this.pnl_editor_status.SuspendLayout();
             this.pnl_editor_scenes.SuspendLayout();
             this.pnl_editor_properties.SuspendLayout();
             this.mst_editor_menu.SuspendLayout();
             this.panel1.SuspendLayout();
-            this.pnl_editor_preview.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnl_editor_selection
@@ -472,19 +469,10 @@ namespace ARdevKit
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel1.Controls.Add(this.pnl_preview_overlay);
             this.panel1.Controls.Add(this.html_preview);
-            this.panel1.Controls.Add(this.pnl_editor_preview);
             this.panel1.Location = new System.Drawing.Point(141, 27);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(661, 612);
             this.panel1.TabIndex = 4;
-            // 
-            // html_preview
-            // 
-            this.html_preview.Location = new System.Drawing.Point(3, 3);
-            this.html_preview.MinimumSize = new System.Drawing.Size(20, 20);
-            this.html_preview.Name = "html_preview";
-            this.html_preview.Size = new System.Drawing.Size(330, 303);
-            this.html_preview.TabIndex = 4;
             // 
             // pnl_preview_overlay
             // 
@@ -498,30 +486,13 @@ namespace ARdevKit
             this.pnl_preview_overlay.DragDrop += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragDrop);
             this.pnl_preview_overlay.DragEnter += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragEnter);
             // 
-            // pnl_editor_preview
+            // html_preview
             // 
-            this.pnl_editor_preview.AllowDrop = true;
-            this.pnl_editor_preview.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.pnl_editor_preview.BackColor = System.Drawing.SystemColors.Control;
-            this.pnl_editor_preview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pnl_editor_preview.Controls.Add(this.menuStrip1);
-            this.pnl_editor_preview.Location = new System.Drawing.Point(199, 227);
-            this.pnl_editor_preview.MinimumSize = new System.Drawing.Size(320, 240);
-            this.pnl_editor_preview.Name = "pnl_editor_preview";
-            this.pnl_editor_preview.Size = new System.Drawing.Size(506, 439);
-            this.pnl_editor_preview.TabIndex = 3;
-            this.pnl_editor_preview.SizeChanged += new System.EventHandler(this.pnl_editor_preview_SizeChanged);
-            this.pnl_editor_preview.Click += new System.EventHandler(this.pnl_editor_preview_Click);
-            this.pnl_editor_preview.DragDrop += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragDrop);
-            this.pnl_editor_preview.DragEnter += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragEnter);
-            // 
-            // menuStrip1
-            // 
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(504, 24);
-            this.menuStrip1.TabIndex = 0;
-            this.menuStrip1.Text = "menuStrip1";
+            this.html_preview.Location = new System.Drawing.Point(3, 3);
+            this.html_preview.MinimumSize = new System.Drawing.Size(20, 20);
+            this.html_preview.Name = "html_preview";
+            this.html_preview.Size = new System.Drawing.Size(653, 604);
+            this.html_preview.TabIndex = 4;
             // 
             // EditorWindow
             // 
@@ -548,8 +519,6 @@ namespace ARdevKit
             this.mst_editor_menu.ResumeLayout(false);
             this.mst_editor_menu.PerformLayout();
             this.panel1.ResumeLayout(false);
-            this.pnl_editor_preview.ResumeLayout(false);
-            this.pnl_editor_preview.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -604,8 +573,6 @@ namespace ARdevKit
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripMenuItem sendProject;
         private ToolStripMenuItem DeviceDebug;
-        private Panel pnl_editor_preview;
-        private MenuStrip menuStrip1;
         private MenuStrip miniToolStrip;
         private Panel panel1;
         private WebBrowser html_preview;
@@ -627,21 +594,6 @@ namespace ARdevKit
             set { propertyGrid1 = value; }
         }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// <summary>
-        /// Gets or sets the pnl editor preview.
-        /// </summary>
-        ///
-        /// <value>
-        /// The pnl editor preview.
-        /// </value>
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        public System.Windows.Forms.Panel Pnl_editor_preview
-        {
-            get { return pnl_editor_preview; }
-            set { pnl_editor_preview = value; }
-        }
 
         /**
          * <summary>    Gets or sets the pnl editor selection. </summary>
@@ -721,7 +673,7 @@ namespace ARdevKit
             set { pnl_preview_overlay = value; }
         }
 
-        public System.Windows.Forms.WebBrowser Web_browser
+        public System.Windows.Forms.WebBrowser Html_preview
         {
             get { return html_preview; }
             set { html_preview = value; }

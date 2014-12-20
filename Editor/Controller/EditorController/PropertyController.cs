@@ -221,12 +221,8 @@ namespace Controller.EditorController
                 else
                 {
                     ((PictureMarker)ew.CurrentElement).PicturePath = e.ChangedItem.Value.ToString();
-                    this.ew.Pnl_editor_preview.Controls.Remove(this.ew.PreviewController.findBox(this.ew.CurrentElement));
-                    this.ew.PreviewController.addPictureBox(this.ew.CurrentElement,
-                        new Vector3D(this.ew.Pnl_editor_preview.Width / 2, this.ew.Pnl_editor_preview.Height / 2, 0));
-                    PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
-                    temp.BorderStyle = BorderStyle.Fixed3D;
-                    temp.BringToFront();
+                    this.ew.PreviewController.updateElement(this.ew.CurrentElement);
+                    this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
                 }
 
                 return;
@@ -242,12 +238,8 @@ namespace Controller.EditorController
                 else
                 {
                     ((ImageTrackable)ew.CurrentElement).ImagePath = e.ChangedItem.Value.ToString();
-                    this.ew.Pnl_editor_preview.Controls.Remove(this.ew.PreviewController.findBox(this.ew.CurrentElement));
-                    this.ew.PreviewController.addPictureBox(this.ew.CurrentElement,
-                        new Vector3D(this.ew.Pnl_editor_preview.Width / 2, this.ew.Pnl_editor_preview.Height / 2, 0));
-                    PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
-                    temp.BorderStyle = BorderStyle.Fixed3D;
-                    temp.BringToFront();
+                    this.ew.PreviewController.updateElement(this.ew.CurrentElement);
+                    this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
                 }
                 return;
             }
