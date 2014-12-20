@@ -836,6 +836,10 @@ namespace ARdevKit
                     icon.EditorWindow.PreviewController.addPreviewable(element, new Vector3D(p.X, p.Y, 0));
                 }
             }
+            if (sender == this.pnl_preview_overlay)
+            {
+                ((Panel)sender).Visible = false;
+            } 
         }
 
         /// <summary>
@@ -1409,5 +1413,9 @@ namespace ARdevKit
             }
         }
 
+        internal void enableDragnNDropOverlay()
+        {
+            this.pnl_preview_overlay.Visible = true;
+        }
     }
 }

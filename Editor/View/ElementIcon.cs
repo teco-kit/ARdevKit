@@ -171,7 +171,7 @@ namespace ARdevKit.View
             }
             else
             {
-                DoDragDrop(this, DragDropEffects.Move);
+                    DoDragDrop(this, DragDropEffects.Move);        
             }
         }
 
@@ -191,6 +191,7 @@ namespace ARdevKit.View
                 Point current = PointToClient(Cursor.Position);
                 if (Math.Abs(clickPoint.X - current.X) > 10 || Math.Abs(clickPoint.Y - current.Y) > 10)
                 {
+                    editorWindow.enableDragnNDropOverlay();
                     DoDragDrop(this, DragDropEffects.Move);
                 }
             }

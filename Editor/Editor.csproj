@@ -89,6 +89,7 @@
   <ItemGroup>
     <Compile Include="Controller\EditorController\ObjectCopier.cs" />
     <Compile Include="Controller\EditorController\ThumbCreator.cs" />
+    <Compile Include="Controller\EditorController\WebSiteBuilder.cs" />
     <Compile Include="Controller\TestController\FrameExtractor.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -200,6 +201,9 @@
       <DependentUpon>Slider.cs</DependentUpon>
     </Compile>
     <Compile Include="View\SliderEditor.cs" />
+    <Compile Include="View\TransparentPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <EmbeddedResource Include="View\ProcessVideoWindow.resx">
       <DependentUpon>ProcessVideoWindow.cs</DependentUpon>
     </EmbeddedResource>

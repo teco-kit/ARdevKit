@@ -143,6 +143,7 @@ namespace ARdevKit.Controller.EditorController
                         {
                             if (((ElementIcon)c).Element.Prototype == e.Prototype)
                             {
+                                //c.MouseDown += editorWindow.pnl_editor_selection_DragLeave;
                                 c.Visible = enable;
                             }
                         }
