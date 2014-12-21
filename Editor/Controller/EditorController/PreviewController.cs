@@ -24,6 +24,8 @@ namespace ARdevKit.Controller.EditorController
     /// </summary>
     public class PreviewController
     {
+
+        public static int PREVIEW_PORT = 1234; 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   The MetaCategory of the current element. </summary>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +63,7 @@ namespace ARdevKit.Controller.EditorController
         /// </value>
         public AbstractAugmentation copy { get; set; }
 
-        private List<WebSiteHTMLManager> Websites;
+        private WebSiteHTMLManager Websites;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
@@ -82,7 +84,16 @@ namespace ARdevKit.Controller.EditorController
             this.index = 0;
             this.trackable = null;
             this.ew.project.Trackables.Add(trackable);
-            this.Websites = new List<WebSiteHTMLManager>();
+            
+            
+            if (ew.project.ProjectPath != null && ew.project.ProjectPath != "")
+            {
+                this.Websites = new WebSiteHTMLManager(ew.project.ProjectPath,PREVIEW_PORT);
+            }
+            else
+            {
+                this.Websites = new WebSiteHTMLManager(PREVIEW_PORT);
+            }
 
             this.ew.Tsm_editor_menu_edit_paste.Click += new System.EventHandler(this.paste_augmentation_center);
             this.ew.Tsm_editor_menu_edit_copie.Click += new System.EventHandler(this.copy_augmentation);
@@ -127,6 +138,7 @@ namespace ARdevKit.Controller.EditorController
             if (v == null)
                 throw new ArgumentException("parameter v was null");
 
+            //adds a trackable to an empty scene
             if (currentElement is AbstractTrackable && trackable == null)
             {
                 this.ew.Tsm_editor_menu_edit_delete.Enabled = true;
@@ -163,6 +175,7 @@ namespace ARdevKit.Controller.EditorController
 
                             this.trackable = (AbstractTrackable)currentElement;
                             this.ew.project.Trackables[index] = (AbstractTrackable)currentElement;
+                            this.addElement(currentElement, center);
                             this.addPictureBox(currentElement, center);
                             setCurrentElement(currentElement);
                             ew.PropertyGrid1.SelectedObject = currentElement;
@@ -179,7 +192,7 @@ namespace ARdevKit.Controller.EditorController
                     //set references 
                     trackable.Augmentations.Add((AbstractAugmentation)currentElement);
 
-                    this.addPictureBox(currentElement, v);
+                    this.addElement(currentElement, v);
 
                     //set the vector and the trackable in <see cref="AbstractAugmentation"/>
                     this.setCoordinates(currentElement, v);
@@ -188,6 +201,79 @@ namespace ARdevKit.Controller.EditorController
                     //set the new box to the front
                     this.findBox(currentElement).BringToFront();
                     setCurrentElement(currentElement);
+                }
+            }
+        }
+
+        private void addElement(IPreviewable prev, Vector3D vector)
+        {
+            if (prev == null)
+                throw new ArgumentException("parameter prev was null");
+
+            if (vector == null)
+                throw new ArgumentException("parameter vector was null");
+
+            //creates the temporateBox with all variables, which'll be add than to the panel.
+            HtmlElement element;
+            element = new HtmlElement();
+            PictureBox tempBox;
+            tempBox = new PictureBox();
+            tempBox.Image = this.scaleIPreviewable(prev);
+            tempBox.SizeMode = PictureBoxSizeMode.AutoSize;
+
+            tempBox.Location = new Point((int)(vector.X - tempBox.Size.Width / 2), (int)(vector.Y - tempBox.Size.Height / 2));
+
+            tempBox.Tag = prev;
+            ContextMenu cm = new ContextMenu();
+
+            //adds drag&drop events for augmentations so that sources can be droped on them
+            if (prev is AbstractAugmentation)
+            {
+                ((Control)tempBox).AllowDrop = true;
+                DragEventHandler enterHandler = new DragEventHandler(onAugmentationEnter);
+                DragEventHandler dropHandler = new DragEventHandler(onAugmentationDrop);
+                tempBox.DragEnter += enterHandler;
+                tempBox.DragDrop += dropHandler;
+                //adds menuItems for the contextmenue
+                cm.MenuItems.Add("kopieren", new EventHandler(this.copy_augmentation));
+
+                //great extra work for Charts
+                if (prev is Chart)
+                {
+                    cm.MenuItems.Add("Öffne Optionen", new EventHandler(this.openOptionsFile));
+                    //declare local variables used to initialize the ChartPreview
+                    string newPath = Path.Combine(Environment.CurrentDirectory, "tmp", ((Chart)prev).ID);
+
+                    initializeChartPreviewAt((Chart)prev, newPath);
+                    WebBrowser wb = new WebBrowser();
+
+                    //modify wb and navigate to desired HTML
+                    wb.ScrollBarsEnabled = false;
+                    wb.Navigate(new Uri(Path.Combine(newPath, "chart.html")));
+                    //add it to pictureBox
+                    tempBox.Controls.Add(wb);
+                    wb.Location = new System.Drawing.Point(0, 0);
+                    wb.Size = wb.Parent.Size;
+                    wb.DocumentCompleted += deactivateWebView;
+                }
+            }
+            tempBox.MouseClick += new MouseEventHandler(selectElement);
+            cm.MenuItems.Add("löschen", new EventHandler(this.remove_by_click));
+            cm.Tag = prev;
+            cm.Popup += new EventHandler(this.popupContextMenu);
+            tempBox.ContextMenu = cm;
+
+
+            if (tempBox.Tag is AbstractAugmentation)
+                tempBox.MouseMove += new MouseEventHandler(controlMouseMove);
+
+            this.panel.Controls.Add(tempBox);
+
+            if (prev is ImageAugmentation || prev is VideoAugmentation)
+            {
+                if (((AbstractAugmentation)prev).Rotation.Z != 0)
+                {
+                    this.rotateAugmentation(prev);
                 }
             }
         }

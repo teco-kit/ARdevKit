@@ -87,12 +87,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controller\Connections\SimpleHttpServer.cs" />
     <Compile Include="Controller\EditorController\ObjectCopier.cs" />
     <Compile Include="Controller\EditorController\ThumbCreator.cs" />
-    <Compile Include="Controller\EditorController\WebSiteBuilder.cs" />
+    <Compile Include="Controller\EditorController\WebSiteHTMLManager.cs" />
     <Compile Include="Controller\TestController\FrameExtractor.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Model\Project\AbstractHtmlElement.cs" />
     <Compile Include="Model\Project\Event\OnVisibleEvent.cs" />
     <Compile Include="Model\Project\Event\OnLoadedEvent.cs" />
     <Compile Include="Model\Project\Event\OnUnloadedEvent.cs" />
@@ -101,6 +103,8 @@
     <Compile Include="Model\Project\Event\OnTouchEndedEvent.cs" />
     <Compile Include="Model\Project\File\EventFile.cs" />
     <Compile Include="Model\Project\Event\OnTouchStartedEvent.cs" />
+    <Compile Include="Model\Project\HtmlImage.cs" />
+    <Compile Include="Model\Project\HTMLVideo.cs" />
     <Compile Include="View\EventTypeEditor.cs" />
     <Compile Include="View\ProcessVideoWindow.cs">
       <SubType>Form</SubType>
@@ -241,6 +245,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ARdevKit.ico" />
+    <None Include="Resources\htmlpreviewpage.html" />
     <Content Include="Resources\IDMarker\IDMarker001.jpg" />
     <Content Include="Resources\IDMarker\IDMarker002.jpg" />
     <Content Include="Resources\IDMarker\IDMarker003.jpg" />
