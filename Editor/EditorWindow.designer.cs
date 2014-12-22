@@ -488,9 +488,14 @@ namespace ARdevKit
             // 
             // html_preview
             // 
+            this.html_preview.AllowWebBrowserDrop = false;
+            this.html_preview.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.html_preview.Location = new System.Drawing.Point(3, 3);
             this.html_preview.MinimumSize = new System.Drawing.Size(20, 20);
             this.html_preview.Name = "html_preview";
+            this.html_preview.ScrollBarsEnabled = false;
             this.html_preview.Size = new System.Drawing.Size(653, 604);
             this.html_preview.TabIndex = 4;
             // 

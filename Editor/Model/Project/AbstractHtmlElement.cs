@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 namespace ARdevKit.Model.Project
 {
-    abstract class AbstractHtmlElement : Abstract2DAugmentation
+    abstract public class AbstractHtmlElement : Abstract2DAugmentation
     {
        
     }

@@ -104,7 +104,7 @@
     <Compile Include="Model\Project\File\EventFile.cs" />
     <Compile Include="Model\Project\Event\OnTouchStartedEvent.cs" />
     <Compile Include="Model\Project\HtmlImage.cs" />
-    <Compile Include="Model\Project\HTMLVideo.cs" />
+    <Compile Include="Model\Project\HtmlVideo.cs" />
     <Compile Include="View\EventTypeEditor.cs" />
     <Compile Include="View\ProcessVideoWindow.cs">
       <SubType>Form</SubType>

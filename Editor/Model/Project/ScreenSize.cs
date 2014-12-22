@@ -103,5 +103,11 @@ namespace ARdevKit.Model.Project
         /// </summary>
         /// <remarks>geht 26.01.2014 20:18</remarks>
         public ScreenSize() { }
+
+        public ScreenSize(uint width, uint height)
+        {
+            this.width = width;
+            this.height = height;
+        }
     }
 }

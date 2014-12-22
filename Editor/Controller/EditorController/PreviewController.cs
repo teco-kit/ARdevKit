@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 using System.IO;
 using System.Diagnostics;
 using ARdevKit.Model.Project.File;
+using System.Threading;
 
 namespace ARdevKit.Controller.EditorController
 {
@@ -85,7 +86,7 @@ namespace ARdevKit.Controller.EditorController
             this.trackable = null;
             this.ew.project.Trackables.Add(trackable);
             
-            
+            //start the Websitemanager, which hosts the previewpages
             if (ew.project.ProjectPath != null && ew.project.ProjectPath != "")
             {
                 this.Websites = new WebSiteHTMLManager(ew.project.ProjectPath,PREVIEW_PORT);
@@ -94,6 +95,12 @@ namespace ARdevKit.Controller.EditorController
             {
                 this.Websites = new WebSiteHTMLManager(PREVIEW_PORT);
             }
+            Websites.changeMainContainerSize(EditorWindow.MINSCREENWIDHT, EditorWindow.MINSCREENHEIGHT);
+            Thread thread = new Thread(new ThreadStart(Websites.listen));
+            thread.Start();
+
+            this.htmlPreview.Navigate("http://localhost:" + PREVIEW_PORT + "/" + index);
+
 
             this.ew.Tsm_editor_menu_edit_paste.Click += new System.EventHandler(this.paste_augmentation_center);
             this.ew.Tsm_editor_menu_edit_copie.Click += new System.EventHandler(this.copy_augmentation);
@@ -176,7 +183,6 @@ namespace ARdevKit.Controller.EditorController
                             this.trackable = (AbstractTrackable)currentElement;
                             this.ew.project.Trackables[index] = (AbstractTrackable)currentElement;
                             this.addElement(currentElement, center);
-                            this.addPictureBox(currentElement, center);
                             setCurrentElement(currentElement);
                             ew.PropertyGrid1.SelectedObject = currentElement;
                             break;
@@ -198,84 +204,87 @@ namespace ARdevKit.Controller.EditorController
                     this.setCoordinates(currentElement, v);
                     ((AbstractAugmentation)currentElement).Trackable = this.trackable;
 
-                    //set the new box to the front
-                    this.findBox(currentElement).BringToFront();
+                    //set the new box as selected;
                     setCurrentElement(currentElement);
                 }
             }
         }
 
-        private void addElement(IPreviewable prev, Vector3D vector)
+        private void addElement(IPreviewable currentElement, Vector3D vector)
         {
-            if (prev == null)
-                throw new ArgumentException("parameter prev was null");
-
-            if (vector == null)
-                throw new ArgumentException("parameter vector was null");
-
-            //creates the temporateBox with all variables, which'll be add than to the panel.
-            HtmlElement element;
-            element = new HtmlElement();
-            PictureBox tempBox;
-            tempBox = new PictureBox();
-            tempBox.Image = this.scaleIPreviewable(prev);
-            tempBox.SizeMode = PictureBoxSizeMode.AutoSize;
-
-            tempBox.Location = new Point((int)(vector.X - tempBox.Size.Width / 2), (int)(vector.Y - tempBox.Size.Height / 2));
-
-            tempBox.Tag = prev;
-            ContextMenu cm = new ContextMenu();
-
-            //adds drag&drop events for augmentations so that sources can be droped on them
-            if (prev is AbstractAugmentation)
+            if (currentElement is Abstract2DTrackable)
             {
-                ((Control)tempBox).AllowDrop = true;
-                DragEventHandler enterHandler = new DragEventHandler(onAugmentationEnter);
-                DragEventHandler dropHandler = new DragEventHandler(onAugmentationDrop);
-                tempBox.DragEnter += enterHandler;
-                tempBox.DragDrop += dropHandler;
-                //adds menuItems for the contextmenue
-                cm.MenuItems.Add("kopieren", new EventHandler(this.copy_augmentation));
+                Abstract2DTrackable trackable = ((Abstract2DTrackable)currentElement);
+                HtmlElement htmlTrackable = htmlPreview.Document.CreateElement("div");
+                int height, width;
 
-                //great extra work for Charts
-                if (prev is Chart)
+                htmlTrackable.Id = trackable.SensorCosID;
+                htmlTrackable.SetAttribute("class", "trackable");
+                if (trackable.Size == 0)
                 {
-                    cm.MenuItems.Add("Öffne Optionen", new EventHandler(this.openOptionsFile));
-                    //declare local variables used to initialize the ChartPreview
-                    string newPath = Path.Combine(Environment.CurrentDirectory, "tmp", ((Chart)prev).ID);
-
-                    initializeChartPreviewAt((Chart)prev, newPath);
-                    WebBrowser wb = new WebBrowser();
-
-                    //modify wb and navigate to desired HTML
-                    wb.ScrollBarsEnabled = false;
-                    wb.Navigate(new Uri(Path.Combine(newPath, "chart.html")));
-                    //add it to pictureBox
-                    tempBox.Controls.Add(wb);
-                    wb.Location = new System.Drawing.Point(0, 0);
-                    wb.Size = wb.Parent.Size;
-                    wb.DocumentCompleted += deactivateWebView;
+                    height = trackable.HeightMM;
+                    width = trackable.HeightMM;
                 }
+                else
+                {
+                    height = width = trackable.Size;
+                }
+                htmlTrackable.Style = String.Format("background-size: 100% 100%; width: {0}; height: {1}; left: {2}; top: {3}; background-image:{4}; z-index: {5}",
+                width, height,
+                getMainContainerSize().Width / 2, getMainContainerSize().Height / 2,
+                trackable.getPreview(ew.project.ProjectPath), Int16.MinValue);
+                Websites.addElementAt(htmlTrackable, index);
             }
-            tempBox.MouseClick += new MouseEventHandler(selectElement);
-            cm.MenuItems.Add("löschen", new EventHandler(this.remove_by_click));
-            cm.Tag = prev;
-            cm.Popup += new EventHandler(this.popupContextMenu);
-            tempBox.ContextMenu = cm;
-
-
-            if (tempBox.Tag is AbstractAugmentation)
-                tempBox.MouseMove += new MouseEventHandler(controlMouseMove);
-
-            this.panel.Controls.Add(tempBox);
-
-            if (prev is ImageAugmentation || prev is VideoAugmentation)
+            else if (currentElement is Chart)
             {
-                if (((AbstractAugmentation)prev).Rotation.Z != 0)
-                {
-                    this.rotateAugmentation(prev);
-                }
+                Chart chart = ((Chart)currentElement);
+                HtmlElement htmlChart = htmlPreview.Document.CreateElement("div");
+                htmlChart.Id = chart.ID;
+                htmlChart.SetAttribute("class", "augmentation");
+                htmlChart.Style = String.Format("width: {0}; height: {1}; left: {3}; top: {4}", chart.Width, chart.Height, chart.Positioning.Left, chart.Positioning.Top);
+                Websites.addElementAt(htmlChart, index);
             }
+            else if (currentElement is Abstract2DAugmentation)
+            {
+                Abstract2DAugmentation augmentation = ((Abstract2DAugmentation)currentElement);
+                HtmlElement htmlAugmentation = htmlPreview.Document.CreateElement("div");
+                Vector3D htmlCoordinate = nativeToHtmlCoordinates(augmentation.Translation);
+                htmlAugmentation.Id = augmentation.ID;
+                htmlAugmentation.SetAttribute("class", "augmentation");
+                htmlAugmentation.Style = String.Format("background-size: 100% 100%; width: {0}; height: {1}; left: {3}; top: {4}; background-image:{5}; z-index: {6}",
+                    augmentation.Width, augmentation.Height,
+                    htmlCoordinate.X, htmlCoordinate.Y,
+                    trackable.getPreview(ew.project.ProjectPath), htmlCoordinate.Y);
+                Websites.addElementAt(htmlAugmentation, index);
+            }
+            else
+            {
+                throw new NotSupportedException("Other then Abstract2DAugmention/Abstract2DTrackable not yet supported");
+            }
+        }
+
+        private Vector3D nativeToHtmlCoordinates(Vector3D native)
+        {
+            if (native == null)
+            {
+                throw new ArgumentNullException();
+            }
+            Vector3D result = new Vector3D(0, 0, native.Z);
+            result.X = (int)((native.X + getMainContainerSize().Width / 2));
+            result.Y = (int)((getMainContainerSize().Height / 2 + native.Y));
+            return result;
+        }
+
+        private Vector3D htmlToNativeCoordinates(Vector3D html)
+        {
+            if (html == null)
+            {
+                throw new ArgumentNullException();
+            }
+            Vector3D result = new Vector3D(0, 0, html.Z);
+            result.X = (int)((html.X - getMainContainerSize().Width / 2));
+            result.Y = (int)((getMainContainerSize().Height / 2 - html.Y));
+            return result;
         }
 
         /// <summary>
@@ -396,8 +405,8 @@ namespace ARdevKit.Controller.EditorController
             {
                 ((AbstractDynamic2DAugmentation)currentElement).Source = null;
                 this.ew.project.Sources.Remove(source);
-                this.findBox(currentElement).Image = this.getSizedBitmap(currentElement);
-                this.findBox(currentElement).Refresh();
+                this.findElement(currentElement).Image = this.getSizedBitmap(currentElement);
+                this.findElement(currentElement).Refresh();
             }
             updateElementCombobox(trackable);
         }
@@ -425,7 +434,8 @@ namespace ARdevKit.Controller.EditorController
             }
             else if (currentElement is AbstractAugmentation && trackable != null)
             {
-                this.panel.Controls.Remove(this.findBox((AbstractAugmentation)currentElement));
+                //TODO
+                //this.panel.Controls.Remove(this.findElement((AbstractAugmentation)currentElement));
                 this.ew.project.RemoveAugmentation((AbstractAugmentation)currentElement);
             }
             updateElementCombobox(trackable);
@@ -438,7 +448,8 @@ namespace ARdevKit.Controller.EditorController
         /// </summary>
         private void removeAll()
         {
-            this.panel.Controls.Clear();
+            //TODO
+            //this.panel.Controls.Clear();
             this.trackable = null;
             this.ew.project.Trackables[index] = null;
             updateElementCombobox(trackable);
@@ -450,13 +461,14 @@ namespace ARdevKit.Controller.EditorController
         /// </summary>
         public void updatePreviewPanel()
         {
-            this.panel.Controls.Clear();
+            //TODO
+            //this.panel.Controls.Clear();
             this.ew.project.Trackables.Add(trackable);
             updateElementCombobox(trackable);
             ContextMenu cm = new ContextMenu();
             cm.MenuItems.Add("einfügen", new EventHandler(this.paste_augmentation));
             cm.MenuItems[0].Enabled = false;
-            this.panel.ContextMenu = cm;
+            //this.panel.ContextMenu = cm;
         }
 
         /// <summary>
@@ -469,10 +481,11 @@ namespace ARdevKit.Controller.EditorController
             //if it's a scene which exists reload scene
             if (index < this.ew.project.Trackables.Count)
             {
-
                 this.index = index;
                 this.trackable = this.ew.project.Trackables[index];
-                this.panel.Controls.Clear();
+                //TODO
+                //this.panel.Controls.Clear();
+
                 //makes differences between the kind of trackables
                 if (trackable != null)
                 {
@@ -499,7 +512,8 @@ namespace ARdevKit.Controller.EditorController
             {
                 this.index = index;
                 this.trackable = null;
-                this.panel.Controls.Clear();
+                //TODO
+                //this.panel.Controls.Clear();
                 this.ew.project.Trackables.Add(trackable);
             }
             //set currentElement, copyButton, deleteButton & property grid to null
@@ -546,7 +560,8 @@ namespace ARdevKit.Controller.EditorController
         /// <param name="prev">The previous.</param>
         public void reloadPreviewable(AbstractAugmentation prev)
         {
-            this.panel.Controls.Remove(this.findBox(prev));
+            //TODO
+            //this.panel.Controls.Remove(this.findElement(prev));
             if (prev is Chart)
             {
                 this.addPictureBox(prev, this.recalculateChartVector(prev.Translation));
@@ -633,7 +648,8 @@ namespace ARdevKit.Controller.EditorController
             if (tempBox.Tag is AbstractAugmentation)
                 tempBox.MouseMove += new MouseEventHandler(controlMouseMove);
 
-            this.panel.Controls.Add(tempBox);
+            //TODO
+            //this.panel.Controls.Add(tempBox);
 
             if (prev is ImageAugmentation || prev is VideoAugmentation)
             {
@@ -789,31 +805,23 @@ namespace ARdevKit.Controller.EditorController
         /// <param name="prev">The previous.</param>
         /// <returns></returns>
         /// <exception cref="System.ArgumentException">parameter prev was null.</exception>
-        public PictureBox findBox(IPreviewable prev)
+        public HtmlElement findElement(IPreviewable prev)
         {
             if (prev == null)
                 throw new ArgumentException("parameter prev was null.");
-            if (prev is AbstractTrackable)
+            HtmlElement element = null;
+            if(!htmlPreview.IsBusy)
             {
-                foreach (Control comp in panel.Controls)
+                if (prev is Abstract2DTrackable)
                 {
-                    if (comp.Tag == (AbstractTrackable)prev)
-                    {
-                        return (PictureBox)comp;
-                    }
+                    element = htmlPreview.Document.GetElementById(((Abstract2DTrackable)prev).SensorCosID);
+                }
+                else if (prev is AbstractAugmentation)
+                {
+                    element = htmlPreview.Document.GetElementById(((AbstractAugmentation)prev).ID);
                 }
             }
-            else if (prev is AbstractAugmentation)
-            {
-                foreach (Control comp in panel.Controls)
-                {
-                    if (comp.Tag == (AbstractAugmentation)prev)
-                    {
-                        return (PictureBox)comp;
-                    }
-                }
-            }
-            return null;
+            return element;
         }
 
         /// <summary>
@@ -845,21 +853,22 @@ namespace ARdevKit.Controller.EditorController
                     {
                         this.ew.Tsm_editor_menu_edit_copie.Enabled = false;
                     }
-
-                    foreach (Control comp in this.panel.Controls)
+                    
+                    foreach (HtmlElement element in htmlPreview.Document.GetElementById("containment-wrapper").Children)
                     {
-                        if (((PictureBox)comp).BorderStyle == BorderStyle.FixedSingle)
+                        if (element.GetAttribute("class").Contains("selected"))
                         {
-                            ((PictureBox)comp).BorderStyle = BorderStyle.None;
-                            ((PictureBox)comp).Refresh();
+                            HtmlElement newElement= htmlPreview.Document.CreateElement("div");
+                            newElement.InnerHtml = element.InnerHtml;
+                            newElement.SetAttribute("class", element.GetAttribute("class").Replace("selected", ""));
+                            Websites.replaceElementsAt(element, newElement, index);
                         }
                     }
-                    findBox(this.ew.CurrentElement).BorderStyle = BorderStyle.FixedSingle;
-                    findBox(this.ew.CurrentElement).Refresh();
-                    if (typeof(AbstractAugmentation).IsAssignableFrom(this.ew.CurrentElement.GetType()))
-                    {
-                        findBox(this.ew.CurrentElement).BringToFront();
-                    }
+                    HtmlElement unselectedElement = findElement(this.ew.CurrentElement);
+                    HtmlElement selectedElement = htmlPreview.Document.CreateElement("div");
+                    selectedElement.InnerHtml = unselectedElement.InnerHtml;
+                    selectedElement.SetAttribute("class", unselectedElement.GetAttribute("class") + " selected");
+                    Websites.replaceElementsAt(unselectedElement, selectedElement, index);                  
                 }
                 ew.PropertyGrid1.SelectedObject = currentElement;
             }
@@ -867,12 +876,14 @@ namespace ARdevKit.Controller.EditorController
             else
             {
                 this.ew.CurrentElement = null;
-                foreach (Control comp in this.panel.Controls)
+                foreach (HtmlElement element in htmlPreview.Document.GetElementById("containment-wrapper").Children)
                 {
-                    if (((PictureBox)comp).BorderStyle == BorderStyle.FixedSingle)
+                    if (element.GetAttribute("class").Contains("selected"))
                     {
-                        ((PictureBox)comp).BorderStyle = BorderStyle.None;
-                        ((PictureBox)comp).Refresh();
+                        HtmlElement newElement = htmlPreview.Document.CreateElement("div");
+                        newElement.InnerHtml = element.InnerHtml;
+                        newElement.SetAttribute("class", element.GetAttribute("class").Replace("selected", ""));
+                        Websites.replaceElementsAt(element, newElement, index);
                     }
                 }
                 this.ew.Tsm_editor_menu_edit_copie.Enabled = false;
@@ -891,7 +902,7 @@ namespace ARdevKit.Controller.EditorController
         /// <param name="currentElement">The current element.</param>
         private void setSourcePreview(IPreviewable currentElement)
         {
-            PictureBox temp = this.findBox(currentElement);
+            PictureBox temp = this.findElement(currentElement);
             //Image image1 = this.getSizedBitmap(currentElement);
             //Image image2 = new Bitmap(ARdevKit.Properties.Resources.db_small);
             //Image newPic = new Bitmap(image1.Width, image1.Height);
@@ -923,16 +934,16 @@ namespace ARdevKit.Controller.EditorController
         private Vector3D recalculateVector(Vector3D v)
         {
             Vector3D result = new Vector3D(0, 0, 0);
-            result.X = (panel.Width / 2 + v.X * 1.6 * scale);
-            result.Y = (panel.Height / 2 - v.Y * 1.6 * scale);
+            result.X = (getMainContainerSize().Width / 2 + v.X * 1.6 * scale);
+            result.Y = (getMainContainerSize().Height / 2 - v.Y * 1.6 * scale);
             return result;
         }
 
         private Vector3D recalculateChartVector(Vector3D v)
         {
             Vector3D result = new Vector3D(0, 0, 0);
-            result.X = (panel.Width / 2 + v.X);
-            result.Y = (panel.Height / 2 - v.Y);
+            result.X = (getMainContainerSize().Width / 2 + v.X);
+            result.Y = (getMainContainerSize().Height / 2 - v.Y);
             return result;
         }
 
@@ -1082,8 +1093,8 @@ namespace ARdevKit.Controller.EditorController
 
         public void rescalePreviewPanel()
         {
-            int width = this.panel.Width;
-            int height = this.panel.Height;
+            int width = (int)this.getMainContainerSize().Width;
+            int height = (int)this.getMainContainerSize().Height;
 
             foreach (AbstractTrackable trackable in this.ew.project.Trackables)
             {
@@ -1094,8 +1105,8 @@ namespace ARdevKit.Controller.EditorController
                     {
                         if (aug is Chart)
                         {
-                            ((Chart)aug).Positioning.Left = (int)((aug.Translation.X + panel.Width / 2));
-                            ((Chart)aug).Positioning.Top = (int)((aug.Translation.Y + panel.Width / 2));
+                            ((Chart)aug).Positioning.Left = (int)((aug.Translation.X + getMainContainerSize().Width / 2));
+                            ((Chart)aug).Positioning.Top = (int)((aug.Translation.Y + getMainContainerSize().Width / 2));
                         }
                     }
                 }
@@ -1128,15 +1139,15 @@ namespace ARdevKit.Controller.EditorController
                 ((Chart)prev).Positioning.Top = (int)newV.Y;
 
                 Vector3D result = new Vector3D(0, 0, 0);
-                result.X = (int)((newV.X - panel.Width / 2));
-                result.Y = (int)((panel.Height / 2 - newV.Y));
+                result.X = (int)((newV.X - getMainContainerSize().Width / 2));
+                result.Y = (int)((getMainContainerSize().Height / 2 - newV.Y));
                 ((AbstractAugmentation)prev).Translation = result;
             }
             else
             {
                 Vector3D result = new Vector3D(0, 0, 0);
-                result.X = (int)((newV.X - panel.Width / 2) / scale / 1.6);
-                result.Y = (int)((panel.Height / 2 - newV.Y) / scale / 1.6);
+                result.X = (int)((newV.X - getMainContainerSize().Width / 2) / scale / 1.6);
+                result.Y = (int)((getMainContainerSize().Height / 2 - newV.Y) / scale / 1.6);
                 ((AbstractAugmentation)prev).Translation = result;
             }
         }
@@ -1155,7 +1166,7 @@ namespace ARdevKit.Controller.EditorController
 
             Vector3D tmp = recalculateVector(current.Translation);
 
-            PictureBox box = findBox(current);
+            PictureBox box = findElement(current);
             box.Location = new Point((int)tmp.X - (box.Size.Width / 2), (int)tmp.Y - (box.Size.Height / 2));
         }
 
@@ -1200,7 +1211,7 @@ namespace ARdevKit.Controller.EditorController
 
             IPreviewable prev = currentElement;
             int grad = -(int)((AbstractAugmentation)prev).Rotation.Z;
-            PictureBox box = this.findBox(prev);
+            PictureBox box = this.findElement(prev);
             Bitmap imgOriginal = this.getSizedBitmap(prev);
 
             Bitmap tempBitmap = new Bitmap((int)(imgOriginal.Width), (int)(imgOriginal.Height));
@@ -1232,7 +1243,7 @@ namespace ARdevKit.Controller.EditorController
                 throw new InvalidOperationException("trackable was not set beforehand");
 
             IPreviewable prev = currentElement;
-            PictureBox box = this.findBox(prev);
+            PictureBox box = this.findElement(prev);
 
             this.scale = 100 / (double)((Abstract2DTrackable)this.trackable).Size / 1.6;
 
@@ -1294,7 +1305,7 @@ namespace ARdevKit.Controller.EditorController
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
                 IPreviewable prev = (IPreviewable)((Control)sender).Tag;
-                PictureBox box = this.findBox(prev);
+                PictureBox box = this.findElement(prev);
                 this.setCurrentElement(prev);
                 Control controlToMove = (Control)sender;
                 controlToMove.BringToFront();
@@ -1346,12 +1357,12 @@ namespace ARdevKit.Controller.EditorController
         {
             AbstractDynamic2DAugmentation temp = (AbstractDynamic2DAugmentation)((ContextMenu)((MenuItem)sender).Parent).Tag;
 
-            this.findBox(temp).ContextMenu.MenuItems.RemoveAt(4);
-            this.findBox(temp).ContextMenu.MenuItems.RemoveAt(4);
-            this.findBox(temp).ContextMenu.MenuItems.RemoveAt(4);
+            this.findElement(temp).ContextMenu.MenuItems.RemoveAt(4);
+            this.findElement(temp).ContextMenu.MenuItems.RemoveAt(4);
+            this.findElement(temp).ContextMenu.MenuItems.RemoveAt(4);
             if (((AbstractDynamic2DAugmentation)this.ew.CurrentElement).Source is FileSource)
             {
-                this.findBox(temp).ContextMenu.MenuItems.RemoveAt(3);
+                this.findElement(temp).ContextMenu.MenuItems.RemoveAt(3);
             }
 
             this.removeSource(temp.Source, temp);
@@ -1370,7 +1381,8 @@ namespace ARdevKit.Controller.EditorController
             if (typeof(AbstractAugmentation).IsAssignableFrom(this.ew.CurrentElement.GetType()))
             {
                 this.copy = (AbstractAugmentation)this.ew.CurrentElement.Clone();
-                this.panel.ContextMenu.MenuItems[0].Enabled = true;
+                //TODO
+                //this.panel.ContextMenu.MenuItems[0].Enabled = true;
                 this.ew.setPasteButtonEnabled();
                 //TODO enable contextmenu paste in MainContainer Conetextmenu
             }
@@ -1386,10 +1398,11 @@ namespace ARdevKit.Controller.EditorController
             {
                 if (this.trackable.Augmentations.Count < 3)
                 {
-                    Point p = this.panel.PointToClient(Cursor.Position);
+                    //TODO
+                    //Point p = this.panel.PointToClient(Cursor.Position);
                     IPreviewable element = (IPreviewable)this.copy.Clone();
-                    this.addPreviewable(element, new Vector3D(p.X, p.Y, 0));
-
+                    //this.addPreviewable(element, new Vector3D(p.X, p.Y, 0));
+                    
                     if (element is AbstractDynamic2DAugmentation && ((AbstractDynamic2DAugmentation)element).Source != null)
                     {
                         this.setSourcePreview(element);
@@ -1410,7 +1423,7 @@ namespace ARdevKit.Controller.EditorController
                 if (this.trackable.Augmentations.Count < 3)
                 {
                     IPreviewable element = (IPreviewable)this.copy.Clone();
-                    this.addPreviewable(element, new Vector3D(this.panel.Width / 2, this.panel.Height / 2, 0));
+                    this.addPreviewable(element, new Vector3D(this.getMainContainerSize().Width / 2, this.getMainContainerSize().Height / 2, 0));
 
                     if (element is AbstractDynamic2DAugmentation && ((AbstractDynamic2DAugmentation)element).Source != null)
                     {
@@ -1578,9 +1591,12 @@ namespace ARdevKit.Controller.EditorController
             this.removePreviewable(this.ew.CurrentElement);
         }
 
-        internal ScreenSize getMainContainerSize()
+        public ScreenSize getMainContainerSize()
         {
-            throw new NotImplementedException();
+            ScreenSize result = new ScreenSize();
+            result.Height = Convert.ToUInt32(Websites.MainContainerHeigth);
+            result.Width = Convert.ToUInt32(Websites.MainContainerWidth);
+            return result;
         }
 
         internal void updateElement(IPreviewable previewable)

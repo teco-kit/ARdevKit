@@ -71,13 +71,13 @@ namespace ARdevKit
         /// The minscreenwidht
         /// </summary>
         /// <remarks>geht 28.01.2014 15:12</remarks>
-        private const uint MINSCREENWIDHT = 320;
+        public const uint MINSCREENWIDHT = 320;
 
         /// <summary>
         /// The minscreenheight
         /// </summary>
         /// <remarks>geht 28.01.2014 15:12</remarks>
-        private const uint MINSCREENHEIGHT = 240;
+        public const uint MINSCREENHEIGHT = 240;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
@@ -865,8 +865,7 @@ namespace ARdevKit
             this.elementCategories = new List<SceneElementCategory>();
             this.exportVisitor = new ExportVisitor();
             this.currentElement = null;
-            this.project.Screensize = new ScreenSize();
-            this.project.Screensize = previewController.getMainContainerSize();
+            this.project.Screensize = new ScreenSize(MINSCREENWIDHT, MINSCREENHEIGHT);
             this.project.Screensize.SizeChanged += new System.EventHandler(this.pnl_editor_preview_SizeChanged);
             registerElements();
         }
