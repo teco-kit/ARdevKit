@@ -81,6 +81,8 @@ namespace ARdevKit.Controller.EditorController
 
             this.ew = ew;
             this.htmlPreview = this.ew.Html_preview;
+            htmlPreview.DocumentCompleted += attachEventHandlers;
+
             this.currentMetaCategory = new MetaCategory();
             this.index = 0;
             this.trackable = null;
@@ -107,6 +109,18 @@ namespace ARdevKit.Controller.EditorController
             this.ew.Tsm_editor_menu_edit_delete.Click += new System.EventHandler(this.delete_current_element);
         }
 
+        private void attachEventHandlers(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+            HtmlElement htmltrack = ((WebBrowser)sender).Document.GetElementById(((Abstract2DTrackable)trackable).SensorCosID);
+            htmltrack.Click += selectElement;
+            foreach(AbstractAugmentation aug in trackable.Augmentations)
+            {
+                HtmlElement htmlaug = ((WebBrowser)sender).Document.GetElementById(aug.ID);
+                htmlaug.Click += selectElement;
+                htmlaug.Drag += DragElement;
+                htmlaug.DragEnd += writeBackChangesfromDOM;
+            }
+        }
 
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1285,13 +1299,43 @@ namespace ARdevKit.Controller.EditorController
         /// <param name="sender">Source of the event.</param>
         /// <param name="e">Mouse event information.</param>
 
-        private void selectElement(object sender, MouseEventArgs e)
+        private void selectElement(object sender, HtmlElementEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
+            if (((Abstract2DTrackable)trackable).SensorCosID == ((HtmlElement)sender).Id)
             {
-                ew.PropertyGrid1.SelectedObject = ((Control)sender).Tag;
-                this.setCurrentElement((IPreviewable)((Control)sender).Tag);
+                ew.PropertyGrid1.SelectedObject = trackable;
+                this.setCurrentElement((IPreviewable)trackable);
             }
+            foreach(AbstractAugmentation aug in trackable.Augmentations)
+            {
+                if (aug.ID == ((HtmlElement)sender).Id)
+                {
+                    ew.PropertyGrid1.SelectedObject = trackable;
+                    this.setCurrentElement((IPreviewable)trackable);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Writes the back changesfrom DOM.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="HtmlElementEventArgs"/> instance containing the event data.</param>
+        /// <exception cref="System.NotImplementedException"></exception>
+        private void writeBackChangesfromDOM(object sender, HtmlElementEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Drags the element.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="HtmlElementEventArgs"/> instance containing the event data.</param>
+        /// <exception cref="System.NotImplementedException"></exception>
+        private void DragElement(object sender, HtmlElementEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
