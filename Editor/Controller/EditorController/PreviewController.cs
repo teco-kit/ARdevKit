@@ -111,17 +111,69 @@ namespace ARdevKit.Controller.EditorController
 
         private void attachEventHandlers(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
+            HtmlElement containmentWrapper = ((WebBrowser)sender).Document.GetElementById("containment-wrapper");
+            containmentWrapper.Click += selectElement;
+            containmentWrapper.MouseDown += showSceneContextMenu;
             HtmlElement htmltrack = ((WebBrowser)sender).Document.GetElementById(((Abstract2DTrackable)trackable).SensorCosID);
             htmltrack.Click += selectElement;
+            htmltrack.MouseDown += showTrackableContextMenu;
             foreach(AbstractAugmentation aug in trackable.Augmentations)
             {
                 HtmlElement htmlaug = ((WebBrowser)sender).Document.GetElementById(aug.ID);
                 htmlaug.Click += selectElement;
                 htmlaug.Drag += DragElement;
                 htmlaug.DragEnd += writeBackChangesfromDOM;
+                if(aug is Chart)
+                {
+                    if(((Chart)aug).Source != null)
+                    {
+                        if(((Chart)aug).Source is DbSource)
+                        {
+                            htmlaug.MouseDown += showChartDbSourceContextMenu;
+                        } 
+                        if(((Chart)aug).Source is FileSource)
+                        {
+                            htmlaug.MouseDown += showChartFileSourceContextMenu;
+                        }
+                    } 
+                    else
+                    {
+                        htmlaug.MouseDown += showAugmentionContextMenu;
+                    }
+                }
+                else
+                {
+                    htmlaug.MouseDown += showAugmentionContextMenu;
+                }
             }
         }
 
+        #region ContextMenuEventHandler
+        private void showAugmentionContextMenu(object sender, HtmlElementEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void showChartFileSourceContextMenu(object sender, HtmlElementEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void showChartDbSourceContextMenu(object sender, HtmlElementEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void showTrackableContextMenu(object sender, HtmlElementEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void showSceneContextMenu(object sender, HtmlElementEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   (This method is obsolete) adds a preview able. </summary>
@@ -419,8 +471,9 @@ namespace ARdevKit.Controller.EditorController
             {
                 ((AbstractDynamic2DAugmentation)currentElement).Source = null;
                 this.ew.project.Sources.Remove(source);
-                this.findElement(currentElement).Image = this.getSizedBitmap(currentElement);
-                this.findElement(currentElement).Refresh();
+                //TODO look into changes that my affect chart updates
+                //this.findElement(currentElement).Image = this.getSizedBitmap(currentElement);
+                //this.findElement(currentElement).Refresh();
             }
             updateElementCombobox(trackable);
         }
@@ -552,11 +605,11 @@ namespace ARdevKit.Controller.EditorController
                     this.scale = 100 / (double)((Abstract2DTrackable)this.trackable).Size / 1.6;
                     if (aug is Chart)
                     {
-                        this.addPictureBox(aug, this.recalculateChartVector(aug.Translation));
+                        this.addElement(aug, this.recalculateChartVector(aug.Translation));
                     }
                     else
                     {
-                        this.addPictureBox(aug, this.recalculateVector(aug.Translation));
+                        this.addElement(aug, this.recalculateVector(aug.Translation));
                     }
 
                     if (typeof(AbstractDynamic2DAugmentation).IsAssignableFrom(aug.GetType()) && ((AbstractDynamic2DAugmentation)aug).Source != null)
@@ -565,7 +618,7 @@ namespace ARdevKit.Controller.EditorController
                     }
                 }
             }
-            this.addPictureBox(trackable, trackable.vector);
+            this.addElement(trackable, trackable.vector);
         }
 
         /// <summary>
@@ -578,11 +631,11 @@ namespace ARdevKit.Controller.EditorController
             //this.panel.Controls.Remove(this.findElement(prev));
             if (prev is Chart)
             {
-                this.addPictureBox(prev, this.recalculateChartVector(prev.Translation));
+                this.addElement(prev, recalculateChartVector(prev.Translation));
             }
             else
             {
-                this.addPictureBox(prev, this.recalculateVector(prev.Translation));
+                this.addElement(prev, this.recalculateVector(prev.Translation));
             }
 
             if (typeof(AbstractDynamic2DAugmentation).IsAssignableFrom(prev.GetType()) && ((AbstractDynamic2DAugmentation)prev).Source != null)
@@ -592,87 +645,87 @@ namespace ARdevKit.Controller.EditorController
         }
 
 
-        /// <summary>
-        /// Adds a PictureBox with for the currentElement to the aktuell Scene.
-        /// </summary>
-        /// <param name="prev">The previous.</param>
-        /// <param name="vector">The vector.</param>
-        /// <exception cref="System.ArgumentNullException">
-        /// parameter prev was null
-        /// or
-        /// parameter vector was null
-        /// </exception>
-        public void addPictureBox(IPreviewable prev, Vector3D vector)
-        {
-            if (prev == null)
-                throw new ArgumentException("parameter prev was null");
+        ///// <summary>
+        ///// Adds a PictureBox with for the currentElement to the aktuell Scene.
+        ///// </summary>
+        ///// <param name="prev">The previous.</param>
+        ///// <param name="vector">The vector.</param>
+        ///// <exception cref="System.ArgumentNullException">
+        ///// parameter prev was null
+        ///// or
+        ///// parameter vector was null
+        ///// </exception>
+        //public void addPictureBox(IPreviewable prev, Vector3D vector)
+        //{
+        //    if (prev == null)
+        //        throw new ArgumentException("parameter prev was null");
 
-            if (vector == null)
-                throw new ArgumentException("parameter vector was null");
+        //    if (vector == null)
+        //        throw new ArgumentException("parameter vector was null");
 
-            //creates the temporateBox with all variables, which'll be add than to the panel.
-            PictureBox tempBox;
-            tempBox = new PictureBox();
-            tempBox.Image = this.scaleIPreviewable(prev);
-            tempBox.SizeMode = PictureBoxSizeMode.AutoSize;
+        //    //creates the temporateBox with all variables, which'll be add than to the panel.
+        //    PictureBox tempBox;
+        //    tempBox = new PictureBox();
+        //    tempBox.Image = this.scaleIPreviewable(prev);
+        //    tempBox.SizeMode = PictureBoxSizeMode.AutoSize;
 
-            tempBox.Location = new Point((int)(vector.X - tempBox.Size.Width / 2), (int)(vector.Y - tempBox.Size.Height / 2));
+        //    tempBox.Location = new Point((int)(vector.X - tempBox.Size.Width / 2), (int)(vector.Y - tempBox.Size.Height / 2));
 
-            tempBox.Tag = prev;
-            ContextMenu cm = new ContextMenu();
+        //    tempBox.Tag = prev;
+        //    ContextMenu cm = new ContextMenu();
 
-            //adds drag&drop events for augmentations so that sources can be droped on them
-            if (prev is AbstractAugmentation)
-            {
-                ((Control)tempBox).AllowDrop = true;
-                DragEventHandler enterHandler = new DragEventHandler(onAugmentationEnter);
-                DragEventHandler dropHandler = new DragEventHandler(onAugmentationDrop);
-                tempBox.DragEnter += enterHandler;
-                tempBox.DragDrop += dropHandler;
-                //adds menuItems for the contextmenue
-                cm.MenuItems.Add("kopieren", new EventHandler(this.copy_augmentation));
+        //    //adds drag&drop events for augmentations so that sources can be droped on them
+        //    if (prev is AbstractAugmentation)
+        //    {
+        //        ((Control)tempBox).AllowDrop = true;
+        //        DragEventHandler enterHandler = new DragEventHandler(onAugmentationEnter);
+        //        DragEventHandler dropHandler = new DragEventHandler(onAugmentationDrop);
+        //        tempBox.DragEnter += enterHandler;
+        //        tempBox.DragDrop += dropHandler;
+        //        //adds menuItems for the contextmenue
+        //        cm.MenuItems.Add("kopieren", new EventHandler(this.copy_augmentation));
                 
-                //great extra work for Charts
-                if (prev is Chart)
-                {
-                    cm.MenuItems.Add("Öffne Optionen", new EventHandler(this.openOptionsFile));
-                    //declare local variables used to initialize the ChartPreview
-                    string newPath = Path.Combine(Environment.CurrentDirectory, "tmp", ((Chart)prev).ID);
+        //        //great extra work for Charts
+        //        if (prev is Chart)
+        //        {
+        //            cm.MenuItems.Add("Öffne Optionen", new EventHandler(this.openOptionsFile));
+        //            //declare local variables used to initialize the ChartPreview
+        //            string newPath = Path.Combine(Environment.CurrentDirectory, "tmp", ((Chart)prev).ID);
                     
-                    initializeChartPreviewAt((Chart)prev, newPath);
-                    WebBrowser wb = new WebBrowser();
+        //            initializeChartPreviewAt((Chart)prev, newPath);
+        //            WebBrowser wb = new WebBrowser();
 
-                    //modify wb and navigate to desired HTML
-                    wb.ScrollBarsEnabled = false;
-                    wb.Navigate(new Uri(Path.Combine(newPath, "chart.html")));
-                    //add it to pictureBox
-                    tempBox.Controls.Add(wb);
-                    wb.Location = new System.Drawing.Point(0, 0);
-                    wb.Size = wb.Parent.Size;
-                    wb.DocumentCompleted += deactivateWebView;
-                }
-            }
-            tempBox.MouseClick += new MouseEventHandler(selectElement);
-            cm.MenuItems.Add("löschen", new EventHandler(this.remove_by_click));
-            cm.Tag = prev;
-            cm.Popup += new EventHandler(this.popupContextMenu);
-            tempBox.ContextMenu = cm;
+        //            //modify wb and navigate to desired HTML
+        //            wb.ScrollBarsEnabled = false;
+        //            wb.Navigate(new Uri(Path.Combine(newPath, "chart.html")));
+        //            //add it to pictureBox
+        //            tempBox.Controls.Add(wb);
+        //            wb.Location = new System.Drawing.Point(0, 0);
+        //            wb.Size = wb.Parent.Size;
+        //            wb.DocumentCompleted += deactivateWebView;
+        //        }
+        //    }
+        //    tempBox.MouseClick += new MouseEventHandler(selectElement);
+        //    cm.MenuItems.Add("löschen", new EventHandler(this.remove_by_click));
+        //    cm.Tag = prev;
+        //    cm.Popup += new EventHandler(this.popupContextMenu);
+        //    tempBox.ContextMenu = cm;
 
 
-            if (tempBox.Tag is AbstractAugmentation)
-                tempBox.MouseMove += new MouseEventHandler(controlMouseMove);
+        //    if (tempBox.Tag is AbstractAugmentation)
+        //        tempBox.MouseMove += new MouseEventHandler(controlMouseMove);
 
-            //TODO
-            //this.panel.Controls.Add(tempBox);
+        //    //TODO
+        //    //this.panel.Controls.Add(tempBox);
 
-            if (prev is ImageAugmentation || prev is VideoAugmentation)
-            {
-                if (((AbstractAugmentation)prev).Rotation.Z != 0)
-                {
-                    this.rotateAugmentation(prev);
-                }
-            }
-        }
+        //    if (prev is ImageAugmentation || prev is VideoAugmentation)
+        //    {
+        //        if (((AbstractAugmentation)prev).Rotation.Z != 0)
+        //        {
+        //            this.rotateAugmentation(prev);
+        //        }
+        //    }
+        //}
 
         private void initializeChartPreviewAt(Chart chart, string newPath)
         {
@@ -916,7 +969,7 @@ namespace ARdevKit.Controller.EditorController
         /// <param name="currentElement">The current element.</param>
         private void setSourcePreview(IPreviewable currentElement)
         {
-            PictureBox temp = this.findElement(currentElement);
+            HtmlElement temp = this.findElement(currentElement);
             //Image image1 = this.getSizedBitmap(currentElement);
             //Image image2 = new Bitmap(ARdevKit.Properties.Resources.db_small);
             //Image newPic = new Bitmap(image1.Width, image1.Height);
@@ -926,7 +979,9 @@ namespace ARdevKit.Controller.EditorController
             //graphic.DrawImage(image2, new Rectangle(0, 0, image1.Width / 4, image1.Height / 4));
             //temp.Image = newPic;
             //adds the new ContextMenuItems for Source
-            temp.ContextMenu.MenuItems.Add("Source anzeigen", new EventHandler(this.show_source_by_click));
+
+            //attaches eventhandlers each time when the site is loaded, which does htmlPreview.Refresh
+            /*temp.ContextMenu.MenuItems.Add("Source anzeigen", new EventHandler(this.show_source_by_click));
             temp.ContextMenu.MenuItems.Add("Source löschen", new EventHandler(this.remove_source_by_click));
             temp.ContextMenu.MenuItems.Add("QueryFile öffnen", new EventHandler(this.openQueryFile));
             if (((AbstractDynamic2DAugmentation)currentElement).Source is FileSource)
@@ -938,7 +993,8 @@ namespace ARdevKit.Controller.EditorController
                     temp.ContextMenu.MenuItems[5].Enabled = false;
                 }
             }
-            temp.Refresh();
+            temp.Refresh();*/
+            htmlPreview.Refresh(WebBrowserRefreshOption.Completely);
         }
         /// <summary>
         /// Recalculates the vector in dependency to panel.
@@ -960,6 +1016,7 @@ namespace ARdevKit.Controller.EditorController
             result.Y = (getMainContainerSize().Height / 2 - v.Y);
             return result;
         }
+
 
         /// <summary>
         /// scales the Pictureboxes to their own scale size
@@ -1166,23 +1223,23 @@ namespace ARdevKit.Controller.EditorController
             }
         }
 
-        /// <summary>
-        /// This updates the position of the currentElement-Picturebox.
-        /// </summary>
-        public void updateTranslation()
-        {
-            AbstractAugmentation current;
+        ///// <summary>
+        ///// This updates the position of the currentElement-Picturebox.
+        ///// </summary>
+        //public void updateTranslation()
+        //{
+        //    AbstractAugmentation current;
 
-            if (ew.CurrentElement is AbstractAugmentation)
-                current = (AbstractAugmentation)ew.CurrentElement;
-            else
-                return;
+        //    if (ew.CurrentElement is AbstractAugmentation)
+        //        current = (AbstractAugmentation)ew.CurrentElement;
+        //    else
+        //        return;
 
-            Vector3D tmp = recalculateVector(current.Translation);
+        //    Vector3D tmp = recalculateVector(current.Translation);
 
-            PictureBox box = findElement(current);
-            box.Location = new Point((int)tmp.X - (box.Size.Width / 2), (int)tmp.Y - (box.Size.Height / 2));
-        }
+        //    PictureBox box = findElement(current);
+        //    box.Location = new Point((int)tmp.X - (box.Size.Width / 2), (int)tmp.Y - (box.Size.Height / 2));
+        //}
 
         /// <summary>
         /// Updates the element combobox.
@@ -1225,7 +1282,7 @@ namespace ARdevKit.Controller.EditorController
 
             IPreviewable prev = currentElement;
             int grad = -(int)((AbstractAugmentation)prev).Rotation.Z;
-            PictureBox box = this.findElement(prev);
+            HtmlElement element = this.findElement(prev);
             Bitmap imgOriginal = this.getSizedBitmap(prev);
 
             Bitmap tempBitmap = new Bitmap((int)(imgOriginal.Width), (int)(imgOriginal.Height));
@@ -1237,8 +1294,10 @@ namespace ARdevKit.Controller.EditorController
             Graph.DrawImageUnscaled(imgOriginal, new Point(0, 0));
 
             X.Dispose();
+
+            HtmlElement newHtmlElement = htmlPreview.Document.GetElementById(((AbstractAugmentation)prev).ID);
+
             box.Image = tempBitmap;
-            X.Dispose();
         }
 
         /// <summary>
@@ -1335,7 +1394,34 @@ namespace ARdevKit.Controller.EditorController
         /// <exception cref="System.NotImplementedException"></exception>
         private void DragElement(object sender, HtmlElementEventArgs e)
         {
-            throw new NotImplementedException();
+            System.Text.StringBuilder messageBoxCS = new System.Text.StringBuilder();
+            messageBoxCS.AppendFormat("{0} = {1}", "MouseButtonsPressed", e.MouseButtonsPressed);
+            messageBoxCS.AppendLine();
+            messageBoxCS.AppendFormat("{0} = {1}", "ClientMousePosition", e.ClientMousePosition);
+            messageBoxCS.AppendLine();
+            messageBoxCS.AppendFormat("{0} = {1}", "OffsetMousePosition", e.OffsetMousePosition);
+            messageBoxCS.AppendLine();
+            messageBoxCS.AppendFormat("{0} = {1}", "MousePosition", e.MousePosition);
+            messageBoxCS.AppendLine();
+            messageBoxCS.AppendFormat("{0} = {1}", "BubbleEvent", e.BubbleEvent);
+            messageBoxCS.AppendLine();
+            messageBoxCS.AppendFormat("{0} = {1}", "KeyPressedCode", e.KeyPressedCode);
+            messageBoxCS.AppendLine();
+            messageBoxCS.AppendFormat("{0} = {1}", "AltKeyPressed", e.AltKeyPressed);
+            messageBoxCS.AppendLine();
+            messageBoxCS.AppendFormat("{0} = {1}", "CtrlKeyPressed", e.CtrlKeyPressed);
+            messageBoxCS.AppendLine();
+            messageBoxCS.AppendFormat("{0} = {1}", "ShiftKeyPressed", e.ShiftKeyPressed);
+            messageBoxCS.AppendLine();
+            messageBoxCS.AppendFormat("{0} = {1}", "EventType", e.EventType);
+            messageBoxCS.AppendLine();
+            messageBoxCS.AppendFormat("{0} = {1}", "ReturnValue", e.ReturnValue);
+            messageBoxCS.AppendLine();
+            messageBoxCS.AppendFormat("{0} = {1}", "FromElement", e.FromElement);
+            messageBoxCS.AppendLine();
+            messageBoxCS.AppendFormat("{0} = {1}", "ToElement", e.ToElement);
+            messageBoxCS.AppendLine();
+            MessageBox.Show(messageBoxCS.ToString(), "Click Event");
         }
 
         /// <summary>
@@ -1349,7 +1435,8 @@ namespace ARdevKit.Controller.EditorController
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
                 IPreviewable prev = (IPreviewable)((Control)sender).Tag;
-                PictureBox box = this.findElement(prev);
+                PictureBox box = 
+                    this.findElement(prev);
                 this.setCurrentElement(prev);
                 Control controlToMove = (Control)sender;
                 controlToMove.BringToFront();
@@ -1411,8 +1498,6 @@ namespace ARdevKit.Controller.EditorController
 
             this.removeSource(temp.Source, temp);
             ew.PropertyGrid1.SelectedObject = null;
-
-
         }
 
         /// <summary>

@@ -292,7 +292,8 @@ namespace Controller.EditorController
             {
                 if (string.Equals((string)e.ChangedItem.Value, "", StringComparison.Ordinal))
                 {
-                    (ew.PreviewController.findElement(ew.CurrentElement).ContextMenu).MenuItems[5].Enabled = false;
+                    //attaches eventhandlers each time when the site is loaded, which does reloadPreviewable
+                    //(ew.PreviewController.findElement(ew.CurrentElement).ContextMenu).MenuItems[5].Enabled = false;
                     this.ew.PreviewController.reloadPreviewable((Chart)this.ew.CurrentElement);
                     this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
                     //this replaces TODO: check if there are unexpected changes or if its even neede
@@ -305,7 +306,8 @@ namespace Controller.EditorController
 
                 if (e.OldValue == null || string.Equals(e.OldValue.ToString(), "", StringComparison.Ordinal))
                 {
-                    (ew.PreviewController.findElement(ew.CurrentElement).ContextMenu).MenuItems[5].Enabled = true;
+                    //attaches eventhandlers each time when the site is loaded, which does reloadPreviewable
+                    //(ew.PreviewController.findElement(ew.CurrentElement).ContextMenu).MenuItems[5].Enabled = true;
                     this.ew.PreviewController.reloadPreviewable((Chart)this.ew.CurrentElement);
                     this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
                     //this replaces TODO: check if there are unexpected changes or if its even neede
@@ -381,7 +383,8 @@ namespace Controller.EditorController
                     marker.MatrixID = ew.project.nextID();
                 }
                 IPreviewable temp = this.ew.CurrentElement;
-                this.ew.PreviewController.findElement(temp).Image = this.ew.PreviewController.scaleIPreviewable(temp);
+                //ATTENTION could cause onforsighted problems
+                //this.ew.PreviewController.findElement(temp).Image = this.ew.PreviewController.scaleIPreviewable(temp);
                 this.ew.PreviewController.reloadPreviewPanel(this.ew.PreviewController.index);
                 this.ew.PreviewController.setCurrentElement(temp);
                 return;
