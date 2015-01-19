@@ -40,7 +40,7 @@ namespace ARdevKit.Model.Project
         /// <summary>
         /// The positioning of the Chart
         /// </summary>
-        private ChartPositioning positioning;
+        private HtmlPositioning positioning;
         /// <summary>
         /// Gets or sets the positioning of the Chart
         /// </summary>
@@ -48,7 +48,7 @@ namespace ARdevKit.Model.Project
         /// The positioning.
         /// </value>
         [CategoryAttribute("Position"), ReadOnly(true)]
-        public ChartPositioning Positioning
+        public HtmlPositioning Positioning
         {
             get { return positioning; }
             set { positioning = value; }
@@ -137,7 +137,7 @@ namespace ARdevKit.Model.Project
         /// <summary>   Default constructor. </summary>
         public Chart()
         {
-            Positioning = new ChartPositioning(ChartPositioning.PositioningModes.RELATIVE);
+            Positioning = new HtmlPositioning(HtmlPositioning.PositioningModes.RELATIVE);
             resFilePath = null;
             Width = 200;
             Height = 200;

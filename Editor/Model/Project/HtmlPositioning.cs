@@ -14,7 +14,7 @@ namespace ARdevKit.Model.Project
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     [TypeConverterAttribute(typeof(ExpandableObjectConverter))]
     [Serializable]
-    public class ChartPositioning
+    public class HtmlPositioning
     {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   Values that represent positioning modes. </summary>
@@ -79,7 +79,7 @@ namespace ARdevKit.Model.Project
         /// <param name="positioningMode"> The position. </param>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        public ChartPositioning(PositioningModes positioningMode)
+        public HtmlPositioning(PositioningModes positioningMode)
         {
             this.positioningMode = positioningMode;
         }

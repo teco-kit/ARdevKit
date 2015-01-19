@@ -15,7 +15,7 @@ namespace ARdevKit.Model.Project
 
         public override System.Drawing.Bitmap getIcon()
         {
-            throw new NotImplementedException();
+            return ARdevKit.Properties.Resources.HtmlVideoAugmention_small_;
         }
 
         public override void CleanUp()

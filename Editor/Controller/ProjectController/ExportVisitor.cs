@@ -87,6 +87,10 @@ namespace ARdevKit.Controller.ProjectController
         private int imageCount;
         /// <summary>   Number of bar charts. </summary>
         private int chartCount;
+        /// <summary>   Number of bar charts. </summary>
+        private int htmlImageCount;
+        /// <summary>   Number of bar charts. </summary>
+        private int htmlVideoCount;
         /// <summary>   Identifier for the coordinate system. </summary>
         private int coordinateSystemID;
         /// <summary>   True if jquery was already imported.    </summary>
@@ -305,7 +309,7 @@ namespace ARdevKit.Controller.ProjectController
             chartIfPatternIsFoundCreateBlock.AddLine(new JavaScriptLine(chartID + ".create()"));
 
             chartIfPatternIsFoundShowBlock.AddLine(new JavaScriptLine(chartID + ".show()"));
-            if (chart.Positioning.PositioningMode == ChartPositioning.PositioningModes.RELATIVE)
+            if (chart.Positioning.PositioningMode == HtmlPositioning.PositioningModes.RELATIVE)
                 chartIfPatternIsFoundShowBlock.AddLine(new JavaScriptLine("arel.Scene.getScreenCoordinatesFrom3DPosition(COS" + coordinateSystemID + "Anchor.getTranslation(), " + chartID + ".getCoordinateSystemID(), function(coord){move(COS"+ coordinateSystemID + "Anchor, " + chartID + ", coord);})"));
 
             // onTracking lost
@@ -350,16 +354,16 @@ namespace ARdevKit.Controller.ProjectController
             chartFileCreateBlock.AddLine(new JavaScriptLine("this.div.setAttribute(\"id\", this.id)"));
             switch (chart.Positioning.PositioningMode)
             {
-                case (ChartPositioning.PositioningModes.STATIC):
+                case (HtmlPositioning.PositioningModes.STATIC):
                     chartFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.position = \"static\""));
                     break;
-                case (ChartPositioning.PositioningModes.ABSOLUTE):
-                case (ChartPositioning.PositioningModes.RELATIVE):
+                case (HtmlPositioning.PositioningModes.ABSOLUTE):
+                case (HtmlPositioning.PositioningModes.RELATIVE):
                     chartFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.position = \"absolute\""));
                     break;
             }
 
-            if (chart.Positioning.PositioningMode == ChartPositioning.PositioningModes.ABSOLUTE)
+            if (chart.Positioning.PositioningMode == HtmlPositioning.PositioningModes.ABSOLUTE)
             {
                 if (chart.Positioning.Top > 0)
                     chartFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.top = \"" + chart.Positioning.Top + "px\""));
@@ -1183,6 +1187,134 @@ namespace ARdevKit.Controller.ProjectController
             arelGlueMoveBlock.AddBlock(arelGlueMoveTimeoutBlock);
 
             arelGlueMoveTimeoutBlock.AddLine(new JavaScriptLine("setTimeout(function() { arel.Scene.getScreenCoordinatesFrom3DPosition(anchor.getTranslation(), object.getCoordinateSystemID(), function(coord){move(anchor, object, coord);}); }, 100)"));
+        }
+
+        public override void Visit(HtmlImage htmlImage)
+        {
+            string htmlImageID = htmlImage.ID = htmlImage.ID == null ? "htmlImage" + htmlImageCount : htmlImage.ID;
+            string htmlImagePluginID = "arel.Plugin." + CultureInfo.CurrentCulture.TextInfo.ToTitleCase(htmlImageID);
+
+            // arel[projectName].html
+            arelProjectFileHeadBlock.AddLine(new XMLLine(new XMLTag("script", "src=\"Assets/" + htmlImageID + "/chart.js\"")));
+
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            // arelGlue.js
+            JavaScriptBlock loadContentBlock = new JavaScriptBlock();
+            sceneReadyFunctionBlock.AddBlock(loadContentBlock);
+
+            arelGlueFile.AddBlock(new JavaScriptLine("var " + htmlImageID));
+
+            loadContentBlock.AddLine(new JavaScriptLine(htmlImageID + " = " + htmlImagePluginID));
+
+            if (htmlImage.Events != null)
+            {
+                JavaScriptBlock loadEventsBlock = new JavaScriptBlock("$.getScript(\"Events/" + htmlImageID + "_Event.js\", function()", new BlockMarker("{", "})"));
+                loadContentBlock.AddBlock(loadEventsBlock);
+                loadContentBlock.AddBlock(new JavaScriptInLine(".fail(function() { console.log(\"Failed to load events\")})", false));
+                loadContentBlock.AddBlock(new JavaScriptLine(".done(function() { console.log(\"Loaded events successfully\")})"));
+            }
+
+            loadContentBlock.AddLine(new JavaScriptLine(htmlImageID + ".hide()"));
+
+            // onTracking
+            JavaScriptBlock htmlImageIfPatternIsFoundShowBlock = new JavaScriptBlock("if (param[0].getCoordinateSystemID() == " + htmlImageID + ".getCoordinateSystemID())", new BlockMarker("{", "}"));
+            ifPatternIsFoundBlock.AddBlock(htmlImageIfPatternIsFoundShowBlock);
+            JavaScriptBlock htmlImageIfPatternIsFoundCreateBlock = new JavaScriptBlock("if (!" + htmlImageID + ".created || " + htmlImageID + ".forceRecalculation)", new BlockMarker("{", "}"));
+            htmlImageIfPatternIsFoundShowBlock.AddBlock(htmlImageIfPatternIsFoundCreateBlock);
+            htmlImageIfPatternIsFoundCreateBlock.AddLine(new JavaScriptLine(htmlImageID + ".create()"));
+
+            htmlImageIfPatternIsFoundShowBlock.AddLine(new JavaScriptLine(htmlImageID + ".show()"));
+            if (htmlImage.Positioning.PositioningMode == HtmlPositioning.PositioningModes.RELATIVE)
+                htmlImageIfPatternIsFoundShowBlock.AddLine(new JavaScriptLine("arel.Scene.getScreenCoordinatesFrom3DPosition(COS" + coordinateSystemID + "Anchor.getTranslation(), " + htmlImageID + ".getCoordinateSystemID(), function(coord){move(COS"+ coordinateSystemID + "Anchor, " + htmlImageID + ", coord);})"));
+
+            // onTracking lost
+            ifPatternIsLostBlock.AddLine(new JavaScriptLine(htmlImageID + ".hide()"));
+
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            // Create htmlImage.js
+            HtmlImageFile htmlImageFile = new HtmlImageFile(project.ProjectPath, htmlImageID);
+            files.Add(htmlImageFile);
+
+            JavaScriptBlock htmlImageFileVariablesBlock = new JavaScriptBlock();
+
+            JavaScriptBlock htmlImageFileDefineBlock = new JavaScriptBlock(htmlImagePluginID + " = ", new BlockMarker("{", "};"));
+            htmlImageFile.AddBlock(htmlImageFileDefineBlock);
+
+            // Ready
+            htmlImageFileDefineBlock.AddLine(new JavaScriptInLine("created : false", true));
+            // Visibility
+            htmlImageFileDefineBlock.AddLine(new JavaScriptInLine("visible : false", true));
+            // ID
+            htmlImageFileDefineBlock.AddLine(new JavaScriptInLine("id : \"" + htmlImageID + "\"", true));
+            // CoordinateSystemID
+            htmlImageFileDefineBlock.AddLine(new JavaScriptInLine("coordinateSystemID : " + coordinateSystemID, true));
+            // Translation
+            string translationX = htmlImage.Translation.X.ToString("F1", CultureInfo.InvariantCulture);
+            string translationY = htmlImage.Translation.Y.ToString("F1", CultureInfo.InvariantCulture);
+            string translationZ = htmlImage.Translation.Z.ToString("F1", CultureInfo.InvariantCulture);
+            htmlImageFileDefineBlock.AddBlock(new JavaScriptInLine("translation : new arel.Vector3D(" + translationX + "," + translationY + "," + translationZ + ")", true));
+            // htmlImageDiv
+            htmlImageFileDefineBlock.AddBlock(new JavaScriptInLine("div : document.createElement(\"div\")", true));
+
+            //copy Image
+            //TODO
+
+            // Create
+            // Div
+            JavaScriptBlock htmlImageFileCreateBlock = new JavaScriptBlock("create : function()", new BlockMarker("{", "},"));
+            htmlImageFileDefineBlock.AddBlock(htmlImageFileCreateBlock);
+            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.created = true"));
+            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.div.setAttribute(\"id\", this.id)"));
+            switch (htmlImage.Positioning.PositioningMode)
+            {
+                case (HtmlPositioning.PositioningModes.STATIC):
+                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.position = \"static\""));
+                    break;
+                case (HtmlPositioning.PositioningModes.ABSOLUTE):
+                case (HtmlPositioning.PositioningModes.RELATIVE):
+                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.position = \"absolute\""));
+                    break;
+            }
+
+            if (htmlImage.Positioning.PositioningMode == HtmlPositioning.PositioningModes.ABSOLUTE)
+            {
+                if (htmlImage.Positioning.Top > 0)
+                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.top = \"" + htmlImage.Positioning.Top + "px\""));
+                if (htmlImage.Positioning.Left > 0)
+                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.left = \"" + htmlImage.Positioning.Left + "px\""));
+            }
+
+            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.width = \"" + htmlImage.Width + "px\""));
+            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.height = \"" + htmlImage.Height + "px\""));
+            //set ImageBackground
+            //TODO
+            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("document.documentElement.appendChild(this.div)"));
+
+            // Show            
+            JavaScriptBlock htmlImageShowBlock = new JavaScriptBlock("show : function()", new BlockMarker("{", "},"));
+            htmlImageFileDefineBlock.AddBlock(htmlImageShowBlock);
+            htmlImageShowBlock.AddLine(new JavaScriptLine("$('#' + this.id).show()"));
+            htmlImageShowBlock.AddLine(new JavaScriptLine("this.visible = true"));
+
+            // Hide
+            JavaScriptBlock htmlImageHideBlock = new JavaScriptBlock("hide : function()", new BlockMarker("{", "},"));
+            htmlImageFileDefineBlock.AddBlock(htmlImageHideBlock);
+            htmlImageHideBlock.AddLine(new JavaScriptLine("$('#' + this.id).hide()"));
+            htmlImageHideBlock.AddLine(new JavaScriptLine("this.visible = false"));
+
+            // Get coordinateSystemID
+            JavaScriptBlock htmlImageGetCoordinateSystemIDBlock = new JavaScriptBlock("getCoordinateSystemID : function()", new BlockMarker("{", "}"));
+            htmlImageFileDefineBlock.AddBlock(htmlImageGetCoordinateSystemIDBlock);
+            htmlImageGetCoordinateSystemIDBlock.AddLine(new JavaScriptLine("return this.coordinateSystemID"));
+
+            //copy Image
+            //TODO
+
+            //
+
+            htmlImageCount++;
         }
     }
 }

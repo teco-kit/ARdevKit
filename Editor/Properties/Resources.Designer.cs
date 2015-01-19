@@ -111,22 +111,50 @@ namespace ARdevKit.Properties {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap HtmlImageAugmentation_small_ {
+            get {
+                object obj = ResourceManager.GetObject("HtmlImageAugmentation_small_", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die &lt;!doctype html&gt;
         ///&lt;html lang=&quot;en&quot;&gt;
         ///&lt;head&gt;
         ///    &lt;meta charset=&quot;utf-8&quot;&gt;
         ///    &lt;title&gt;HTMLPreviewPage&lt;/title&gt;
-        ///&lt;/head&gt;
-        ///&lt;body&gt;
-        ///    &lt;h1&gt;TESTESTESTEST&lt;/h1&gt;
-        ///        &lt;div id=&quot;containment-wrapper&quot;&gt;
-        ///        &lt;/div&gt;
-        ///&lt;/body&gt;
-        ///&lt;/html&gt; ähnelt.
+        ///    &lt;style type =&quot;text/css&quot;&gt;
+        ///        .trackable {
+        ///            background-size: 100% 100%
+        ///        }
+        ///
+        ///        #containment-wrapper {
+        ///            left: 50%;
+        ///            top: 50%;
+        ///            position: absolute;
+        ///            border: 2px solid #4cff00;
+        ///            background-color: white
+        ///        }
+        ///            #containment-wrapper .selected {
+        ///                border: solid 2.5px #F39814;
+        ///         [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
         /// </summary>
         internal static string HTMLPreviewPage {
             get {
                 return ResourceManager.GetString("HTMLPreviewPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap HtmlVideoAugmention_small_ {
+            get {
+                object obj = ResourceManager.GetObject("HtmlVideoAugmention_small_", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         

@@ -1316,7 +1316,6 @@ namespace ARdevKit.Controller.EditorController
                 throw new InvalidOperationException("trackable was not set beforehand");
 
             IPreviewable prev = currentElement;
-            PictureBox box = this.findElement(prev);
 
             this.scale = 100 / (double)((Abstract2DTrackable)this.trackable).Size / 1.6;
 
@@ -1365,13 +1364,17 @@ namespace ARdevKit.Controller.EditorController
                 ew.PropertyGrid1.SelectedObject = trackable;
                 this.setCurrentElement((IPreviewable)trackable);
             }
-            foreach(AbstractAugmentation aug in trackable.Augmentations)
+            else
             {
-                if (aug.ID == ((HtmlElement)sender).Id)
+                foreach(AbstractAugmentation aug in trackable.Augmentations)
                 {
-                    ew.PropertyGrid1.SelectedObject = trackable;
-                    this.setCurrentElement((IPreviewable)trackable);
+                    if (aug.ID == ((HtmlElement)sender).Id)
+                    {
+                        ew.PropertyGrid1.SelectedObject = trackable;
+                        this.setCurrentElement((IPreviewable)trackable);
+                    }
                 }
+
             }
         }
 
