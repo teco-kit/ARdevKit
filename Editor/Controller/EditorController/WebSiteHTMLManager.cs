@@ -89,8 +89,9 @@ namespace ARdevKit.Controller.EditorController
         /// <param name="index">The index.</param>
         public void addElementAt(HtmlElement element, int index)
         {
+            string conWrap = containmentWrapper.Match(websiteTexts[index]).Value;
             string[] splittedPage = containmentWrapper.Split(websiteTexts[index]);
-            websiteTexts[index] = splittedPage[0] + element.OuterHtml + splittedPage[1];
+            websiteTexts[index] = splittedPage[0] +conWrap + element.OuterHtml + splittedPage[1];
         }
 
         /// <summary>
@@ -123,8 +124,17 @@ namespace ARdevKit.Controller.EditorController
         {
             for (int i = 0; i < 9; i++)
             {
-                websiteTexts[i] = containmentWrapper.Replace(websiteTexts[i], String.Format(@"<div id=""containment-wrapper"" style = "" width: {0}px; height: {1}px; margin-left: -{2}px; margin-top: -{3}px"" >", width, height, width / 2, height / 2));
+                websiteTexts[i] = containmentWrapper.Replace(websiteTexts[i], 
+                    String.Format(@"<div id=""containment-wrapper"" style = "" 
+                    width: {0}px; height: {1}px; margin-left: -{2}px; margin-top: -{3}px"" >", 
+                    width, height, width / 2, height / 2));
             }  
+        }
+
+        
+        public void deleteSelection(int index)
+        {
+            websiteTexts[index].Replace("selected", "");
         }
 
         /// <summary>

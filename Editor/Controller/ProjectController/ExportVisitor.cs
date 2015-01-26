@@ -1258,8 +1258,17 @@ namespace ARdevKit.Controller.ProjectController
             // htmlImageDiv
             htmlImageFileDefineBlock.AddBlock(new JavaScriptInLine("div : document.createElement(\"div\")", true));
 
-            //copy Image
-            //TODO
+            // Copy image to projectPath
+            string newPath = "Assets";
+            if (htmlImage.ResFilePath.Contains(':'))
+            {
+                ExportIsValid = Helper.Copy(htmlImage.ResFilePath, Path.Combine(project.ProjectPath, newPath)) && ExportIsValid;
+            }
+            else if (project.OldProjectPath != null && !project.OldProjectPath.Equals(project.ProjectPath))
+            {
+                ExportIsValid = Helper.Copy(Path.Combine(project.OldProjectPath, htmlImage.ResFilePath), Path.Combine(project.ProjectPath, newPath)) && ExportIsValid;
+            }
+            htmlImage.ResFilePath = Path.Combine(newPath, Path.GetFileName(htmlImage.ResFilePath));
 
             // Create
             // Div
@@ -1288,8 +1297,11 @@ namespace ARdevKit.Controller.ProjectController
 
             htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.width = \"" + htmlImage.Width + "px\""));
             htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.height = \"" + htmlImage.Height + "px\""));
+            
             //set ImageBackground
+            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.backgroundimage = \"url(" + Path.GetFileName(htmlImage.ResFilePath) + ")"));
             //TODO
+           
             htmlImageFileCreateBlock.AddLine(new JavaScriptLine("document.documentElement.appendChild(this.div)"));
 
             // Show            
@@ -1309,12 +1321,12 @@ namespace ARdevKit.Controller.ProjectController
             htmlImageFileDefineBlock.AddBlock(htmlImageGetCoordinateSystemIDBlock);
             htmlImageGetCoordinateSystemIDBlock.AddLine(new JavaScriptLine("return this.coordinateSystemID"));
 
-            //copy Image
-            //TODO
-
-            //
-
             htmlImageCount++;
+        }
+
+        public override void Visit(HtmlVideo htmlVideo)
+        {
+            throw new NotImplementedException();
         }
     }
 }

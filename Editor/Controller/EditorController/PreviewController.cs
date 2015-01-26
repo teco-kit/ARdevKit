@@ -26,7 +26,9 @@ namespace ARdevKit.Controller.EditorController
     public class PreviewController
     {
 
-        public static int PREVIEW_PORT = 1234; 
+        public static readonly int PREVIEW_PORT = 1234;
+
+        public readonly string TEMP_PATH = Directory.GetCurrentDirectory() + "/temp/";
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   The MetaCategory of the current element. </summary>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -66,6 +68,12 @@ namespace ARdevKit.Controller.EditorController
 
         private WebSiteHTMLManager Websites;
 
+        private ContextMenu mainContainerContextMenu;
+
+        private ContextMenu augmentationContextMenu;
+
+        private ContextMenu trackableContextMenu;
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
         /// Constructor.
@@ -103,6 +111,15 @@ namespace ARdevKit.Controller.EditorController
 
             this.htmlPreview.Navigate("http://localhost:" + PREVIEW_PORT + "/" + index);
 
+            //initialize mainContainerContextMenu
+            mainContainerContextMenu = new ContextMenu();
+            mainContainerContextMenu.MenuItems.Add("einfügen", paste_augmentation_center);
+            mainContainerContextMenu.MenuItems[0].Enabled = false;
+
+            //initialize augmentationContextMenu
+            augmentationContextMenu = new ContextMenu();
+            augmentationContextMenu.MenuItems.Add("kopieren", copy_augmentation);
+            augmentationContextMenu.MenuItems.Add("löschen", delete_current_element);
 
             this.ew.Tsm_editor_menu_edit_paste.Click += new System.EventHandler(this.paste_augmentation_center);
             this.ew.Tsm_editor_menu_edit_copie.Click += new System.EventHandler(this.copy_augmentation);
@@ -114,42 +131,53 @@ namespace ARdevKit.Controller.EditorController
             HtmlElement containmentWrapper = ((WebBrowser)sender).Document.GetElementById("containment-wrapper");
             containmentWrapper.Click += selectElement;
             containmentWrapper.MouseDown += showSceneContextMenu;
-            HtmlElement htmltrack = ((WebBrowser)sender).Document.GetElementById(((Abstract2DTrackable)trackable).SensorCosID);
-            htmltrack.Click += selectElement;
-            htmltrack.MouseDown += showTrackableContextMenu;
-            foreach(AbstractAugmentation aug in trackable.Augmentations)
+            if (containmentWrapper.FirstChild != null)
             {
-                HtmlElement htmlaug = ((WebBrowser)sender).Document.GetElementById(aug.ID);
-                htmlaug.Click += selectElement;
-                htmlaug.Drag += DragElement;
-                htmlaug.DragEnd += writeBackChangesfromDOM;
-                if(aug is Chart)
+                HtmlElement htmltrack = ((WebBrowser)sender).Document.GetElementById(((Abstract2DTrackable)trackable).SensorCosID);
+                htmltrack.Click += selectElement;
+                htmltrack.MouseDown += showTrackableContextMenu;
+
+                //foreach (HtmlElement elem in containmentWrapper.Children)
+                //{
+                //    if(elem.Style.Contains("selected"))
+                //    {
+                //        elem.Style = elem.Style + "; border: solid 2.5px #f39814";
+                //    }
+                //}
+                foreach (AbstractAugmentation aug in trackable.Augmentations)
                 {
-                    if(((Chart)aug).Source != null)
+                    HtmlElement htmlaug = ((WebBrowser)sender).Document.GetElementById(aug.ID);
+                    htmlaug.Click += selectElement;
+                    htmlaug.Drag += dragElement;
+                    htmlaug.DragEnd += writeBackChangesfromDOM;
+                    if (aug is Chart)
                     {
-                        if(((Chart)aug).Source is DbSource)
+                        if (((Chart)aug).Source != null)
                         {
-                            htmlaug.MouseDown += showChartDbSourceContextMenu;
-                        } 
-                        if(((Chart)aug).Source is FileSource)
-                        {
-                            htmlaug.MouseDown += showChartFileSourceContextMenu;
+                            if (((Chart)aug).Source is DbSource)
+                            {
+                                htmlaug.MouseDown += showChartDbSourceContextMenu;
+                            }
+                            if (((Chart)aug).Source is FileSource)
+                            {
+                                htmlaug.MouseDown += showChartFileSourceContextMenu;
+                            }
                         }
-                    } 
+                        else
+                        {
+                            htmlaug.MouseDown += showAugmentationContextMenu;
+                        }
+                    }
                     else
                     {
-                        htmlaug.MouseDown += showAugmentionContextMenu;
+                        htmlaug.MouseDown += showAugmentationContextMenu;
                     }
-                }
-                else
-                {
-                    htmlaug.MouseDown += showAugmentionContextMenu;
                 }
             }
         }
 
         #region ContextMenuEventHandler
-        private void showAugmentionContextMenu(object sender, HtmlElementEventArgs e)
+        private void showAugmentationContextMenu(object sender, HtmlElementEventArgs e)
         {
             throw new NotImplementedException();
         }
@@ -171,7 +199,21 @@ namespace ARdevKit.Controller.EditorController
 
         private void showSceneContextMenu(object sender, HtmlElementEventArgs e)
         {
-            throw new NotImplementedException();
+            switch (e.MouseButtonsPressed)
+            {
+                case MouseButtons.Left :
+                    {
+                        throw new NotImplementedException();
+                        break;
+                    }
+                case MouseButtons.Right :
+                    {
+                        mainContainerContextMenu.Show(htmlPreview, e.MousePosition);
+                        break;
+                    }
+                default:
+                    break;
+            }
         }
         #endregion
 
@@ -248,8 +290,8 @@ namespace ARdevKit.Controller.EditorController
 
                             this.trackable = (AbstractTrackable)currentElement;
                             this.ew.project.Trackables[index] = (AbstractTrackable)currentElement;
-                            this.addElement(currentElement, center);
-                            setCurrentElement(currentElement);
+                            Websites.deleteSelection(index);
+                            this.addElement(currentElement, center);                        
                             ew.PropertyGrid1.SelectedObject = currentElement;
                             break;
                         }
@@ -263,19 +305,17 @@ namespace ARdevKit.Controller.EditorController
                 {
                     //set references 
                     trackable.Augmentations.Add((AbstractAugmentation)currentElement);
-
+                    Websites.deleteSelection(index);
                     this.addElement(currentElement, v);
 
                     //set the vector and the trackable in <see cref="AbstractAugmentation"/>
                     this.setCoordinates(currentElement, v);
                     ((AbstractAugmentation)currentElement).Trackable = this.trackable;
-
-                    //set the new box as selected;
-                    setCurrentElement(currentElement);
                 }
             }
         }
 
+        //adds elements to website and marks them as selected and navigates again to new Website
         private void addElement(IPreviewable currentElement, Vector3D vector)
         {
             if (currentElement is Abstract2DTrackable)
@@ -285,7 +325,7 @@ namespace ARdevKit.Controller.EditorController
                 int height, width;
 
                 htmlTrackable.Id = trackable.SensorCosID;
-                htmlTrackable.SetAttribute("class", "trackable");
+                htmlTrackable.SetAttribute("class", "trackable selected");
                 if (trackable.Size == 0)
                 {
                     height = trackable.HeightMM;
@@ -295,10 +335,13 @@ namespace ARdevKit.Controller.EditorController
                 {
                     height = width = trackable.Size;
                 }
+                //local temp copy
+                trackable.getPreview(ew.project.ProjectPath).Save(TEMP_PATH + trackable.SensorCosID + ".bmp");
+
                 htmlTrackable.Style = String.Format("background-size: 100% 100%; width: {0}; height: {1}; left: {2}; top: {3}; background-image:{4}; z-index: {5}",
                 width, height,
                 getMainContainerSize().Width / 2, getMainContainerSize().Height / 2,
-                trackable.getPreview(ew.project.ProjectPath), Int16.MinValue);
+                TEMP_PATH + trackable.SensorCosID + ".bmp", Int16.MinValue);
                 Websites.addElementAt(htmlTrackable, index);
             }
             else if (currentElement is Chart)
@@ -306,27 +349,30 @@ namespace ARdevKit.Controller.EditorController
                 Chart chart = ((Chart)currentElement);
                 HtmlElement htmlChart = htmlPreview.Document.CreateElement("div");
                 htmlChart.Id = chart.ID;
-                htmlChart.SetAttribute("class", "augmentation");
+                htmlChart.SetAttribute("class", "augmentation selected");
                 htmlChart.Style = String.Format("width: {0}; height: {1}; left: {3}; top: {4}", chart.Width, chart.Height, chart.Positioning.Left, chart.Positioning.Top);
                 Websites.addElementAt(htmlChart, index);
             }
-            else if (currentElement is Abstract2DAugmentation)
+            else if (currentElement is Abstract2DAugmentation && !(currentElement is Chart))
             {
                 Abstract2DAugmentation augmentation = ((Abstract2DAugmentation)currentElement);
                 HtmlElement htmlAugmentation = htmlPreview.Document.CreateElement("div");
                 Vector3D htmlCoordinate = nativeToHtmlCoordinates(augmentation.Translation);
+                Helper.Copy(((Abstract2DAugmentation)currentElement).ResFilePath, TEMP_PATH);
+                ((Abstract2DAugmentation)currentElement).ResFilePath = TEMP_PATH + Path.GetFileName(((Abstract2DAugmentation)currentElement).ResFilePath);
                 htmlAugmentation.Id = augmentation.ID;
-                htmlAugmentation.SetAttribute("class", "augmentation");
-                htmlAugmentation.Style = String.Format("background-size: 100% 100%; width: {0}; height: {1}; left: {3}; top: {4}; background-image:{5}; z-index: {6}",
+                htmlAugmentation.SetAttribute("class", "augmentation selected");
+                htmlAugmentation.Style = String.Format("background-size: 100% 100%; width: {0}; height: {1}; left: {3}; top: {4}; background-image:url(\"temp/{5}\"); z-index: {6}",
                     augmentation.Width, augmentation.Height,
                     htmlCoordinate.X, htmlCoordinate.Y,
-                    trackable.getPreview(ew.project.ProjectPath), htmlCoordinate.Y);
+                    Path.GetFileName(((Abstract2DAugmentation)currentElement).ResFilePath) , htmlCoordinate.Y);
                 Websites.addElementAt(htmlAugmentation, index);
             }
             else
             {
-                throw new NotSupportedException("Other then Abstract2DAugmention/Abstract2DTrackable not yet supported");
+                throw new NotSupportedException("Other then Abstract2DAugmentation/Abstract2DTrackable not yet supported");
             }
+            htmlPreview.Navigate(htmlPreview.Url);
         }
 
         private Vector3D nativeToHtmlCoordinates(Vector3D native)
@@ -921,16 +967,7 @@ namespace ARdevKit.Controller.EditorController
                         this.ew.Tsm_editor_menu_edit_copie.Enabled = false;
                     }
                     
-                    foreach (HtmlElement element in htmlPreview.Document.GetElementById("containment-wrapper").Children)
-                    {
-                        if (element.GetAttribute("class").Contains("selected"))
-                        {
-                            HtmlElement newElement= htmlPreview.Document.CreateElement("div");
-                            newElement.InnerHtml = element.InnerHtml;
-                            newElement.SetAttribute("class", element.GetAttribute("class").Replace("selected", ""));
-                            Websites.replaceElementsAt(element, newElement, index);
-                        }
-                    }
+                    Websites.deleteSelection(index);
                     HtmlElement unselectedElement = findElement(this.ew.CurrentElement);
                     HtmlElement selectedElement = htmlPreview.Document.CreateElement("div");
                     selectedElement.InnerHtml = unselectedElement.InnerHtml;
@@ -1295,9 +1332,11 @@ namespace ARdevKit.Controller.EditorController
 
             X.Dispose();
 
-            HtmlElement newHtmlElement = htmlPreview.Document.GetElementById(((AbstractAugmentation)prev).ID);
-
-            box.Image = tempBitmap;
+            if(prev is Abstract2DAugmentation)
+            {
+                 tempBitmap.Save(((Abstract2DAugmentation)prev).ResFilePath);
+            }
+            htmlPreview.Navigate(htmlPreview.Url);
         }
 
         /// <summary>
@@ -1395,7 +1434,7 @@ namespace ARdevKit.Controller.EditorController
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="HtmlElementEventArgs"/> instance containing the event data.</param>
         /// <exception cref="System.NotImplementedException"></exception>
-        private void DragElement(object sender, HtmlElementEventArgs e)
+        private void dragElement(object sender, HtmlElementEventArgs e)
         {
             System.Text.StringBuilder messageBoxCS = new System.Text.StringBuilder();
             messageBoxCS.AppendFormat("{0} = {1}", "MouseButtonsPressed", e.MouseButtonsPressed);
@@ -1427,35 +1466,36 @@ namespace ARdevKit.Controller.EditorController
             MessageBox.Show(messageBoxCS.ToString(), "Click Event");
         }
 
-        /// <summary>
-        /// Event to move a object of type Control.
-        /// Also updates x/y coord in the Tag of the control.
-        /// </summary>
-        /// <param name="sender">Source of the event.</param>
-        /// <param name="e">Mouse event information.</param>
-        private void controlMouseMove(object sender, MouseEventArgs e)
-        {
-            if (e.Button == System.Windows.Forms.MouseButtons.Left)
-            {
-                IPreviewable prev = (IPreviewable)((Control)sender).Tag;
-                PictureBox box = 
-                    this.findElement(prev);
-                this.setCurrentElement(prev);
-                Control controlToMove = (Control)sender;
-                controlToMove.BringToFront();
+        //TODO
+        ///// <summary>
+        ///// Event to move a object of type Control.
+        ///// Also updates x/y coord in the Tag of the control.
+        ///// </summary>
+        ///// <param name="sender">Source of the event.</param>
+        ///// <param name="e">Mouse event information.</param>
+        //private void controlMouseMove(object sender, MouseEventArgs e)
+        //{
+        //    if (e.Button == System.Windows.Forms.MouseButtons.Left)
+        //    {
+        //        IPreviewable prev = (IPreviewable)((Control)sender).Tag;
+        //        PictureBox box = 
+        //            this.findElement(prev);
+        //        this.setCurrentElement(prev);
+        //        Control controlToMove = (Control)sender;
+        //        controlToMove.BringToFront();
 
-                if (((Control)sender).Tag is AbstractAugmentation)
-                {
+        //        if (((Control)sender).Tag is AbstractAugmentation)
+        //        {
 
-                    AbstractAugmentation aa;
-                    aa = (AbstractAugmentation)((Control)sender).Tag;
-                    this.setCoordinates(this.ew.CurrentElement, new Vector3D((int)((controlToMove.Location.X + e.Location.X)),
-                        (int)((controlToMove.Location.Y + e.Location.Y)), 0));
-                }
-                controlToMove.Location = new Point(controlToMove.Location.X + e.Location.X - (box.Width / 2),
-                       controlToMove.Location.Y + e.Location.Y - (box.Height / 2));
-            }
-        }
+        //            AbstractAugmentation aa;
+        //            aa = (AbstractAugmentation)((Control)sender).Tag;
+        //            this.setCoordinates(this.ew.CurrentElement, new Vector3D((int)((controlToMove.Location.X + e.Location.X)),
+        //                (int)((controlToMove.Location.Y + e.Location.Y)), 0));
+        //        }
+        //        controlToMove.Location = new Point(controlToMove.Location.X + e.Location.X - (box.Width / 2),
+        //               controlToMove.Location.Y + e.Location.Y - (box.Height / 2));
+        //    }
+        //}
 
         /// <summary>
         /// Event handler. removes the current object.
@@ -1482,26 +1522,26 @@ namespace ARdevKit.Controller.EditorController
 
 
 
-        /// <summary>
-        ///  Event handler. Removes the source of the augmentation and the contextmenuentries of this augmentation.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        private void remove_source_by_click(object sender, EventArgs e)
-        {
-            AbstractDynamic2DAugmentation temp = (AbstractDynamic2DAugmentation)((ContextMenu)((MenuItem)sender).Parent).Tag;
+        ///// <summary>
+        /////  Event handler. Removes the source of the augmentation and the contextmenuentries of this augmentation.
+        ///// </summary>
+        ///// <param name="sender">The source of the event.</param>
+        ///// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        //private void remove_source_by_click(object sender, EventArgs e)
+        //{
+        //    AbstractDynamic2DAugmentation temp = (AbstractDynamic2DAugmentation)((ContextMenu)((MenuItem)sender).Parent).Tag;
 
-            this.findElement(temp).ContextMenu.MenuItems.RemoveAt(4);
-            this.findElement(temp).ContextMenu.MenuItems.RemoveAt(4);
-            this.findElement(temp).ContextMenu.MenuItems.RemoveAt(4);
-            if (((AbstractDynamic2DAugmentation)this.ew.CurrentElement).Source is FileSource)
-            {
-                this.findElement(temp).ContextMenu.MenuItems.RemoveAt(3);
-            }
+        //    this.findElement(temp).ContextMenu.MenuItems.RemoveAt(4);
+        //    this.findElement(temp).ContextMenu.MenuItems.RemoveAt(4);
+        //    this.findElement(temp).ContextMenu.MenuItems.RemoveAt(4);
+        //    if (((AbstractDynamic2DAugmentation)this.ew.CurrentElement).Source is FileSource)
+        //    {
+        //        this.findElement(temp).ContextMenu.MenuItems.RemoveAt(3);
+        //    }
 
-            this.removeSource(temp.Source, temp);
-            ew.PropertyGrid1.SelectedObject = null;
-        }
+        //    this.removeSource(temp.Source, temp);
+        //    ew.PropertyGrid1.SelectedObject = null;
+        //}
 
         /// <summary>
         /// EventHandler for copy function. copies the currentElement
@@ -1513,10 +1553,8 @@ namespace ARdevKit.Controller.EditorController
             if (typeof(AbstractAugmentation).IsAssignableFrom(this.ew.CurrentElement.GetType()))
             {
                 this.copy = (AbstractAugmentation)this.ew.CurrentElement.Clone();
-                //TODO
-                //this.panel.ContextMenu.MenuItems[0].Enabled = true;
+                mainContainerContextMenu.MenuItems[0].Enabled = true;
                 this.ew.setPasteButtonEnabled();
-                //TODO enable contextmenu paste in MainContainer Conetextmenu
             }
         }
         /// <summary>

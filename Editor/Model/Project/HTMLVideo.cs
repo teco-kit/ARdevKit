@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ARdevKit.Model.Project
 {
-    class HtmlVideo : AbstractHtmlElement
+    public class HtmlVideo : AbstractHtmlElement
     {
         public override System.Drawing.Bitmap getPreview(string projectPath)
         {

@@ -167,10 +167,10 @@ namespace ARdevKit.Controller.ProjectController
         ///
         /// <remarks>   Imanuel, 17.01.2014. </remarks>
         ///
-        /// <param name="HtmlVideo"> The identifier marker. </param>
+        /// <param name="HtmlVideo"> The identifier Html Video. </param>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        public abstract void Visit(IDMarker htmlVideo);
+        public abstract void Visit(HtmlVideo htmlVideo);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   Visits the given <see cref="Project"/>. </summary>

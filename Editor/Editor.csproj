@@ -101,6 +101,7 @@
     <Compile Include="Model\Project\Event\CustomEvent.cs" />
     <Compile Include="Model\Project\Event\OnInvisibleEvent.cs" />
     <Compile Include="Model\Project\Event\OnTouchEndedEvent.cs" />
+    <Compile Include="Model\Project\File\HtmlImageFile.cs" />
     <Compile Include="Model\Project\File\EventFile.cs" />
     <Compile Include="Model\Project\Event\OnTouchStartedEvent.cs" />
     <Compile Include="Model\Project\HtmlImage.cs" />
@@ -117,7 +118,7 @@
     <Compile Include="Model\Project\ScreenSize.cs" />
     <Compile Include="Model\Project\ImageTrackable.cs" />
     <Compile Include="Model\Project\AbstractDynamic2DAugmentation.cs" />
-    <Compile Include="Model\Project\ChartPositioning.cs" />
+    <Compile Include="Model\Project\HtmlPositioning.cs" />
     <Compile Include="Model\Project\File\ChartFile.cs" />
     <Compile Include="Model\Project\File\JavaScriptInLine.cs" />
     <Compile Include="Model\Project\ImageAugmentation.cs" />
@@ -246,6 +247,8 @@
   <ItemGroup>
     <Content Include="ARdevKit.ico" />
     <None Include="Resources\htmlpreviewpage.html" />
+    <None Include="Resources\HtmlImageAugmentation%28small%29.bmp" />
+    <None Include="Resources\HtmlVideoAugmention%28small%29.bmp" />
     <Content Include="Resources\IDMarker\IDMarker001.jpg" />
     <Content Include="Resources\IDMarker\IDMarker002.jpg" />
     <Content Include="Resources\IDMarker\IDMarker003.jpg" />
