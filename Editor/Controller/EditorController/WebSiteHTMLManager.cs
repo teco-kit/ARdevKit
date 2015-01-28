@@ -15,6 +15,7 @@ namespace ARdevKit.Controller.EditorController
     /// </summary>
     internal class WebSiteHTMLManager : HttpServer
     {
+        public List<System.Drawing.Bitmap> previews; 
         /// <summary>
         /// The website texts
         /// </summary>
@@ -64,6 +65,7 @@ namespace ARdevKit.Controller.EditorController
 			{
 			    websiteTexts[i] = ARdevKit.Properties.Resources.HTMLPreviewPage;
 			}
+            previews = new List<System.Drawing.Bitmap>();
         }
         /// <summary>
         /// builds a html document or loads the existing one at the 
@@ -80,6 +82,7 @@ namespace ARdevKit.Controller.EditorController
                 websiteTexts[i] = File.ReadAllText(projectPath);
                 ++i;
             }
+            previews = new List<System.Drawing.Bitmap>();
         }
 
         /// <summary>
@@ -150,7 +153,20 @@ namespace ARdevKit.Controller.EditorController
         {
             try
             {
-                int index = Convert.ToInt32(p.http_url.Substring(1));
+                string extension = p.http_url.Substring(1);
+                foreach (var bitmap in previews)
+                {
+                    if ((string)bitmap.Tag == extension)
+                    {
+                        System.Drawing.ImageConverter converter = new System.Drawing.ImageConverter();
+                        byte[] toWrite = (byte[])converter.ConvertTo(bitmap, typeof(byte[]));
+		                p.writeSuccess("image/bmp");
+                        p.outputStream.BaseStream.Write(toWrite, 0, toWrite.Length);
+                        return;
+                    }
+		 
+                }
+                int index = Convert.ToInt32(extension);
                 if (index > 9 || index < 0)
                 {
                     p.writeFailure();

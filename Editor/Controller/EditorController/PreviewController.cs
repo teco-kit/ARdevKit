@@ -95,7 +95,11 @@ namespace ARdevKit.Controller.EditorController
             this.index = 0;
             this.trackable = null;
             this.ew.project.Trackables.Add(trackable);
-            
+
+            //create the temp directory if it does not exist
+            if(!Directory.Exists(TEMP_PATH))
+            Directory.CreateDirectory(TEMP_PATH);
+
             //start the Websitemanager, which hosts the previewpages
             if (ew.project.ProjectPath != null && ew.project.ProjectPath != "")
             {
@@ -258,8 +262,8 @@ namespace ARdevKit.Controller.EditorController
             {
                 this.ew.Tsm_editor_menu_edit_delete.Enabled = true;
                 Vector3D center = new Vector3D(0, 0, 0);
-                center.Y = getMainContainerSize().Height / 2;
-                center.X = getMainContainerSize().Width / 2;
+                center.Y = 0;
+                center.X = 0;
                 while (true)
                 {
                     //ask the user for the picture (if the trackable is a picturemarker)
@@ -316,32 +320,34 @@ namespace ARdevKit.Controller.EditorController
         }
 
         //adds elements to website and marks them as selected and navigates again to new Website
+        //adds the according preview to 
         private void addElement(IPreviewable currentElement, Vector3D vector)
         {
             if (currentElement is Abstract2DTrackable)
             {
                 Abstract2DTrackable trackable = ((Abstract2DTrackable)currentElement);
-                HtmlElement htmlTrackable = htmlPreview.Document.CreateElement("div");
+                HtmlElement htmlTrackable = htmlPreview.Document.CreateElement("img");
                 int height, width;
 
                 htmlTrackable.Id = trackable.SensorCosID;
                 htmlTrackable.SetAttribute("class", "trackable selected");
-                if (trackable.Size == 0)
+                if (currentElement is IDMarker)
                 {
-                    height = trackable.HeightMM;
-                    width = trackable.HeightMM;
+                    height = width = trackable.Size;     
                 }
                 else
                 {
-                    height = width = trackable.Size;
+                    height = trackable.HeightMM;
+                    width = trackable.WidthMM;
                 }
-                //local temp copy
-                trackable.getPreview(ew.project.ProjectPath).Save(TEMP_PATH + trackable.SensorCosID + ".bmp");
-
-                htmlTrackable.Style = String.Format("background-size: 100% 100%; width: {0}; height: {1}; left: {2}; top: {3}; background-image:{4}; z-index: {5}",
+                //tempPreview in WebsiteManager
+                Bitmap preview = trackable.getPreview(ew.project.ProjectPath);
+                preview.Tag = trackable.SensorCosID;
+                Websites.previews.Add(preview);
+                htmlTrackable.SetAttribute("src", "http://localhost:" + PREVIEW_PORT + "/" + trackable.SensorCosID);
+                htmlTrackable.Style = String.Format(@"width: {0}px; height: {1}px; margin-left: {2}px; margin-top: {3}px; z-index:{4}",
                 width, height,
-                getMainContainerSize().Width / 2, getMainContainerSize().Height / 2,
-                TEMP_PATH + trackable.SensorCosID + ".bmp", Int16.MinValue);
+                nativeToHtmlCoordinates(vector).X - width/2, nativeToHtmlCoordinates(vector).Y - height/2, nativeToHtmlCoordinates(vector).Z);
                 Websites.addElementAt(htmlTrackable, index);
             }
             else if (currentElement is Chart)
@@ -382,8 +388,9 @@ namespace ARdevKit.Controller.EditorController
                 throw new ArgumentNullException();
             }
             Vector3D result = new Vector3D(0, 0, native.Z);
-            result.X = (int)((native.X + getMainContainerSize().Width / 2));
-            result.Y = (int)((getMainContainerSize().Height / 2 + native.Y));
+            ScreenSize currentSize = getMainContainerSize();
+            result.X = (int)((native.X + currentSize.Width / 2));
+            result.Y = (int)((currentSize.Height / 2 + native.Y));
             return result;
         }
 
@@ -394,8 +401,9 @@ namespace ARdevKit.Controller.EditorController
                 throw new ArgumentNullException();
             }
             Vector3D result = new Vector3D(0, 0, html.Z);
-            result.X = (int)((html.X - getMainContainerSize().Width / 2));
-            result.Y = (int)((getMainContainerSize().Height / 2 - html.Y));
+            ScreenSize currentSize = getMainContainerSize();
+            result.X = (int)((html.X - currentSize.Width / 2));
+            result.Y = (int)((currentSize.Height / 2 - html.Y));
             return result;
         }
 
@@ -1761,11 +1769,12 @@ namespace ARdevKit.Controller.EditorController
             this.removePreviewable(this.ew.CurrentElement);
         }
 
+       
         public ScreenSize getMainContainerSize()
         {
             ScreenSize result = new ScreenSize();
-            result.Height = Convert.ToUInt32(Websites.MainContainerHeigth);
-            result.Width = Convert.ToUInt32(Websites.MainContainerWidth);
+            result.Height = Convert.ToUInt32(htmlPreview.Document.GetElementById("containment-wrapper").ClientRectangle.Height);
+            result.Width = Convert.ToUInt32(htmlPreview.Document.GetElementById("containment-wrapper").ClientRectangle.Width);
             return result;
         }
 
