@@ -765,7 +765,6 @@
     <None Include="Resources\ImageTrackable_normal_.bmp" />
     <None Include="Resources\ImageTrackable.bmp" />
     <None Include="Resources\refresh.jpg" />
-    <None Include="Resources\Image1.bmp" />
     <None Include="Resources\highcharts%28normal%29.png" />
     <None Include="Resources\db_small.bmp" />
     <None Include="Resources\database.bmp" />

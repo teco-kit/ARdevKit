@@ -364,7 +364,7 @@ namespace Controller.EditorController
             // Checks if the size of a trackable has been changed.
             if (string.Equals(e.ChangedItem.Label.ToString(), "Size", StringComparison.Ordinal))
             {
-                ew.PreviewController.reloadPreviewPanel(ew.PreviewController.index);
+                ew.PreviewController.reloadPreviewPanel(ew.PreviewController.Index);
 
                 return;
             }
@@ -385,7 +385,7 @@ namespace Controller.EditorController
                 IPreviewable temp = this.ew.CurrentElement;
                 //ATTENTION could cause onforsighted problems
                 //this.ew.PreviewController.findElement(temp).Image = this.ew.PreviewController.scaleIPreviewable(temp);
-                this.ew.PreviewController.reloadPreviewPanel(this.ew.PreviewController.index);
+                this.ew.PreviewController.reloadPreviewPanel(this.ew.PreviewController.Index);
                 this.ew.PreviewController.setCurrentElement(temp);
                 return;
             }

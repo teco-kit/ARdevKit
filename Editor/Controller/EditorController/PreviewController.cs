@@ -51,8 +51,17 @@ namespace ARdevKit.Controller.EditorController
         private EditorWindow ew;
 
         /// <summary>   The Index which Trackable out of Project we musst use </summary>
-        public int index;
+         int index;
 
+        /// <summary>
+        /// gets the Index of the Trackable currently viewed,
+        /// changes the Trackable which is viewn according to the trackables
+        /// </summary>
+        public int Index
+        {
+            get { return index; }
+        }
+        
         /// <summary>
         /// The scale of the previewPanel. we need this to scale the distance and the size of the elements.
         /// </summary>
@@ -125,101 +134,127 @@ namespace ARdevKit.Controller.EditorController
             augmentationContextMenu.MenuItems.Add("kopieren", copy_augmentation);
             augmentationContextMenu.MenuItems.Add("löschen", delete_current_element);
 
+            //initialize trackableContextMenu
+            trackableContextMenu = new ContextMenu();
+            trackableContextMenu.MenuItems.Add("löschen", delete_current_element);
+
             this.ew.Tsm_editor_menu_edit_paste.Click += new System.EventHandler(this.paste_augmentation_center);
             this.ew.Tsm_editor_menu_edit_copie.Click += new System.EventHandler(this.copy_augmentation);
             this.ew.Tsm_editor_menu_edit_delete.Click += new System.EventHandler(this.delete_current_element);
         }
 
-        private void attachEventHandlers(object sender, WebBrowserDocumentCompletedEventArgs e)
+        private void handleDocumentMouseDown(object sender, HtmlElementEventArgs e)
         {
-            HtmlElement containmentWrapper = ((WebBrowser)sender).Document.GetElementById("containment-wrapper");
-            containmentWrapper.Click += selectElement;
-            containmentWrapper.MouseDown += showSceneContextMenu;
-            if (containmentWrapper.FirstChild != null)
+            HtmlElement clickedElement = htmlPreview.Document.GetElementFromPoint(e.MousePosition);
+            switch (clickedElement.GetAttribute("title"))
             {
-                HtmlElement htmltrack = ((WebBrowser)sender).Document.GetElementById(((Abstract2DTrackable)trackable).SensorCosID);
-                htmltrack.Click += selectElement;
-                htmltrack.MouseDown += showTrackableContextMenu;
-
-                //foreach (HtmlElement elem in containmentWrapper.Children)
-                //{
-                //    if(elem.Style.Contains("selected"))
-                //    {
-                //        elem.Style = elem.Style + "; border: solid 2.5px #f39814";
-                //    }
-                //}
-                foreach (AbstractAugmentation aug in trackable.Augmentations)
-                {
-                    HtmlElement htmlaug = ((WebBrowser)sender).Document.GetElementById(aug.ID);
-                    htmlaug.Click += selectElement;
-                    htmlaug.Drag += dragElement;
-                    htmlaug.DragEnd += writeBackChangesfromDOM;
-                    if (aug is Chart)
-                    {
-                        if (((Chart)aug).Source != null)
-                        {
-                            if (((Chart)aug).Source is DbSource)
-                            {
-                                htmlaug.MouseDown += showChartDbSourceContextMenu;
-                            }
-                            if (((Chart)aug).Source is FileSource)
-                            {
-                                htmlaug.MouseDown += showChartFileSourceContextMenu;
-                            }
-                        }
-                        else
-                        {
-                            htmlaug.MouseDown += showAugmentationContextMenu;
-                        }
-                    }
-                    else
-                    {
-                        htmlaug.MouseDown += showAugmentationContextMenu;
-                    }
-                }
-            }
-        }
-
-        #region ContextMenuEventHandler
-        private void showAugmentationContextMenu(object sender, HtmlElementEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void showChartFileSourceContextMenu(object sender, HtmlElementEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void showChartDbSourceContextMenu(object sender, HtmlElementEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void showTrackableContextMenu(object sender, HtmlElementEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void showSceneContextMenu(object sender, HtmlElementEventArgs e)
-        {
-            switch (e.MouseButtonsPressed)
-            {
-                case MouseButtons.Left :
-                    {
-                        throw new NotImplementedException();
-                        break;
-                    }
-                case MouseButtons.Right :
+                case "containment-wrapper":
+                    //TODO set Screensize as editable or leave it with changes made to Screensize picking
+                    if (e.MouseButtonsPressed == MouseButtons.Right)
                     {
                         mainContainerContextMenu.Show(htmlPreview, e.MousePosition);
-                        break;
                     }
+                    break;
+
+                case "trackable":
+                    setCurrentElement(trackable);
+                    if (e.MouseButtonsPressed == MouseButtons.Right)
+                    {
+                        trackableContextMenu.Show(htmlPreview, e.MousePosition);
+                    }
+                    break;
+
+                case "augmentation":
+                    
+                    foreach(var aug in trackable.Augmentations)
+                    {
+                        if(aug is Abstract2DAugmentation)
+                        {
+                            if(((Abstract2DAugmentation)aug).ID == clickedElement.Id)
+                            {
+                                setCurrentElement(aug);
+                                if (e.MouseButtonsPressed == MouseButtons.Right)
+                                {
+                                    if (aug is Abstract2DAugmentation)
+                                    {
+                                        if (aug is Chart)
+                                        {
+                                            if (((Chart)aug).Source != null)
+                                            {
+                                                if (((Chart)aug).Source is FileSource)
+                                                {
+
+                                                }
+                                                else
+                                                {
+
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    break;
+
                 default:
                     break;
             }
         }
-        #endregion
+
+        private void attachEventHandlers(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+            htmlPreview.Document.MouseDown += handleDocumentMouseDown;
+            //HtmlElement containmentWrapper = ((WebBrowser)sender).Document.GetElementById("containment-wrapper");
+            //containmentWrapper.Click += selectElement;
+            //containmentWrapper.MouseDown += showSceneContextMenu;
+        //    if (containmentWrapper.FirstChild != null)
+        //    {
+        //        HtmlElement htmltrack = ((WebBrowser)sender).Document.GetElementById(((Abstract2DTrackable)trackable).SensorCosID);
+        //        htmltrack.Click += selectElement;
+        //        htmltrack.MouseDown += showTrackableContextMenu;
+
+        //        //foreach (HtmlElement elem in containmentWrapper.Children)
+        //        //{
+        //        //    if(elem.Style.Contains("selected"))
+        //        //    {
+        //        //        elem.Style = elem.Style + "; border: solid 2.5px #f39814";
+        //        //    }
+        //        //}
+        //        foreach (AbstractAugmentation aug in trackable.Augmentations)
+        //        {
+        //            HtmlElement htmlaug = ((WebBrowser)sender).Document.GetElementById(aug.ID);
+        //            htmlaug.Click += selectElement;
+        //            htmlaug.Drag += dragElement;
+        //            htmlaug.DragEnd += writeBackChangesfromDOM;
+        //            if (aug is Chart)
+        //            {
+        //                if (((Chart)aug).Source != null)
+        //                {
+        //                    if (((Chart)aug).Source is DbSource)
+        //                    {
+        //                        htmlaug.MouseDown += showChartDbSourceContextMenu;
+        //                    }
+        //                    if (((Chart)aug).Source is FileSource)
+        //                    {
+        //                        htmlaug.MouseDown += showChartFileSourceContextMenu;
+        //                    }
+        //                }
+        //                else
+        //                {
+        //                    htmlaug.MouseDown += showAugmentationContextMenu;
+        //                }
+        //            }
+        //            else
+        //            {
+        //                htmlaug.MouseDown += showAugmentationContextMenu;
+        //            }
+        //        }
+        //    }
+        }
+
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   (This method is obsolete) adds a preview able. </summary>
@@ -330,7 +365,8 @@ namespace ARdevKit.Controller.EditorController
                 int height, width;
 
                 htmlTrackable.Id = trackable.SensorCosID;
-                htmlTrackable.SetAttribute("class", "trackable selected");
+                htmlTrackable.SetAttribute("class", "selected");
+                htmlTrackable.SetAttribute("title", "trackable");
                 if (currentElement is IDMarker)
                 {
                     height = width = trackable.Size;     
@@ -544,7 +580,10 @@ namespace ARdevKit.Controller.EditorController
 
             if (currentElement is AbstractTrackable && trackable != null)
             {
-                this.removeAll();
+                Websites.resetPage(index);
+                this.trackable = null;
+                this.ew.project.Trackables[index] = null;
+                updateElementCombobox(trackable);
                 if (!this.ew.project.hasTrackable())
                 {
                     this.ew.ElementSelectionController.setElementEnable(typeof(PictureMarker), true);
@@ -563,16 +602,15 @@ namespace ARdevKit.Controller.EditorController
             this.ew.Tsm_editor_menu_edit_delete.Enabled = false;
         }
 
-
         /// <summary>
         /// Removes all Elements from the PreviewPanel and clears all references and delete the trackable from the list.
         /// </summary>
-        private void removeAll()
+        public void emptyCurrentScene()
         {
-            //TODO
-            //this.panel.Controls.Clear();
+            Websites.resetPage(index);
+            this.ew.project.Trackables[this.ew.project.Trackables.IndexOf(trackable)] = null;
             this.trackable = null;
-            this.ew.project.Trackables[index] = null;
+
             updateElementCombobox(trackable);
         }
 
@@ -582,14 +620,9 @@ namespace ARdevKit.Controller.EditorController
         /// </summary>
         public void updatePreviewPanel()
         {
-            //TODO
-            //this.panel.Controls.Clear();
+            Websites.resetPage(index);
             this.ew.project.Trackables.Add(trackable);
             updateElementCombobox(trackable);
-            ContextMenu cm = new ContextMenu();
-            cm.MenuItems.Add("einfügen", new EventHandler(this.paste_augmentation));
-            cm.MenuItems[0].Enabled = false;
-            //this.panel.ContextMenu = cm;
         }
 
         /// <summary>
@@ -602,10 +635,7 @@ namespace ARdevKit.Controller.EditorController
             //if it's a scene which exists reload scene
             if (index < this.ew.project.Trackables.Count)
             {
-                this.index = index;
-                this.trackable = this.ew.project.Trackables[index];
-                //TODO
-                //this.panel.Controls.Clear();
+                changeSceneTo(index);
 
                 //makes differences between the kind of trackables
                 if (trackable != null)
@@ -681,8 +711,7 @@ namespace ARdevKit.Controller.EditorController
         /// <param name="prev">The previous.</param>
         public void reloadPreviewable(AbstractAugmentation prev)
         {
-            //TODO
-            //this.panel.Controls.Remove(this.findElement(prev));
+            Websites.removeElementAt(findElement(prev), index);
             if (prev is Chart)
             {
                 this.addElement(prev, recalculateChartVector(prev.Translation));
@@ -1781,6 +1810,17 @@ namespace ARdevKit.Controller.EditorController
         internal void updateElement(IPreviewable previewable)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Navigates the browser to the new address and changes the index and current trackable
+        /// </summary>
+        /// <param name="index"></param>
+        public void changeSceneTo(int index)
+        {
+            this.index = index;
+            this.trackable = ew.project.Trackables[index];
+            htmlPreview.Navigate("http://localhost:" + PREVIEW_PORT + "/" + index);            
         }
     }
 }

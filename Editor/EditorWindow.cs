@@ -359,17 +359,19 @@ namespace ARdevKit
         private void btn_editor_scene_scene_change(object sender, EventArgs e)
         {
             int temp = Convert.ToInt32(((Button)sender).Text);
-            if (this.project.Trackables.Count > 1)
-            {
-                this.previewController.reloadPreviewPanel(temp - 1);
-                this.PropertyGrid1.SelectedObject = null;
+            //if (this.project.Trackables.Count > 1)
+            //{
+                this.previewController.changeSceneTo(temp - 1);
+                //this.previewController.reloadPreviewPanel(temp - 1);
+                this.PropertyGrid1.SelectedObject = project.Trackables[temp - 1];
 
-            }
-            else
-            {
-                this.previewController.reloadPreviewPanel(0);
-                this.PropertyGrid1.SelectedObject = null;
-            }
+            //}
+            //else
+            //{
+            //    this.previewController.showSceneNr(0);
+            //    //this.previewController.reloadPreviewPanel(0);
+            //    this.PropertyGrid1.SelectedObject = null;
+            //}
 
             this.resetButton();
             this.setButton(((Button)sender).Text);
@@ -405,8 +407,10 @@ namespace ARdevKit
                 tempButton.ContextMenu.MenuItems.Add("Duplicate", new EventHandler(this.pnl_editor_scene_duplicate));
 
                 this.pnl_editor_scenes.Controls.Add(tempButton);
-                this.previewController.reloadPreviewPanel(this.project.Trackables.Count);
-                this.PropertyGrid1.SelectedObject = null;
+                this.project.Trackables.Add(null);
+                this.previewController.changeSceneTo(this.project.Trackables.Count - 1);
+                //this.previewController.reloadPreviewPanel(temp - 1);
+                this.PropertyGrid1.SelectedObject = project.Trackables[this.project.Trackables.Count - 1];
                 this.resetButton();
                 this.setButton(tempButton.Text);
             }
@@ -433,11 +437,10 @@ namespace ARdevKit
         {
             if (this.project.Trackables.Count > 1)
             {
-                this.project.Trackables.Remove(this.previewController.trackable);
-                this.previewController.trackable = this.project.Trackables[0];
+                this.previewController.emptyCurrentScene();
+                this.project.Trackables.RemoveAt(previewController.Index);
                 this.reloadSelectionPanel();
-                this.previewController.index = -1;
-                this.previewController.reloadPreviewPanel(0);
+                this.previewController.changeSceneTo(0);
                 if (!this.project.hasTrackable())
                 {
                     this.ElementSelectionController.setElementEnable(typeof(PictureMarker), true);
@@ -537,8 +540,8 @@ namespace ARdevKit
             {
                 initializeLoadedProject(SaveLoadController.loadProject(openFileDialog1.FileName));
                 this.initializeControllers();
-                this.updatePanels();
-                previewController.index = -1;
+                //this.updatePanels();
+                //previewController.Index = -1;
                 previewController.reloadPreviewPanel(0);
                 this.updateSceneSelectionPanel();
                 this.updateScreenSize();

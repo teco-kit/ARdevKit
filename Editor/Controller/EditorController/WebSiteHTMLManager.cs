@@ -15,6 +15,9 @@ namespace ARdevKit.Controller.EditorController
     /// </summary>
     internal class WebSiteHTMLManager : HttpServer
     {
+        /// <summary>
+        /// A list of all Bitmaps, which are included in the Websites
+        /// </summary>
         public List<System.Drawing.Bitmap> previews; 
         /// <summary>
         /// The website texts
@@ -128,16 +131,32 @@ namespace ARdevKit.Controller.EditorController
             for (int i = 0; i < 9; i++)
             {
                 websiteTexts[i] = containmentWrapper.Replace(websiteTexts[i], 
-                    String.Format(@"<div id=""containment-wrapper"" style = "" 
+                    String.Format(@"<div id=""containment-wrapper"" title=""containment-wrapper"" style = "" 
                     width: {0}px; height: {1}px; margin-left: -{2}px; margin-top: -{3}px"" >", 
                     width, height, width / 2, height / 2));
             }  
         }
 
-        
+        /// <summary>
+        /// removes the word "selected" from within the MainContainer
+        /// </summary>
+        /// <param name="index">index of the Page, which should be affected</param>
         public void deleteSelection(int index)
         {
-            websiteTexts[index].Replace("selected", "");
+            string conWrap = containmentWrapper.Match(websiteTexts[index]).Value;
+            string[] splittedPage = containmentWrapper.Split(websiteTexts[index]);
+            websiteTexts[index] = splittedPage[0] + conWrap + splittedPage[1].Replace("selected", "");
+        }
+
+        /// <summary>
+        /// overrides the chosen page with the default PreviewPage
+        /// </summary>
+        /// <param name="index">specifies which Website is affected</param>
+        public void resetPage(int index)
+        {
+            string conWrap = containmentWrapper.Match(websiteTexts[index]).Value;
+            string[] splittedPage = containmentWrapper.Split(websiteTexts[index]);
+            websiteTexts[index] = splittedPage[0] + conWrap + "</div>\n</body>\n</html>";
         }
 
         /// <summary>
