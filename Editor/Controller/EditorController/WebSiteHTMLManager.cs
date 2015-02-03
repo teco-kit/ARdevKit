@@ -22,7 +22,7 @@ namespace ARdevKit.Controller.EditorController
         /// <summary>
         /// The website texts
         /// </summary>
-        private string[] websiteTexts;
+        public string[] websiteTexts;
         /// <summary>
         /// The main container width
         /// </summary>
@@ -159,6 +159,15 @@ namespace ARdevKit.Controller.EditorController
             websiteTexts[index] = splittedPage[0] + conWrap + "</div>\n</body>\n</html>";
         }
 
+        public void changePositionOf(HtmlElement element, int index, string top, string left)
+        {
+            Regex RegElementLeft = new Regex("(?<front><" + element.TagName + @"[^>]*id\s*=\s*""?" + element.Id + @"[^>]*margin-left\s*:\s*)(?<value>[0-9]*(?:\.[0-9]+)?\s*(px|em)?)(?<tail>[^>]*>)", RegexOptions.IgnoreCase);
+            Regex RegElementTop = new Regex("(?<front><" + element.TagName + @"[^>]*id\s*=\s*""?" + element.Id + @"[^>]*margin-top\s*:\s*)(?<value>[0-9]*(?:\.[0-9]+)?\s*(px|em)?)(?<tail>[^>]*>)", RegexOptions.IgnoreCase);
+            string result = Regex.Replace(websiteTexts[index], RegElementLeft.ToString(), "${front}" + left + "${tail}", RegexOptions.IgnoreCase);
+            result = Regex.Replace(result, RegElementTop.ToString(), "${front}" + top + "${tail}", RegexOptions.IgnoreCase);
+            websiteTexts[index] = result;
+        }
+
         /// <summary>
         /// receives the Request of the WebBrowser which shows the Preview of the scene,
         /// the index of the scene is indicated by a 0 to 9 number seperated with a "/" after the
@@ -183,7 +192,18 @@ namespace ARdevKit.Controller.EditorController
                         p.outputStream.BaseStream.Write(toWrite, 0, toWrite.Length);
                         return;
                     }
-		 
+                }
+                if(extension == "jquery")
+                {
+                    p.writeSuccess();
+                    p.outputStream.Write(ARdevKit.Properties.Resources.jquery_1_11_1);
+                    return;
+                }
+                if(extension == "jquery-ui")
+                {
+                    p.writeSuccess();
+                    p.outputStream.Write(ARdevKit.Properties.Resources.jquery_ui);
+                    return;
                 }
                 int index = Convert.ToInt32(extension);
                 if (index > 9 || index < 0)

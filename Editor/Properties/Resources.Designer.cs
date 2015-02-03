@@ -126,6 +126,8 @@ namespace ARdevKit.Properties {
         ///&lt;head&gt;
         ///    &lt;meta charset=&quot;utf-8&quot;&gt;
         ///    &lt;title&gt;HTMLPreviewPage&lt;/title&gt;
+        ///    &lt;script src=&quot;http://localhost:1234/jquery&quot;&gt;&lt;/script&gt;
+        ///    &lt;script src=&quot;http://localhost:1234/jquery-ui&quot;&gt;&lt;/script&gt;
         ///    &lt;style type =&quot;text/css&quot;&gt;
         ///        .trackable {
         ///            background-size: 100% 100%
@@ -136,11 +138,7 @@ namespace ARdevKit.Properties {
         ///            top: 50%;
         ///            position: absolute;
         ///            border: 2px solid #4cff00;
-        ///            background-color: white
-        ///        }
-        ///            #containment-wrapper .selected {
-        ///                border: solid 2.5px #F39814;
-        ///         [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
+        ///            background-color: [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
         /// </summary>
         internal static string HTMLPreviewPage {
             get {
@@ -5325,6 +5323,44 @@ namespace ARdevKit.Properties {
             get {
                 object obj = ResourceManager.GetObject("ImageTrackable_small_", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die /*!
+        /// * jQuery JavaScript Library v1.11.1
+        /// * http://jquery.com/
+        /// *
+        /// * Includes Sizzle.js
+        /// * http://sizzlejs.com/
+        /// *
+        /// * Copyright 2005, 2014 jQuery Foundation, Inc. and other contributors
+        /// * Released under the MIT license
+        /// * http://jquery.org/license
+        /// *
+        /// * Date: 2014-05-01T17:42Z
+        /// */
+        ///
+        ///(function( global, factory ) {
+        ///
+        ///	if ( typeof module === &quot;object&quot; &amp;&amp; typeof module.exports === &quot;object&quot; ) {
+        ///		// For CommonJS and CommonJS-like environments where a proper window is present,
+        ///		// execute the fac [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
+        /// </summary>
+        internal static string jquery_1_11_1 {
+            get {
+                return ResourceManager.GetString("jquery_1_11_1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die /*! jQuery UI - v1.11.2 - 2014-10-16
+        ///* http://jqueryui.com
+        ///* Includes: core.js, widget.js, mouse.js, position.js, accordion.js, autocomplete.js, button.js, datepicker.js, dialog.js, draggable.js, droppable.js, effect.js, effect-blind.js, effect-bounce.js, effect-clip.js, effect-drop.js, effect-explode.js, effect-fade.js, effect-fold.js, effect-highlight.js, effect-puff.js, effect-pulsate.js, effect-scale.js, effect-shake.js, effect-size.js, effect-slide.js, effect-transfer.js, menu.js, progressbar.js, resiz [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
+        /// </summary>
+        internal static string jquery_ui {
+            get {
+                return ResourceManager.GetString("jquery_ui", resourceCulture);
             }
         }
         

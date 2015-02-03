@@ -3,6 +3,8 @@
 <head>
     <meta charset="utf-8">
     <title>HTMLPreviewPage</title>
+    <script src="http://localhost:1234/jquery"></script>
+    <script src="http://localhost:1234/jquery-ui"></script>
     <style type ="text/css">
         .trackable {
             background-size: 100% 100%
@@ -18,12 +20,28 @@
             #containment-wrapper .selected {
                 border: solid 2.5px #F39814;
                 z-index: 100000 !important;
+                position: absolute;
             }
 
         body {
             background-color: grey;
         }
     </style>
+    <script type='text/javascript'>
+        //<![CDATA[
+        $(document).ready(function () {
+            //make divs which are from class augmentation draggable within the borders
+            $(".selected").draggable({
+                containment: "#containment-wrapper",
+                cursorAt: { left: 0, top: 0 },
+                start: function () {
+                    $(this).css('margin-left', 0);
+                    $(this).css('margin-top', 0);
+                }
+            });
+        });
+        //]]>
+    </script>
 </head>
 <body>
     <div id="containment-wrapper" title="containment-wrapper">
