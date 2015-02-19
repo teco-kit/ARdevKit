@@ -161,8 +161,8 @@ namespace ARdevKit.Controller.EditorController
 
         public void changePositionOf(HtmlElement element, int index, string top, string left)
         {
-            Regex RegElementLeft = new Regex("(?<front><" + element.TagName + @"[^>]*id\s*=\s*""?" + element.Id + @"[^>]*margin-left\s*:\s*)(?<value>[0-9]*(?:\.[0-9]+)?\s*(px|em)?)(?<tail>[^>]*>)", RegexOptions.IgnoreCase);
-            Regex RegElementTop = new Regex("(?<front><" + element.TagName + @"[^>]*id\s*=\s*""?" + element.Id + @"[^>]*margin-top\s*:\s*)(?<value>[0-9]*(?:\.[0-9]+)?\s*(px|em)?)(?<tail>[^>]*>)", RegexOptions.IgnoreCase);
+            Regex RegElementLeft = new Regex("(?<front><" + element.TagName + @"[^>]*id\s*=\s*""?" + element.Id + @"[^>]*margin-left\s*:\s*)(?<value>-?[0-9]*(?:\.[0-9]+)?\s*(px|em)?)(?<tail>(;|"")[^>]*>)", RegexOptions.IgnoreCase);
+            Regex RegElementTop = new Regex("(?<front><" + element.TagName + @"[^>]*id\s*=\s*""?" + element.Id + @"[^>]*margin-top\s*:\s*)(?<value>-?[0-9]*(?:\.[0-9]+)?\s*(px|em)?)(?<tail>(;|"")[^>]*>)", RegexOptions.IgnoreCase);
             string result = Regex.Replace(websiteTexts[index], RegElementLeft.ToString(), "${front}" + left + "${tail}", RegexOptions.IgnoreCase);
             result = Regex.Replace(result, RegElementTop.ToString(), "${front}" + top + "${tail}", RegexOptions.IgnoreCase);
             websiteTexts[index] = result;

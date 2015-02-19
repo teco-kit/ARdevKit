@@ -1,16 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ARdevKit.Model.Project;
-using System.Collections;
-using ARdevKit;
-using ARdevKit.Controller.EditorController;
 using ARdevKit.View;
-using ARdevKit.Properties;
 using System.Drawing.Drawing2D;
 using System.Runtime.CompilerServices;
 using System.IO;
@@ -86,7 +78,9 @@ namespace ARdevKit.Controller.EditorController
 
         private System.Windows.Forms.Timer dragTimer;
 
-        private IPreviewable tempCurrentElement;
+        private Point dragStartPosition;
+
+        private bool markCurrentElementInPreview;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
@@ -145,13 +139,11 @@ namespace ARdevKit.Controller.EditorController
             trackableContextMenu = new ContextMenu();
             trackableContextMenu.MenuItems.Add("löschen", delete_current_element);
 
-            tempCurrentElement = null;
-            dragTimer = new System.Windows.Forms.Timer();
-            dragTimer.Tick += drawThumbnail;
-
             this.ew.Tsm_editor_menu_edit_paste.Click += new System.EventHandler(this.paste_augmentation_center);
             this.ew.Tsm_editor_menu_edit_copie.Click += new System.EventHandler(this.copy_augmentation);
             this.ew.Tsm_editor_menu_edit_delete.Click += new System.EventHandler(this.delete_current_element);
+
+            markCurrentElementInPreview = false;
         }
 
         private void drawThumbnail(object sender, EventArgs e)
@@ -164,19 +156,18 @@ namespace ARdevKit.Controller.EditorController
         private void htmlPreview_DocumentFirstCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             htmlPreview.DocumentCompleted -= htmlPreview_DocumentFirstCompleted;
-            htmlPreview.Document.MouseUp += writeBackChangesfromDOM;
-            //htmlPreview.Document.MouseDown += handleDocumentMouseDown;
             //htmlPreview.Document.MouseUp += writeBackChangesfromDOM;
+            htmlPreview.Document.MouseMove += dragHandler;
+            htmlPreview.Document.MouseDown += handleDocumentMouseDown;
+            htmlPreview.Document.MouseUp += writeBackChangesfromDOM;
         }
 
         private void htmlPreview_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
-            if(tempCurrentElement != null)
+            if(markCurrentElementInPreview)
             {
-                setCurrentElement(tempCurrentElement);
-                ew.CurrentElement = tempCurrentElement;
-                ew.PropertyGrid1.SelectedObject = tempCurrentElement;
-                tempCurrentElement = null;
+                IHTMLElement selectedElement = (IHTMLElement)findElement(this.ew.CurrentElement).DomElement;
+                selectedElement.style.border = "solid 2.5px #F39814";
             }
         }
 
@@ -199,14 +190,13 @@ namespace ARdevKit.Controller.EditorController
                     {
                         trackableContextMenu.Show(htmlPreview, e.MousePosition);
                     }
-                    //if (e.MouseButtonsPressed == MouseButtons.Left && clickedElement.GetAttribute("title") == "trackable")
-                    //{
-                    //    Bitmap thumb = new Bitmap(ew.CurrentElement.getPreview(ew.project.ProjectPath),
-                    //        clickedElement.ClientRectangle.Width, clickedElement.ClientRectangle.Height);
-                    //    Cursor.Current = new Cursor(thumb.GetHicon());
-                        //dragTimer.Enabled = true;
-                        //dragTimer.Start();                     
-                    //}     
+                    if (e.MouseButtonsPressed == MouseButtons.Left)
+                    {
+                        IPreviewable currentElement = ew.project.Trackables.Find(
+                            track => { return ((Abstract2DTrackable)track).SensorCosID == clickedElement.Id; });
+                        setCurrentElement(currentElement);
+                        dragStartPosition = e.MousePosition;
+                    } 
                     break;
 
                 case "augmentation":
@@ -306,9 +296,19 @@ namespace ARdevKit.Controller.EditorController
             HtmlElement draggedElement = htmlPreview.Document.GetElementFromPoint(e.MousePosition);
             if (e.MouseButtonsPressed == MouseButtons.Left && draggedElement.GetAttribute("title") == "trackable")
             {
-                Bitmap thumb = new Bitmap(ew.CurrentElement.getPreview(ew.project.ProjectPath),
-                    draggedElement.ClientRectangle.Width, draggedElement.ClientRectangle.Height);
-                Cursor.Current = new Cursor(thumb.GetHicon());
+                IHTMLElement draggedDomElement = ((IHTMLElement)draggedElement.DomElement);
+                int newMarginLeft = (e.MousePosition.X - dragStartPosition.X) + draggedDomElement.offsetLeft;
+                int newMarginTop = (e.MousePosition.Y - dragStartPosition.Y) + draggedDomElement.offsetTop;
+                if (newMarginLeft >= 0 && newMarginLeft + draggedElement.ClientRectangle.Width < getMainContainerSize().Width)
+                draggedDomElement.style.marginLeft = (e.MousePosition.X - dragStartPosition.X) + draggedDomElement.offsetLeft + "px";
+
+                if (newMarginTop >= 0 && newMarginTop + draggedElement.ClientRectangle.Height < getMainContainerSize().Height)
+                draggedDomElement.style.marginTop = (e.MousePosition.Y - dragStartPosition.Y) + draggedDomElement.offsetTop + "px";
+
+                dragStartPosition = e.MousePosition;
+                //Bitmap thumb = new Bitmap(ew.CurrentElement.getPreview(ew.project.ProjectPath),
+                //    draggedElement.ClientRectangle.Width, draggedElement.ClientRectangle.Height);
+                //Cursor.Current = new Cursor(thumb.GetHicon());
                 //Point offsetToBrowser = GetOffset(draggedElement);
                 //        draggedElement.Style = draggedElement.Style + string.Format("; margin-left: {0}px; margin-top: {1}px",
                 //            e.ClientMousePosition.X - offsetToBrowser.X,
@@ -316,7 +316,7 @@ namespace ARdevKit.Controller.EditorController
                 //        //Websites.removeElementAt(clickedElement, index);
                 //        //Websites.addElementAt(clickedElement, index);
                 //        Websites.websiteTexts[index] = htmlPreview.DocumentText.Remove(htmlPreview.DocumentText.IndexOf("<body>",StringComparison.OrdinalIgnoreCase)) + htmlPreview.Document.Body.OuterHtml + "</html>";
-                //        htmlPreview.Refresh(WebBrowserRefreshOption.Completely);
+                //        reloadCurrentWebsite();
             }
             
             //its still to decide when to do this
@@ -405,7 +405,8 @@ namespace ARdevKit.Controller.EditorController
                             //this.setCurrentElement(currentElement);
                             //ew.PropertyGrid1.SelectedObject = currentElement;
                             //ew.CurrentElement = currentElement;
-                            tempCurrentElement = currentElement;
+                            //dont use setCurrentElement here, because it requires the DOM to be loaded wich is not the case at this point
+                            setCurrentElement(currentElement);                           
                             break;
                         }
                     }
@@ -1058,19 +1059,26 @@ namespace ARdevKit.Controller.EditorController
             //the box of the new currentElement will be set to the new Borderstyle.
             if (currentElement != null)
             {
-                if (this.ew.CurrentElement != currentElement)
+                if (htmlPreview.IsBusy)
                 {
-                    if (this.ew.CurrentElement != null)
+                    markCurrentElementInPreview = true;
+                }
+                else {
+
+                    if (this.ew.CurrentElement != currentElement && this.ew.CurrentElement != null)
                     {
-                        HtmlElement previouslySelectedElement = findElement(this.ew.CurrentElement);
-                        Websites.removeElementAt(previouslySelectedElement, index);
-                        previouslySelectedElement.SetAttribute("class", "");
-                        Websites.addElementAt(previouslySelectedElement, index);
+                        IHTMLElement previouslySelectedElement = (IHTMLElement)findElement(this.ew.CurrentElement).DomElement;
+                        previouslySelectedElement.style.border = null;
+                        IHTMLElement unselectedElement = (IHTMLElement)findElement(currentElement).DomElement;
+                        unselectedElement.style.border = "solid 2.5px #F39814";
+                        //Websites.removeElementAt(previouslySelectedElement, index);
+                        //previouslySelectedElement.SetAttribute("class", "");
+                        //Websites.addElementAt(previouslySelectedElement, index);
                     }
-                    HtmlElement unselectedElement = findElement(currentElement);
-                    Websites.removeElementAt(unselectedElement, index);
-                    unselectedElement.SetAttribute("class", "selected");
-                    Websites.addElementAt(unselectedElement, index);
+                    //IHTMLElement unselectedElement = (IHTMLElement)findElement(currentElement).DomElement;
+                    ////Websites.removeElementAt(unselectedElement, index);
+                    //unselectedElement.style.border = "solid 2.5px #F39814";
+                    //Websites.addElementAt(unselectedElement, index);
                     //if (currentElement is AbstractSource)
                     //{
                     //    this.ew.CurrentElement = ((AbstractSource)currentElement).Augmentation;
@@ -1089,13 +1097,16 @@ namespace ARdevKit.Controller.EditorController
                     //    this.ew.Tsm_editor_menu_edit_copie.Enabled = false;
                     //}           
                 }
+                ew.CurrentElement = currentElement;
                 ew.PropertyGrid1.SelectedObject = currentElement;
             }
             //if there is no currentElement we'll mark the box and set the currentElement in EditorWindow.
             else
             {
+                IHTMLElement previouslySelectedElement = (IHTMLElement)findElement(this.ew.CurrentElement).DomElement;
+                previouslySelectedElement.style.border = null;
                 this.ew.CurrentElement = null;
-                Websites.deleteSelection(index);
+                //Websites.deleteSelection(index);
                 this.ew.Tsm_editor_menu_edit_copie.Enabled = false;
             }
             updateElementCombobox(trackable);
@@ -1104,7 +1115,6 @@ namespace ARdevKit.Controller.EditorController
             {
                 this.ew.Tsm_editor_menu_edit_delete.Enabled = true;
             }
-            htmlPreview.Refresh(WebBrowserRefreshOption.Completely);
         }
         /// <summary>
         /// set the PictureBox of the Augmentation to a augmentationPreview with source icon
@@ -1138,7 +1148,8 @@ namespace ARdevKit.Controller.EditorController
                 }
             }
             temp.Refresh();*/
-            htmlPreview.Refresh(WebBrowserRefreshOption.Completely);
+
+            reloadCurrentWebsite();
         }
         /// <summary>
         /// Recalculates the vector in dependency to panel.
@@ -1533,8 +1544,17 @@ namespace ARdevKit.Controller.EditorController
         private void writeBackChangesfromDOM(object sender, HtmlElementEventArgs e)
         {
             HtmlElement changedElement = findElement(ew.CurrentElement);
-            Websites.changePositionOf(changedElement, index, ((IHTMLElement)changedElement.DomElement).style.top, ((IHTMLElement)changedElement.DomElement).style.left);
-            htmlPreview.Refresh(WebBrowserRefreshOption.Completely);
+            if(changedElement.GetAttribute("title") == "trackable")
+            {
+                Websites.changePositionOf(changedElement, index, ((IHTMLElement)changedElement.DomElement).style.marginTop, ((IHTMLElement)changedElement.DomElement).style.marginLeft);
+                reloadCurrentWebsite();
+            }
+        }
+
+        private void reloadCurrentWebsite()
+        {
+            markCurrentElementInPreview = true;
+            htmlPreview.Navigate(htmlPreview.Url);
         }
 
         /// <summary>
@@ -1899,7 +1919,7 @@ namespace ARdevKit.Controller.EditorController
         /// </summary>
         /// <param name="el">the HtmlElement from which the offset to the WebbrowserCOntrol is calculated</param>
         /// <returns>the offset from the HtmlElement to the Browser showing it</returns>
-        public Point GetOffset(HtmlElement el)
+        public Point getOffset(HtmlElement el)
         {
             //get element pos
             Point pos = new Point(el.OffsetRectangle.Left, el.OffsetRectangle.Top);
@@ -1910,6 +1930,23 @@ namespace ARdevKit.Controller.EditorController
             {
                 pos.X += tempEl.OffsetRectangle.Left;
                 pos.Y += tempEl.OffsetRectangle.Top;
+                tempEl = tempEl.OffsetParent;
+            }
+
+            return pos;
+        }
+
+        public Point getDomOffset(HtmlElement el)
+        {
+            //get element pos
+            Point pos = new Point(((IHTMLElement)el.DomElement).offsetLeft, ((IHTMLElement)el.DomElement).offsetTop);
+
+            //get the parents pos
+            HtmlElement tempEl = el.OffsetParent;
+            while (tempEl != null)
+            {
+                pos.X += ((IHTMLElement)el.DomElement).offsetLeft;
+                pos.Y += ((IHTMLElement)el.DomElement).offsetTop;
                 tempEl = tempEl.OffsetParent;
             }
 
