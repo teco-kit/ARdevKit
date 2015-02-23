@@ -222,7 +222,7 @@ namespace ARdevKit.Controller.Connections.DeviceConnection
                     if (sender.Available > 0)
                     {
                         int read = sendStream.Read(msg, 0, msg.Length);
-                        editorWindow.DebugWindow.AppendText(ASCIIEncoding.ASCII.GetString(msg, 0, read) + "\n");
+                        editorWindow.DebugWindow.AppendText(ASCIIEncoding.ASCII.GetString(msg, 0, read));
                     }
                     else
                     {
