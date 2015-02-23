@@ -363,7 +363,8 @@ namespace ARdevKit
             //{
                 this.previewController.changeSceneTo(temp - 1);
                 //this.previewController.reloadPreviewPanel(temp - 1);
-                this.PropertyGrid1.SelectedObject = project.Trackables[temp - 1];
+                this.PropertyGrid1.SelectedObject = null;
+                this.currentElement = null;
 
             //}
             //else
@@ -411,6 +412,7 @@ namespace ARdevKit
                 this.previewController.changeSceneTo(this.project.Trackables.Count - 1);
                 //this.previewController.reloadPreviewPanel(temp - 1);
                 this.PropertyGrid1.SelectedObject = project.Trackables[this.project.Trackables.Count - 1];
+                this.currentElement = project.Trackables[this.project.Trackables.Count - 1];
                 this.resetButton();
                 this.setButton(tempButton.Text);
             }
@@ -437,9 +439,10 @@ namespace ARdevKit
         {
             if (this.project.Trackables.Count > 1)
             {
-                this.previewController.emptyCurrentScene();
+                this.previewController.deleteCurrentScene();
                 this.project.Trackables.RemoveAt(previewController.Index);
                 this.reloadSelectionPanel();
+                this.PropertyGrid1.SelectedObject = project.Trackables[0];
                 this.previewController.changeSceneTo(0);
                 if (!this.project.hasTrackable())
                 {
@@ -465,6 +468,7 @@ namespace ARdevKit
             this.resetButton();
             this.setButton(Convert.ToString("1"));
             this.PropertyGrid1.SelectedObject = null;
+            this.currentElement = null;
         }
 
         /// <summary>
@@ -577,6 +581,8 @@ namespace ARdevKit
             augmentations.addElement(new SceneElement("Chart", new Chart(), this));
             augmentations.addElement(new SceneElement("Image", new ImageAugmentation(), this));
             augmentations.addElement(new SceneElement("Video", new VideoAugmentation(), this));
+            augmentations.addElement(new SceneElement("HtmlImage", new HtmlImage(), this));
+            augmentations.addElement(new SceneElement("HtmlVideo", new HtmlVideo(), this));
             SceneElementCategory trackables = new SceneElementCategory(MetaCategory.Trackable, "Trackables");
             trackables.addElement(new SceneElement("Picture Marker", new PictureMarker(), this));
             trackables.addElement(new SceneElement("IDMarker", new IDMarker(1), this));

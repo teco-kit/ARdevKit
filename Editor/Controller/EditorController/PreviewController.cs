@@ -18,10 +18,16 @@ namespace ARdevKit.Controller.EditorController
     /// </summary>
     public class PreviewController
     {
-
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>   The Preview Port on which the WebsiteManager can be reached. </summary>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
         public static readonly int PREVIEW_PORT = 1234;
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>  The path where the temp data is stored. </summary>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
         public readonly string TEMP_PATH = Directory.GetCurrentDirectory() + "/temp/";
+        
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   The MetaCategory of the current element. </summary>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -30,7 +36,6 @@ namespace ARdevKit.Controller.EditorController
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   The Trackable which hold the Augmentations and Sources. </summary>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-
         public AbstractTrackable trackable { get; set; }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -146,17 +151,9 @@ namespace ARdevKit.Controller.EditorController
             markCurrentElementInPreview = false;
         }
 
-        private void drawThumbnail(object sender, EventArgs e)
-        {
-            HtmlElement draggedElement = findElement(ew.CurrentElement);
-            Bitmap thumb = ew.CurrentElement.getPreview(ew.project.ProjectPath);
-            Cursor.Current = new Cursor(thumb.GetHicon());
-        }
-
         private void htmlPreview_DocumentFirstCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             htmlPreview.DocumentCompleted -= htmlPreview_DocumentFirstCompleted;
-            //htmlPreview.Document.MouseUp += writeBackChangesfromDOM;
             htmlPreview.Document.MouseMove += dragHandler;
             htmlPreview.Document.MouseDown += handleDocumentMouseDown;
             htmlPreview.Document.MouseUp += writeBackChangesfromDOM;
@@ -164,10 +161,13 @@ namespace ARdevKit.Controller.EditorController
 
         private void htmlPreview_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
-            if(markCurrentElementInPreview)
+            if (markCurrentElementInPreview)
             {
-                IHTMLElement selectedElement = (IHTMLElement)findElement(this.ew.CurrentElement).DomElement;
-                selectedElement.style.border = "solid 2.5px #F39814";
+                if (ew.CurrentElement != null)
+                {
+                    IHTMLElement selectedElement = (IHTMLElement)findElement(this.ew.CurrentElement).DomElement;
+                    selectedElement.style.border = "solid 2.5px #F39814";
+                }
             }
         }
 
@@ -185,50 +185,37 @@ namespace ARdevKit.Controller.EditorController
                     break;
 
                 case "trackable":
-                    //setCurrentElement(trackable);
+                    setCurrentElement(trackable);
                     if (e.MouseButtonsPressed == MouseButtons.Right)
                     {
                         trackableContextMenu.Show(htmlPreview, e.MousePosition);
                     }
                     if (e.MouseButtonsPressed == MouseButtons.Left)
                     {
-                        IPreviewable currentElement = ew.project.Trackables.Find(
-                            track => { return ((Abstract2DTrackable)track).SensorCosID == clickedElement.Id; });
-                        setCurrentElement(currentElement);
                         dragStartPosition = e.MousePosition;
                     } 
                     break;
 
                 case "augmentation":
-                    
-                    foreach(var aug in trackable.Augmentations)
+                    AbstractAugmentation aug = trackable.Augmentations.Find(augmentation => { return augmentation.ID == clickedElement.Id; });
+                    setCurrentElement(aug);
+                    if (e.MouseButtonsPressed == MouseButtons.Right)
                     {
-                        if(aug is Abstract2DAugmentation)
+                        if (aug is Abstract2DAugmentation)
                         {
-                            if(((Abstract2DAugmentation)aug).ID == clickedElement.Id)
+                            if (aug is Chart)
                             {
-                                setCurrentElement(aug);
-                                if (e.MouseButtonsPressed == MouseButtons.Right)
+                                if (((Chart)aug).Source != null)
                                 {
-                                    if (aug is Abstract2DAugmentation)
+                                    if (((Chart)aug).Source is FileSource)
                                     {
-                                        if (aug is Chart)
-                                        {
-                                            if (((Chart)aug).Source != null)
-                                            {
-                                                if (((Chart)aug).Source is FileSource)
-                                                {
 
-                                                }
-                                                else
-                                                {
+                                    }
+                                    else
+                                    {
 
-                                                }
-                                            }
-                                        }
                                     }
                                 }
-                                break;
                             }
                         }
                     }
@@ -237,58 +224,6 @@ namespace ARdevKit.Controller.EditorController
                 default:
                     break;
             }
-        }
-
-        private void attachEventHandlers(object sender, WebBrowserDocumentCompletedEventArgs e)
-        {
-            htmlPreview.Document.MouseDown += handleDocumentMouseDown;
-            //htmlPreview.Document.MouseMove += dragHandler;
-            //HtmlElement containmentWrapper = ((WebBrowser)sender).Document.GetElementById("containment-wrapper");
-            //containmentWrapper.Click += selectElement;
-            //containmentWrapper.MouseDown += showSceneContextMenu;
-        //    if (containmentWrapper.FirstChild != null)
-        //    {
-        //        HtmlElement htmltrack = ((WebBrowser)sender).Document.GetElementById(((Abstract2DTrackable)trackable).SensorCosID);
-            //        htmltrack.Click += selectElement;
-        //        htmltrack.MouseDown += showTrackableContextMenu;
-
-        //        //foreach (HtmlElement elem in containmentWrapper.Children)
-        //        //{
-        //        //    if(elem.Style.Contains("selected"))
-        //        //    {
-        //        //        elem.Style = elem.Style + "; border: solid 2.5px #f39814";
-        //        //    }
-        //        //}
-        //        foreach (AbstractAugmentation aug in trackable.Augmentations)
-        //        {
-        //            HtmlElement htmlaug = ((WebBrowser)sender).Document.GetElementById(aug.ID);
-        //            htmlaug.Click += selectElement;
-        //            htmlaug.Drag += dragElement;
-        //            htmlaug.DragEnd += writeBackChangesfromDOM;
-        //            if (aug is Chart)
-        //            {
-        //                if (((Chart)aug).Source != null)
-        //                {
-        //                    if (((Chart)aug).Source is DbSource)
-        //                    {
-        //                        htmlaug.MouseDown += showChartDbSourceContextMenu;
-        //                    }
-        //                    if (((Chart)aug).Source is FileSource)
-        //                    {
-        //                        htmlaug.MouseDown += showChartFileSourceContextMenu;
-        //                    }
-        //                }
-        //                else
-        //                {
-        //                    htmlaug.MouseDown += showAugmentationContextMenu;
-        //                }
-        //            }
-        //            else
-        //            {
-        //                htmlaug.MouseDown += showAugmentationContextMenu;
-        //            }
-        //        }
-        //    }
         }
 
         private void dragHandler(object sender, HtmlElementEventArgs e)
@@ -306,23 +241,10 @@ namespace ARdevKit.Controller.EditorController
                 draggedDomElement.style.marginTop = (e.MousePosition.Y - dragStartPosition.Y) + draggedDomElement.offsetTop + "px";
 
                 dragStartPosition = e.MousePosition;
-                //Bitmap thumb = new Bitmap(ew.CurrentElement.getPreview(ew.project.ProjectPath),
-                //    draggedElement.ClientRectangle.Width, draggedElement.ClientRectangle.Height);
-                //Cursor.Current = new Cursor(thumb.GetHicon());
-                //Point offsetToBrowser = GetOffset(draggedElement);
-                //        draggedElement.Style = draggedElement.Style + string.Format("; margin-left: {0}px; margin-top: {1}px",
-                //            e.ClientMousePosition.X - offsetToBrowser.X,
-                //            e.ClientMousePosition.Y - offsetToBrowser.Y);
-                //        //Websites.removeElementAt(clickedElement, index);
-                //        //Websites.addElementAt(clickedElement, index);
-                //        Websites.websiteTexts[index] = htmlPreview.DocumentText.Remove(htmlPreview.DocumentText.IndexOf("<body>",StringComparison.OrdinalIgnoreCase)) + htmlPreview.Document.Body.OuterHtml + "</html>";
-                //        reloadCurrentWebsite();
-            }
-            
+            }       
             //its still to decide when to do this
             //this.setCoordinates(this.ew.CurrentElement, new Vector3D((int)((draggedElement.OffsetRectangle.Width + e.ClientMousePosition.X)),
-            //(int)((draggedElement.OffsetRectangle.Height + e.ClientMousePosition.Y)), 0));
-            
+            //(int)((draggedElement.OffsetRectangle.Height + e.ClientMousePosition.Y)), 0)); 
         }
 
 
@@ -399,13 +321,7 @@ namespace ARdevKit.Controller.EditorController
 
                             this.trackable = (AbstractTrackable)currentElement;
                             this.ew.project.Trackables[index] = (AbstractTrackable)currentElement;
-                            Websites.deleteSelection(index);
                             this.addElement(currentElement, center);
-                            //sets as current Element
-                            //this.setCurrentElement(currentElement);
-                            //ew.PropertyGrid1.SelectedObject = currentElement;
-                            //ew.CurrentElement = currentElement;
-                            //dont use setCurrentElement here, because it requires the DOM to be loaded wich is not the case at this point
                             setCurrentElement(currentElement);                           
                             break;
                         }
@@ -419,7 +335,6 @@ namespace ARdevKit.Controller.EditorController
                 {
                     //set references 
                     trackable.Augmentations.Add((AbstractAugmentation)currentElement);
-                    Websites.deleteSelection(index);
                     this.addElement(currentElement, v);
 
                     //set the vector and the trackable in <see cref="AbstractAugmentation"/>
@@ -479,7 +394,7 @@ namespace ARdevKit.Controller.EditorController
                 ((Abstract2DAugmentation)currentElement).ResFilePath = TEMP_PATH + Path.GetFileName(((Abstract2DAugmentation)currentElement).ResFilePath);
                 htmlAugmentation.Id = augmentation.ID;
                 htmlAugmentation.SetAttribute("class", "augmentation");
-                htmlAugmentation.Style = String.Format("background-size: 100% 100%; width: {0}; height: {1}; left: {3}; top: {4}; background-image:url(\"temp/{5}\"); z-index: {6}",
+                htmlAugmentation.Style = String.Format("background-size: 100% 100%; width: {0}; height: {1}; margin-left: {2}; margin-top: {3}; background-image:url(\"temp/{4}\"); z-index: {5}",
                     augmentation.Width, augmentation.Height,
                     htmlCoordinate.X, htmlCoordinate.Y,
                     Path.GetFileName(((Abstract2DAugmentation)currentElement).ResFilePath) , htmlCoordinate.Y);
@@ -489,7 +404,7 @@ namespace ARdevKit.Controller.EditorController
             {
                 throw new NotSupportedException("Other then Abstract2DAugmentation/Abstract2DTrackable not yet supported");
             }
-            htmlPreview.Navigate(htmlPreview.Url);
+            reloadCurrentWebsite();
         }
 
         private Vector3D nativeToHtmlCoordinates(Vector3D native)
@@ -656,6 +571,7 @@ namespace ARdevKit.Controller.EditorController
             if (currentElement is AbstractTrackable && trackable != null)
             {
                 Websites.resetPage(index);
+                reloadCurrentWebsite();
                 this.trackable = null;
                 this.ew.project.Trackables[index] = null;
                 updateElementCombobox(trackable);
@@ -680,12 +596,11 @@ namespace ARdevKit.Controller.EditorController
         /// <summary>
         /// Removes all Elements from the PreviewPanel and clears all references and delete the trackable from the list.
         /// </summary>
-        public void emptyCurrentScene()
+        public void deleteCurrentScene()
         {
-            Websites.resetPage(index);
-            this.ew.project.Trackables[this.ew.project.Trackables.IndexOf(trackable)] = null;
+            Websites.deletePage(index);
             this.trackable = null;
-
+            reloadCurrentWebsite();
             updateElementCombobox(trackable);
         }
 
@@ -740,6 +655,7 @@ namespace ARdevKit.Controller.EditorController
                 this.trackable = null;
                 //TODO
                 //this.panel.Controls.Clear();
+                this.Websites.resetPage(index);
                 this.ew.project.Trackables.Add(trackable);
             }
             //set currentElement, copyButton, deleteButton & property grid to null
@@ -1888,6 +1804,7 @@ namespace ARdevKit.Controller.EditorController
         private void delete_current_element(object sender, EventArgs e)
         {
             this.removePreviewable(this.ew.CurrentElement);
+            ew.CurrentElement = null;
         }
 
        
@@ -1910,9 +1827,11 @@ namespace ARdevKit.Controller.EditorController
         /// <param name="index"></param>
         public void changeSceneTo(int index)
         {
+            htmlPreview.Navigate("http://localhost:" + PREVIEW_PORT + "/" + index);
             this.index = index;
             this.trackable = ew.project.Trackables[index];
-            htmlPreview.Navigate("http://localhost:" + PREVIEW_PORT + "/" + index);            
+            ew.Cmb_editor_properties_objectSelection.Items.Clear();
+            updateElementCombobox(trackable);
         }
         /// <summary>
         /// iterates upwords through html stucture and sums up the offsets

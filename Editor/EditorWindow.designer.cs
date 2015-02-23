@@ -73,8 +73,8 @@ namespace ARdevKit
             this.tsm_editor_menu_help_info = new System.Windows.Forms.ToolStripMenuItem();
             this.miniToolStrip = new System.Windows.Forms.MenuStrip();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.html_preview = new System.Windows.Forms.WebBrowser();
             this.pnl_preview_overlay = new ARdevKit.View.TransparentPanel();
+            this.html_preview = new System.Windows.Forms.WebBrowser();
             this.pnl_editor_selection.SuspendLayout();
             this.pnl_editor_status.SuspendLayout();
             this.pnl_editor_scenes.SuspendLayout();
@@ -474,6 +474,18 @@ namespace ARdevKit
             this.panel1.Size = new System.Drawing.Size(661, 612);
             this.panel1.TabIndex = 4;
             // 
+            // pnl_preview_overlay
+            // 
+            this.pnl_preview_overlay.AllowDrop = true;
+            this.pnl_preview_overlay.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnl_preview_overlay.Location = new System.Drawing.Point(0, 0);
+            this.pnl_preview_overlay.Name = "pnl_preview_overlay";
+            this.pnl_preview_overlay.Size = new System.Drawing.Size(659, 610);
+            this.pnl_preview_overlay.TabIndex = 5;
+            this.pnl_preview_overlay.Visible = false;
+            this.pnl_preview_overlay.DragDrop += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragDrop);
+            this.pnl_preview_overlay.DragEnter += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragEnter);
+            // 
             // html_preview
             // 
             this.html_preview.AllowWebBrowserDrop = false;
@@ -486,18 +498,6 @@ namespace ARdevKit
             this.html_preview.Name = "html_preview";
             this.html_preview.Size = new System.Drawing.Size(653, 604);
             this.html_preview.TabIndex = 4;
-            // 
-            // pnl_preview_overlay
-            // 
-            this.pnl_preview_overlay.AllowDrop = true;
-            this.pnl_preview_overlay.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnl_preview_overlay.Location = new System.Drawing.Point(0, 0);
-            this.pnl_preview_overlay.Name = "pnl_preview_overlay";
-            this.pnl_preview_overlay.Size = new System.Drawing.Size(659, 610);
-            this.pnl_preview_overlay.TabIndex = 5;
-            this.pnl_preview_overlay.Visible = false;
-            this.pnl_preview_overlay.DragDrop += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragDrop);
-            this.pnl_preview_overlay.DragEnter += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragEnter);
             // 
             // EditorWindow
             // 

@@ -64,11 +64,13 @@ namespace ARdevKit.Controller.EditorController
         public WebSiteHTMLManager(int port) : base(port)
         {
             websiteTexts = new string[10];
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < websiteTexts.Length; ++i)
 			{
 			    websiteTexts[i] = ARdevKit.Properties.Resources.HTMLPreviewPage;
 			}
             previews = new List<System.Drawing.Bitmap>();
+            mainContainerWidth = 0;
+            mainContainerHeigth = 0;
         }
         /// <summary>
         /// builds a html document or loads the existing one at the 
@@ -84,6 +86,10 @@ namespace ARdevKit.Controller.EditorController
             {
                 websiteTexts[i] = File.ReadAllText(projectPath);
                 ++i;
+            }
+            for (; i < websiteTexts.Length; ++i)
+            {
+                websiteTexts[i] = ARdevKit.Properties.Resources.HTMLPreviewPage;
             }
             previews = new List<System.Drawing.Bitmap>();
         }
@@ -128,24 +134,30 @@ namespace ARdevKit.Controller.EditorController
         /// <param name="height">The height.</param>
         public void changeMainContainerSize(uint width, uint height)
         {
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < websiteTexts.Length; i++)
             {
                 websiteTexts[i] = containmentWrapper.Replace(websiteTexts[i], 
                     String.Format(@"<div id=""containment-wrapper"" title=""containment-wrapper"" style = "" 
                     width: {0}px; height: {1}px; margin-left: -{2}px; margin-top: -{3}px"" >", 
                     width, height, width / 2, height / 2));
-            }  
+            }
+            mainContainerWidth = width;
+            mainContainerHeigth = height;
         }
 
         /// <summary>
-        /// removes the word "selected" from within the MainContainer
+        /// removes the chosen page, diminishing all higher indixes by one, and adding a new and empty one to the end
         /// </summary>
         /// <param name="index">index of the Page, which should be affected</param>
-        public void deleteSelection(int index)
+        public void deletePage(int index)
         {
-            string conWrap = containmentWrapper.Match(websiteTexts[index]).Value;
-            string[] splittedPage = containmentWrapper.Split(websiteTexts[index]);
-            websiteTexts[index] = splittedPage[0] + conWrap + splittedPage[1].Replace("selected", "");
+            for (int i = index; i < websiteTexts.Length - 1; ++i)
+                websiteTexts[i] = websiteTexts[i + 1];
+            websiteTexts[websiteTexts.Length - 1] = ARdevKit.Properties.Resources.HTMLPreviewPage;
+            websiteTexts[websiteTexts.Length - 1] = containmentWrapper.Replace(websiteTexts[websiteTexts.Length - 1], 
+                    String.Format(@"<div id=""containment-wrapper"" title=""containment-wrapper"" style = "" 
+                    width: {0}px; height: {1}px; margin-left: -{2}px; margin-top: -{3}px"" >", 
+                    mainContainerWidth, mainContainerHeigth, mainContainerWidth/2, mainContainerHeigth/2));
         }
 
         /// <summary>
