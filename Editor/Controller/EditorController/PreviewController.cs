@@ -143,6 +143,7 @@ namespace ARdevKit.Controller.EditorController
             //initialize trackableContextMenu
             trackableContextMenu = new ContextMenu();
             trackableContextMenu.MenuItems.Add("löschen", delete_current_element);
+            trackableContextMenu.MenuItems[0].Enabled = true;
 
             this.ew.Tsm_editor_menu_edit_paste.Click += new System.EventHandler(this.paste_augmentation_center);
             this.ew.Tsm_editor_menu_edit_copie.Click += new System.EventHandler(this.copy_augmentation);
@@ -188,7 +189,7 @@ namespace ARdevKit.Controller.EditorController
                     setCurrentElement(trackable);
                     if (e.MouseButtonsPressed == MouseButtons.Right)
                     {
-                        trackableContextMenu.Show(htmlPreview, e.MousePosition);
+                        trackableContextMenu.Show(ew.GetChildAtPoint(e.MousePosition),new Point(e.MousePosition.X + 3, e.MousePosition.Y + 3));
                     }
                     if (e.MouseButtonsPressed == MouseButtons.Left)
                     {
@@ -219,6 +220,10 @@ namespace ARdevKit.Controller.EditorController
                             }
                         }
                     }
+                    if (e.MouseButtonsPressed == MouseButtons.Left)
+                    {
+                        dragStartPosition = e.MousePosition;
+                    } 
                     break;
 
                 default:
@@ -229,16 +234,16 @@ namespace ARdevKit.Controller.EditorController
         private void dragHandler(object sender, HtmlElementEventArgs e)
         {
             HtmlElement draggedElement = htmlPreview.Document.GetElementFromPoint(e.MousePosition);
-            if (e.MouseButtonsPressed == MouseButtons.Left && draggedElement.GetAttribute("title") == "trackable")
+            if (e.MouseButtonsPressed == MouseButtons.Left && draggedElement.GetAttribute("title") == "augmentation")
             {
                 IHTMLElement draggedDomElement = ((IHTMLElement)draggedElement.DomElement);
                 int newMarginLeft = (e.MousePosition.X - dragStartPosition.X) + draggedDomElement.offsetLeft;
                 int newMarginTop = (e.MousePosition.Y - dragStartPosition.Y) + draggedDomElement.offsetTop;
                 if (newMarginLeft >= 0 && newMarginLeft + draggedElement.ClientRectangle.Width < getMainContainerSize().Width)
-                draggedDomElement.style.marginLeft = (e.MousePosition.X - dragStartPosition.X) + draggedDomElement.offsetLeft + "px";
+                draggedDomElement.style.marginLeft = newMarginLeft + "px";
 
                 if (newMarginTop >= 0 && newMarginTop + draggedElement.ClientRectangle.Height < getMainContainerSize().Height)
-                draggedDomElement.style.marginTop = (e.MousePosition.Y - dragStartPosition.Y) + draggedDomElement.offsetTop + "px";
+                draggedDomElement.style.marginTop = newMarginTop + "px";
 
                 dragStartPosition = e.MousePosition;
             }       
@@ -335,10 +340,8 @@ namespace ARdevKit.Controller.EditorController
                 {
                     //set references 
                     trackable.Augmentations.Add((AbstractAugmentation)currentElement);
-                    this.addElement(currentElement, v);
-
-                    //set the vector and the trackable in <see cref="AbstractAugmentation"/>
                     this.setCoordinates(currentElement, v);
+                    this.addElement(currentElement, v);
                     ((AbstractAugmentation)currentElement).Trackable = this.trackable;
                 }
             }
@@ -370,7 +373,7 @@ namespace ARdevKit.Controller.EditorController
                 preview.Tag = trackable.SensorCosID;
                 Websites.previews.Add(preview);
                 htmlTrackable.SetAttribute("src", "http://localhost:" + PREVIEW_PORT + "/" + trackable.SensorCosID);
-                htmlTrackable.Style = String.Format(@"width: {0}px; height: {1}px; z-index:{2}; margin-left: {3}px; margin-top: {4}px",
+                htmlTrackable.Style = String.Format(@"width: {0}px; height: {1}px; z-index:{2}; margin-left: {3}px; margin-top: {4}px; position: absolute",
                 width, height,
                 nativeToHtmlCoordinates(vector).Z,
                 nativeToHtmlCoordinates(vector).X - width / 2, nativeToHtmlCoordinates(vector).Y - height / 2);
@@ -385,7 +388,7 @@ namespace ARdevKit.Controller.EditorController
                 htmlChart.Style = String.Format("width: {0}; height: {1}; left: {3}; top: {4}", chart.Width, chart.Height, chart.Positioning.Left, chart.Positioning.Top);
                 Websites.addElementAt(htmlChart, index);
             }
-            else if (currentElement is Abstract2DAugmentation && !(currentElement is Chart))
+            else if (currentElement is Abstract2DAugmentation && !(currentElement is AbstractHtmlElement))
             {
                 Abstract2DAugmentation augmentation = ((Abstract2DAugmentation)currentElement);
                 HtmlElement htmlAugmentation = htmlPreview.Document.CreateElement("div");
@@ -399,6 +402,29 @@ namespace ARdevKit.Controller.EditorController
                     htmlCoordinate.X, htmlCoordinate.Y,
                     Path.GetFileName(((Abstract2DAugmentation)currentElement).ResFilePath) , htmlCoordinate.Y);
                 Websites.addElementAt(htmlAugmentation, index);
+            }
+            else if (currentElement is HtmlImage)
+            {
+                HtmlImage image = ((HtmlImage)currentElement);
+                HtmlElement htmlImage = htmlPreview.Document.CreateElement("img");
+                Bitmap preview = image.getPreview(ew.project.ProjectPath);
+                htmlImage.Id = image.ID;
+                htmlImage.SetAttribute("title", "augmentation");
+                preview.Tag = image.ID;
+                image.Width = preview.Width;
+                image.Height = preview.Height;
+                Websites.previews.Add(preview);
+                htmlImage.SetAttribute("src", "http://localhost:" + PREVIEW_PORT + "/" + image.ID);
+                htmlImage.Style = String.Format(@"width: {0}px; height: {1}px; z-index:{2}; margin-left: {3}px; margin-top: {4}px; position: absolute",
+                image.Width, image.Height,
+                nativeToHtmlCoordinates(vector).Z,
+                image.Positioning.Left , image.Positioning.Top);
+                Websites.addElementAt(htmlImage, index);
+                
+            } 
+            else if (currentElement is HtmlVideo)
+            {
+
             }
             else
             {
@@ -626,7 +652,7 @@ namespace ARdevKit.Controller.EditorController
             if (index < this.ew.project.Trackables.Count)
             {
                 changeSceneTo(index);
-
+                removePreviewable(trackable);
                 //makes differences between the kind of trackables
                 if (trackable != null)
                 {
@@ -1285,6 +1311,17 @@ namespace ARdevKit.Controller.EditorController
                 result.Y = (int)((getMainContainerSize().Height / 2 - newV.Y));
                 ((AbstractAugmentation)prev).Translation = result;
             }
+            else if (prev is AbstractHtmlElement)
+            {
+                Point position = htmlPreview.PointToClient(new Point((int)newV.X, (int)newV.Y));
+               ((AbstractHtmlElement)prev).Positioning.Left = (int)newV.X - (int)getMainContainerSize().Width/2;
+               ((AbstractHtmlElement)prev).Positioning.Top = (int)newV.Y - (int)getMainContainerSize().Height/2;
+
+                Vector3D result = new Vector3D(0, 0, 0);
+                result.X = (int)(newV.X - getMainContainerSize().Width / 2);
+                result.Y = (int)(getMainContainerSize().Height / 2 - newV.Y);
+                ((AbstractAugmentation)prev).Translation = result;
+            }
             else
             {
                 Vector3D result = new Vector3D(0, 0, 0);
@@ -1459,12 +1496,15 @@ namespace ARdevKit.Controller.EditorController
         /// <exception cref="System.NotImplementedException"></exception>
         private void writeBackChangesfromDOM(object sender, HtmlElementEventArgs e)
         {
-            HtmlElement changedElement = findElement(ew.CurrentElement);
-            if(changedElement.GetAttribute("title") == "trackable")
+            if (ew.CurrentElement != null)
             {
-                Websites.changePositionOf(changedElement, index, ((IHTMLElement)changedElement.DomElement).style.marginTop, ((IHTMLElement)changedElement.DomElement).style.marginLeft);
-                reloadCurrentWebsite();
-            }
+                HtmlElement changedElement = findElement(ew.CurrentElement);
+                if (changedElement.GetAttribute("title") == "trackable")
+                {
+                    Websites.changePositionOf(changedElement, index, ((IHTMLElement)changedElement.DomElement).style.marginTop, ((IHTMLElement)changedElement.DomElement).style.marginLeft);
+                    reloadCurrentWebsite();
+                }
+            } 
         }
 
         private void reloadCurrentWebsite()

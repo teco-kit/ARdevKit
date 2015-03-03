@@ -16,23 +16,6 @@ namespace ARdevKit.Model.Project
     public class HtmlImage : AbstractHtmlElement
     {
         /// <summary>
-        /// The positioning of the Chart
-        /// </summary>
-        private HtmlPositioning positioning;
-        /// <summary>
-        /// Gets or sets the positioning of the Chart
-        /// </summary>
-        /// <value>
-        /// The positioning.
-        /// </value>
-        [CategoryAttribute("Position"), ReadOnly(true)]
-        public HtmlPositioning Positioning
-        {
-            get { return positioning; }
-            set { positioning = value; }
-        }
-
-        /// <summary>
         /// Gets or sets the width.
         /// </summary>
         /// <value>
@@ -56,6 +39,16 @@ namespace ARdevKit.Model.Project
         {
             get { return base.Height; }
             set { base.Height = value; }
+        }
+
+        /// <summary>
+        /// default constructor
+        /// </summary>
+        public HtmlImage()
+        {
+            base.Positioning = new HtmlPositioning(HtmlPositioning.PositioningModes.RELATIVE);
+            resFilePath = null;
+            Scaling = new Vector3D(0, 0, 0);
         }
 
         /// <summary>
