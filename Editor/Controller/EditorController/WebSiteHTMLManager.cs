@@ -107,13 +107,15 @@ namespace ARdevKit.Controller.EditorController
         }
 
         /// <summary>
-        /// removes the HTMLText of the given <para>element</para> from the htmlDoc
+        /// removes the HTMLText of the given <para>element</para> from the htmlDoc and removes associated previews
         /// </summary>
         /// <param name="element">the HtmlElement that should be removed</param>
         /// <param name="index">The index.</param>
         public void removeElementAt(HtmlElement element, int index)
         {
-            websiteTexts[index] = websiteTexts[index].Replace(element.OuterHtml, "");
+            previews.RemoveAll(x => x.Tag.Equals(element.Id));
+            Regex RexElement = new Regex(@"<[^>]*id\s*=\s*" + element.Id + "[^>]*>");
+            websiteTexts[index] = RexElement.Replace(websiteTexts[index],"");
         }
 
         /// <summary>

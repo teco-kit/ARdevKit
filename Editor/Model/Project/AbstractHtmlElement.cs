@@ -28,5 +28,25 @@ namespace ARdevKit.Model.Project
             get { return positioning; }
             set { positioning = value; }
         }
+
+        /// <summary>
+        /// gets or sets the Vector
+        /// </summary>
+        [Browsable(false)]
+        public Vector3D Rotation
+        {
+            get { return base.Rotation; }
+            set { base.Rotation = value; }
+        }
+
+        /// <summary>   Gets or sets the scaling. </summary>
+        ///
+        /// <value> The scaling. </value>
+        [Browsable(false)]
+        public Vector3D Scaling
+        {
+            get { return base.Scaling; }
+            set { base.Scaling = value; }
+        }
     }
 }

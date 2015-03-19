@@ -168,6 +168,7 @@ namespace ARdevKit.Controller.EditorController
                 {
                     IHTMLElement selectedElement = (IHTMLElement)findElement(this.ew.CurrentElement).DomElement;
                     selectedElement.style.border = "solid 2.5px #F39814";
+                   selectedElement.style.zIndex = "10";
                 }
             }
         }
@@ -189,7 +190,7 @@ namespace ARdevKit.Controller.EditorController
                     setCurrentElement(trackable);
                     if (e.MouseButtonsPressed == MouseButtons.Right)
                     {
-                        trackableContextMenu.Show(ew.GetChildAtPoint(e.MousePosition),new Point(e.MousePosition.X + 3, e.MousePosition.Y + 3));
+                        trackableContextMenu.Show(ew.GetChildAtPoint(e.MousePosition), e.MousePosition);
                     }
                     if (e.MouseButtonsPressed == MouseButtons.Left)
                     {
@@ -217,6 +218,10 @@ namespace ARdevKit.Controller.EditorController
 
                                     }
                                 }
+                            } 
+                            else 
+                            {
+                                augmentationContextMenu.Show(ew.GetChildAtPoint(e.MousePosition), e.MousePosition);
                             }
                         }
                     }
@@ -239,10 +244,10 @@ namespace ARdevKit.Controller.EditorController
                 IHTMLElement draggedDomElement = ((IHTMLElement)draggedElement.DomElement);
                 int newMarginLeft = (e.MousePosition.X - dragStartPosition.X) + draggedDomElement.offsetLeft;
                 int newMarginTop = (e.MousePosition.Y - dragStartPosition.Y) + draggedDomElement.offsetTop;
-                if (newMarginLeft >= 0 && newMarginLeft + draggedElement.ClientRectangle.Width < getMainContainerSize().Width)
+                //if (newMarginLeft >= 0 && newMarginLeft + draggedElement.ClientRectangle.Width < getMainContainerSize().Width)
                 draggedDomElement.style.marginLeft = newMarginLeft + "px";
 
-                if (newMarginTop >= 0 && newMarginTop + draggedElement.ClientRectangle.Height < getMainContainerSize().Height)
+                //if (newMarginTop >= 0 && newMarginTop + draggedElement.ClientRectangle.Height < getMainContainerSize().Height)
                 draggedDomElement.style.marginTop = newMarginTop + "px";
 
                 dragStartPosition = e.MousePosition;
@@ -385,7 +390,7 @@ namespace ARdevKit.Controller.EditorController
                 HtmlElement htmlChart = htmlPreview.Document.CreateElement("div");
                 htmlChart.Id = chart.ID;
                 htmlChart.SetAttribute("class", "augmentation");
-                htmlChart.Style = String.Format("width: {0}; height: {1}; left: {3}; top: {4}", chart.Width, chart.Height, chart.Positioning.Left, chart.Positioning.Top);
+                htmlChart.Style = String.Format("width: {0}; height: {1}; margin-left: {2}; margin-top: {3}", chart.Width, chart.Height, chart.Positioning.Left, chart.Positioning.Top);
                 Websites.addElementAt(htmlChart, index);
             }
             else if (currentElement is Abstract2DAugmentation && !(currentElement is AbstractHtmlElement))
@@ -611,8 +616,8 @@ namespace ARdevKit.Controller.EditorController
             }
             else if (currentElement is AbstractAugmentation && trackable != null)
             {
-                //TODO
-                //this.panel.Controls.Remove(this.findElement((AbstractAugmentation)currentElement));
+                Websites.removeElementAt(findElement(currentElement), index);
+                reloadCurrentWebsite();
                 this.ew.project.RemoveAugmentation((AbstractAugmentation)currentElement);
             }
             updateElementCombobox(trackable);
@@ -729,13 +734,13 @@ namespace ARdevKit.Controller.EditorController
         public void reloadPreviewable(AbstractAugmentation prev)
         {
             Websites.removeElementAt(findElement(prev), index);
-            if (prev is Chart)
+            if (prev is Chart ||prev is AbstractHtmlElement)
             {
                 this.addElement(prev, recalculateChartVector(prev.Translation));
             }
             else
             {
-                this.addElement(prev, this.recalculateVector(prev.Translation));
+                this.addElement(prev, recalculateVector(prev.Translation));
             }
 
             if (typeof(AbstractDynamic2DAugmentation).IsAssignableFrom(prev.GetType()) && ((AbstractDynamic2DAugmentation)prev).Source != null)
@@ -1011,8 +1016,17 @@ namespace ARdevKit.Controller.EditorController
                     {
                         IHTMLElement previouslySelectedElement = (IHTMLElement)findElement(this.ew.CurrentElement).DomElement;
                         previouslySelectedElement.style.border = null;
+                        if (currentElement is AbstractAugmentation)
+                        {
+                            previouslySelectedElement.style.zIndex = ((AbstractAugmentation)currentElement).Translation.Z;
+                        }
+                        else
+                        {
+                            previouslySelectedElement.style.zIndex = 0;
+                        }
                         IHTMLElement unselectedElement = (IHTMLElement)findElement(currentElement).DomElement;
                         unselectedElement.style.border = "solid 2.5px #F39814";
+                        unselectedElement.style.zIndex = 10;
                         //Websites.removeElementAt(previouslySelectedElement, index);
                         //previouslySelectedElement.SetAttribute("class", "");
                         //Websites.addElementAt(previouslySelectedElement, index);
@@ -1314,12 +1328,12 @@ namespace ARdevKit.Controller.EditorController
             else if (prev is AbstractHtmlElement)
             {
                 Point position = htmlPreview.PointToClient(new Point((int)newV.X, (int)newV.Y));
-               ((AbstractHtmlElement)prev).Positioning.Left = (int)newV.X - (int)getMainContainerSize().Width/2;
-               ((AbstractHtmlElement)prev).Positioning.Top = (int)newV.Y - (int)getMainContainerSize().Height/2;
+               ((AbstractHtmlElement)prev).Positioning.Left = (int)newV.X;
+               ((AbstractHtmlElement)prev).Positioning.Top = (int)newV.Y;
 
                 Vector3D result = new Vector3D(0, 0, 0);
                 result.X = (int)(newV.X - getMainContainerSize().Width / 2);
-                result.Y = (int)(getMainContainerSize().Height / 2 - newV.Y);
+                result.Y = (int)(newV.Y - getMainContainerSize().Height / 2);
                 ((AbstractAugmentation)prev).Translation = result;
             }
             else
@@ -1499,10 +1513,16 @@ namespace ARdevKit.Controller.EditorController
             if (ew.CurrentElement != null)
             {
                 HtmlElement changedElement = findElement(ew.CurrentElement);
-                if (changedElement.GetAttribute("title") == "trackable")
+                if (changedElement.GetAttribute("title") == "augmentation")
                 {
-                    Websites.changePositionOf(changedElement, index, ((IHTMLElement)changedElement.DomElement).style.marginTop, ((IHTMLElement)changedElement.DomElement).style.marginLeft);
+                    string newMarginLeft =  ((IHTMLElement)changedElement.DomElement).style.marginLeft;
+                    string newMarginTop = ((IHTMLElement)changedElement.DomElement).style.marginTop;
+                    float newLeft = ((IHTMLElement)changedElement.DomElement).offsetLeft;
+                    float newTop = ((IHTMLElement)changedElement.DomElement).offsetTop;
+                    Websites.changePositionOf(changedElement, index, newMarginTop ,newMarginLeft);
                     reloadCurrentWebsite();
+                    setCoordinates(ew.CurrentElement, new Vector3D(newLeft, newTop, ((AbstractAugmentation)ew.CurrentElement).Translation.Z));
+                    ew.PropertyGrid1.SelectedObject = ew.CurrentElement;
                 }
             } 
         }

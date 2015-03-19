@@ -361,6 +361,14 @@ namespace Controller.EditorController
                 }
             }
 
+            // Checks if the position of a htmlAUgmentation has been changed.
+            if (string.Equals(e.ChangedItem.Label.ToString(), "Top", StringComparison.Ordinal)
+                || string.Equals(e.ChangedItem.Label.ToString(), "Left", StringComparison.Ordinal))
+            {
+                this.ew.PreviewController.reloadPreviewable((AbstractAugmentation)this.ew.CurrentElement);
+                this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
+            }
+
             // Checks if the size of a trackable has been changed.
             if (string.Equals(e.ChangedItem.Label.ToString(), "Size", StringComparison.Ordinal))
             {
