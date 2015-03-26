@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ARdevKit.Model.Project
 {
+    [Serializable]
+    [TypeConverterAttribute(typeof(ExpandableObjectConverter))]
     public class HtmlVideo : AbstractHtmlElement
     {
         public override System.Drawing.Bitmap getPreview(string projectPath)
         {
-            throw new NotImplementedException();
+            return ARdevKit.Properties.Resources.HtmlVideoAugmention_small_;
         }
 
         public override System.Drawing.Bitmap getIcon()
@@ -25,7 +28,7 @@ namespace ARdevKit.Model.Project
 
         public override object Clone()
         {
-            throw new NotImplementedException();
+            return ObjectCopier.Clone<HtmlVideo>(this);
         }
     }
 }

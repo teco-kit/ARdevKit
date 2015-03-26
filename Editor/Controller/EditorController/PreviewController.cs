@@ -16,7 +16,7 @@ namespace ARdevKit.Controller.EditorController
     /// <summary>
     /// The class PreviewController manages all things which are in contact with the PreviewPanel. Here are all methods, who influence the PreviewPanel.
     /// </summary>
-    public class PreviewController
+    public class PreviewController : IDisposable
     {
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   The Preview Port on which the WebsiteManager can be reached. </summary>
@@ -87,6 +87,8 @@ namespace ARdevKit.Controller.EditorController
 
         private bool markCurrentElementInPreview;
 
+        private Thread webServerThread;
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
         /// Constructor.
@@ -125,8 +127,8 @@ namespace ARdevKit.Controller.EditorController
                 this.Websites = new WebSiteHTMLManager(PREVIEW_PORT);
             }
             Websites.changeMainContainerSize(EditorWindow.MINSCREENWIDHT, EditorWindow.MINSCREENHEIGHT);
-            Thread thread = new Thread(new ThreadStart(Websites.listen));
-            thread.Start();
+            webServerThread = new Thread(new ThreadStart(Websites.listen));
+            webServerThread.Start();
 
             this.htmlPreview.Navigate("http://localhost:" + PREVIEW_PORT + "/" + index);
 
@@ -1876,9 +1878,15 @@ namespace ARdevKit.Controller.EditorController
             return result;
         }
 
+        public void setMainContainerSize(ScreenSize size)
+        {
+            Websites.changeMainContainerSize(size.Width, size.Height);
+        }
+
         internal void updateElement(IPreviewable previewable)
         {
-            throw new NotImplementedException();
+            Websites.removeElementAt(findElement(previewable), index);
+            addElement(previewable, new Vector3D(0, 0, 0));
         }
 
         /// <summary>
@@ -1930,6 +1938,19 @@ namespace ARdevKit.Controller.EditorController
             }
 
             return pos;
+        }
+
+        public void shutDownWebserver()
+        {
+            Websites.Listener.Server.Close();
+            if (!webServerThread.Join(1000)) // try to wait for it...
+                webServerThread.Abort();
+            Websites = null;
+        }
+
+        public void Dispose()
+        {
+            shutDownWebserver();
         }
     }
 }

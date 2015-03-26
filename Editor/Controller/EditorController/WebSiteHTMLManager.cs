@@ -81,17 +81,25 @@ namespace ARdevKit.Controller.EditorController
         /// <param name="port">The port.</param>
         public WebSiteHTMLManager(string projectPath, int port) : base(port)
         {
-            int i = 0;
-            while (File.Exists(projectPath + "htmlWebsites/" + i + ".html"))
-            {
-                websiteTexts[i] = File.ReadAllText(projectPath);
-                ++i;
-            }
-            for (; i < websiteTexts.Length; ++i)
+            websiteTexts = new string[10];
+            for (int i = 0; i < websiteTexts.Length; ++i)
             {
                 websiteTexts[i] = ARdevKit.Properties.Resources.HTMLPreviewPage;
             }
             previews = new List<System.Drawing.Bitmap>();
+            mainContainerWidth = 0;
+            mainContainerHeigth = 0;
+            //int i = 0;
+            //while (File.Exists(projectPath + "htmlWebsites/" + i + ".html"))
+            //{
+            //    websiteTexts[i] = File.ReadAllText(projectPath);
+            //    ++i;
+            //}
+            //for (; i < websiteTexts.Length; ++i)
+            //{
+            //    websiteTexts[i] = ARdevKit.Properties.Resources.HTMLPreviewPage;
+            //}
+            //previews = new List<System.Drawing.Bitmap>();
         }
 
         /// <summary>

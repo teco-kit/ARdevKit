@@ -543,6 +543,7 @@ namespace ARdevKit
             try
             {
                 initializeLoadedProject(SaveLoadController.loadProject(openFileDialog1.FileName));
+                previewController.shutDownWebserver();
                 this.initializeControllers();
                 //this.updatePanels();
                 //previewController.Index = -1;
@@ -579,10 +580,11 @@ namespace ARdevKit
             sources.addElement(new SceneElement("File Source", new FileSource(""), this));
             SceneElementCategory augmentations = new SceneElementCategory(MetaCategory.Augmentation, "Augmentations");
             augmentations.addElement(new SceneElement("Chart", new Chart(), this));
-            augmentations.addElement(new SceneElement("Image", new ImageAugmentation(), this));
-            augmentations.addElement(new SceneElement("Video", new VideoAugmentation(), this));
+            //augmentations.addElement(new SceneElement("Image", new ImageAugmentation(), this));
+            //augmentations.addElement(new SceneElement("Video", new VideoAugmentation(), this));
             augmentations.addElement(new SceneElement("HtmlImage", new HtmlImage(), this));
             augmentations.addElement(new SceneElement("HtmlVideo", new HtmlVideo(), this));
+            augmentations.addElement(new SceneElement("HtmlGeneric", new GenericHtml(), this));
             SceneElementCategory trackables = new SceneElementCategory(MetaCategory.Trackable, "Trackables");
             trackables.addElement(new SceneElement("Picture Marker", new PictureMarker(), this));
             trackables.addElement(new SceneElement("IDMarker", new IDMarker(1), this));
@@ -911,25 +913,13 @@ namespace ARdevKit
             if (project.Screensize.Width < MINSCREENWIDHT)
             {
                 this.project.Screensize.Width = MINSCREENWIDHT;
-                this.setMainContainerSize((int)project.Screensize.Width, (int)project.Screensize.Height);
-                this.previewController.rescalePreviewPanel();
             }
-            else if (project.Screensize.Height < MINSCREENHEIGHT)
+            if (project.Screensize.Height < MINSCREENHEIGHT)
             {
                 this.project.Screensize.Height = MINSCREENHEIGHT;
-                this.setMainContainerSize((int)project.Screensize.Width, (int)project.Screensize.Height);
-                this.previewController.rescalePreviewPanel();
             }
-            else
-            {
-                this.setMainContainerSize((int)project.Screensize.Width, (int)project.Screensize.Height);
+                this.previewController.setMainContainerSize(project.Screensize);
                 this.previewController.rescalePreviewPanel();
-            }
-        }
-
-        private void setMainContainerSize(int p1, int p2)
-        {
-            throw new NotImplementedException();
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1219,7 +1209,10 @@ namespace ARdevKit
         private void EditorWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!ProjectChanged())
+            {
+                previewController.shutDownWebserver();
                 return;
+            }
 
             DialogResult dlg = MessageBox.Show("Möchten Sie das aktuelle Projekt abspeichern, bevor ARdevKit beendet wird?", "Projekt speichern?", MessageBoxButtons.YesNoCancel);
             if (dlg == DialogResult.Yes)
@@ -1258,6 +1251,7 @@ namespace ARdevKit
                     MessageBox.Show("Could not delete tmp folder.\n" + uae.Message, "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+            previewController.shutDownWebserver();
         }
 
         /// <summary>

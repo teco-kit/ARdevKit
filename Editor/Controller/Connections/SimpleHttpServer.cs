@@ -44,7 +44,7 @@ namespace ARdevKit.Controller.Connections
             }
             return data;
         }
-        public void process()
+        public void process(Object threadContext)
         {
             // we can't use a StreamReader for input, because it buffers up extra data on us inside it's
             // "processed" view of the world, and we want the data raw after the headers
@@ -70,6 +70,7 @@ namespace ARdevKit.Controller.Connections
                 Console.WriteLine("Exception: " + e.ToString());
                 writeFailure();
             }
+            if (socket.Connected)
             outputStream.Flush();
             // bs.Flush(); // flush any remaining output
             inputStream = null; outputStream = null; // bs = null;            
@@ -196,25 +197,36 @@ namespace ARdevKit.Controller.Connections
     {
 
         protected int port;
-        TcpListener listener;
-        bool is_active = true;
+        private TcpListener listener;
+        public TcpListener Listener { get {return listener;} }
+        public bool is_active { get; set; }
 
         public HttpServer(int port)
         {
             this.port = port;
+            is_active = true;
         }
 
         public void listen()
         {
+            int i = 0;
             listener = new TcpListener(port);
             listener.Start();
             while (is_active)
             {
-                TcpClient s = listener.AcceptTcpClient();
-                HttpProcessor processor = new HttpProcessor(s, this);
-                Thread thread = new Thread(new ThreadStart(processor.process));
-                thread.Start();
-                Thread.Sleep(1);
+
+                try
+                {
+                    TcpClient s = listener.AcceptTcpClient();
+                    HttpProcessor processor = new HttpProcessor(s, this);
+                    ThreadPool.QueueUserWorkItem(processor.process, i++);
+                    Thread.Sleep(1);
+                }
+                catch (Exception ex)
+                {   // shutdown requested?
+                    if (ex.Message.Contains("WSACancelBlockingCall"))
+                        return;
+                }
             }
         }
 

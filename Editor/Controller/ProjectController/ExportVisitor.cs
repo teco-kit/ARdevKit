@@ -1195,7 +1195,7 @@ namespace ARdevKit.Controller.ProjectController
             string htmlImagePluginID = "arel.Plugin." + CultureInfo.CurrentCulture.TextInfo.ToTitleCase(htmlImageID);
 
             // arel[projectName].html
-            arelProjectFileHeadBlock.AddLine(new XMLLine(new XMLTag("script", "src=\"Assets/" + htmlImageID + "/chart.js\"")));
+            arelProjectFileHeadBlock.AddLine(new XMLLine(new XMLTag("script", "src=\"Assets/" + htmlImageID + "/htmlImage.js\"")));
 
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1255,8 +1255,8 @@ namespace ARdevKit.Controller.ProjectController
             string translationY = htmlImage.Translation.Y.ToString("F1", CultureInfo.InvariantCulture);
             string translationZ = htmlImage.Translation.Z.ToString("F1", CultureInfo.InvariantCulture);
             htmlImageFileDefineBlock.AddBlock(new JavaScriptInLine("translation : new arel.Vector3D(" + translationX + "," + translationY + "," + translationZ + ")", true));
-            // htmlImageDiv
-            htmlImageFileDefineBlock.AddBlock(new JavaScriptInLine("div : document.createElement(\"div\")", true));
+            // htmlImage
+            htmlImageFileDefineBlock.AddBlock(new JavaScriptInLine("img : document.createElement(\"img\")", true));
 
             // Copy image to projectPath
             string newPath = "Assets";
@@ -1275,34 +1275,34 @@ namespace ARdevKit.Controller.ProjectController
             JavaScriptBlock htmlImageFileCreateBlock = new JavaScriptBlock("create : function()", new BlockMarker("{", "},"));
             htmlImageFileDefineBlock.AddBlock(htmlImageFileCreateBlock);
             htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.created = true"));
-            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.div.setAttribute(\"id\", this.id)"));
+            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.img.setAttribute(\"id\", this.id)"));
             switch (htmlImage.Positioning.PositioningMode)
             {
                 case (HtmlPositioning.PositioningModes.STATIC):
-                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.position = \"static\""));
+                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.img.style.position = \"static\""));
                     break;
                 case (HtmlPositioning.PositioningModes.ABSOLUTE):
                 case (HtmlPositioning.PositioningModes.RELATIVE):
-                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.position = \"absolute\""));
+                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.img.style.position = \"absolute\""));
                     break;
             }
 
             if (htmlImage.Positioning.PositioningMode == HtmlPositioning.PositioningModes.ABSOLUTE)
             {
                 if (htmlImage.Positioning.Top > 0)
-                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.top = \"" + htmlImage.Positioning.Top + "px\""));
+                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.img.style.top = \"" + htmlImage.Positioning.Top + "px\""));
                 if (htmlImage.Positioning.Left > 0)
-                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.left = \"" + htmlImage.Positioning.Left + "px\""));
+                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.img.style.left = \"" + htmlImage.Positioning.Left + "px\""));
             }
 
-            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.width = \"" + htmlImage.Width + "px\""));
-            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.height = \"" + htmlImage.Height + "px\""));
+            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.img.style.width = \"" + htmlImage.Width + "px\""));
+            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.img.style.height = \"" + htmlImage.Height + "px\""));
             
             //set ImageBackground
-            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.backgroundimage = \"url(" + Path.GetFileName(htmlImage.ResFilePath) + ")"));
+            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.img.src =" + Path.GetFileName(htmlImage.ResFilePath) + "\""));
             //TODO
            
-            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("document.documentElement.appendChild(this.div)"));
+            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("document.documentElement.appendChild(this.img)"));
 
             // Show            
             JavaScriptBlock htmlImageShowBlock = new JavaScriptBlock("show : function()", new BlockMarker("{", "},"));
@@ -1325,6 +1325,11 @@ namespace ARdevKit.Controller.ProjectController
         }
 
         public override void Visit(HtmlVideo htmlVideo)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Visit(GenericHtml htmlGeneric)
         {
             throw new NotImplementedException();
         }

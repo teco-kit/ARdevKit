@@ -326,7 +326,7 @@ namespace Controller.EditorController
             if ((String.Equals(e.ChangedItem.Label.ToString(), "X", StringComparison.Ordinal)
                 || String.Equals(e.ChangedItem.Label.ToString(), "Y", StringComparison.Ordinal))
                 && !(String.Equals(e.ChangedItem.Parent.Label.ToString(), "Rotating", StringComparison.Ordinal)))
-            {
+            {              
                 this.ew.PreviewController.reloadPreviewable((AbstractAugmentation)this.ew.CurrentElement);
                 this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
                 //this replaces TODO: check if there are unexpected changes or if its even neede
