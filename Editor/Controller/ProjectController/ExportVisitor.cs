@@ -343,37 +343,37 @@ namespace ARdevKit.Controller.ProjectController
             string translationY = chart.Translation.Y.ToString("F1", CultureInfo.InvariantCulture);
             string translationZ = chart.Translation.Z.ToString("F1", CultureInfo.InvariantCulture);
             chartFileDefineBlock.AddBlock(new JavaScriptInLine("translation : new arel.Vector3D(" + translationX + "," + translationY + "," + translationZ + ")", true));
-            // ChartDiv
-            chartFileDefineBlock.AddBlock(new JavaScriptInLine("div : document.createElement(\"div\")", true));
+            // Chartelement
+            chartFileDefineBlock.AddBlock(new JavaScriptInLine("element : document.createElement(\"div\")", true));
 
             // Create
-            // Div
+            // DivElement
             chartFileCreateBlock = new JavaScriptBlock("create : function()", new BlockMarker("{", "},"));
             chartFileDefineBlock.AddBlock(chartFileCreateBlock);
             chartFileCreateBlock.AddLine(new JavaScriptLine("this.created = true"));
-            chartFileCreateBlock.AddLine(new JavaScriptLine("this.div.setAttribute(\"id\", this.id)"));
+            chartFileCreateBlock.AddLine(new JavaScriptLine("this.element.setAttribute(\"id\", this.id)"));
             switch (chart.Positioning.PositioningMode)
             {
                 case (HtmlPositioning.PositioningModes.STATIC):
-                    chartFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.position = \"static\""));
+                    chartFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.position = \"static\""));
                     break;
                 case (HtmlPositioning.PositioningModes.ABSOLUTE):
                 case (HtmlPositioning.PositioningModes.RELATIVE):
-                    chartFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.position = \"absolute\""));
+                    chartFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.position = \"absolute\""));
                     break;
             }
 
             if (chart.Positioning.PositioningMode == HtmlPositioning.PositioningModes.ABSOLUTE)
             {
                 if (chart.Positioning.Top > 0)
-                    chartFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.top = \"" + chart.Positioning.Top + "px\""));
+                    chartFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.top = \"" + chart.Positioning.Top + "px\""));
                 if (chart.Positioning.Left > 0)
-                    chartFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.left = \"" + chart.Positioning.Left + "px\""));
+                    chartFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.left = \"" + chart.Positioning.Left + "px\""));
             }
 
-            chartFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.width = \"" + chart.Width + "px\""));
-            chartFileCreateBlock.AddLine(new JavaScriptLine("this.div.style.height = \"" + chart.Height + "px\""));
-            chartFileCreateBlock.AddLine(new JavaScriptLine("document.documentElement.appendChild(this.div)"));
+            chartFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.width = \"" + chart.Width + "px\""));
+            chartFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.height = \"" + chart.Height + "px\""));
+            chartFileCreateBlock.AddLine(new JavaScriptLine("document.documentElement.appendChild(this.element)"));
 
             // Copy options.js
             string chartFilesDirectory = Path.Combine("Assets", chartID);
@@ -1172,16 +1172,16 @@ namespace ARdevKit.Controller.ProjectController
             // Move
             JavaScriptBlock arelGlueMoveBlock = new JavaScriptBlock("function move(anchor, object, coord)", new BlockMarker("{", "};"));
             arelGlueFile.AddBlock(arelGlueMoveBlock);
-            arelGlueMoveBlock.AddBlock(new JavaScriptLine("var oldLeft = object.div.style.left"));
-            arelGlueMoveBlock.AddBlock(new JavaScriptLine("var oldTop = object.div.style.top"));
-            arelGlueMoveBlock.AddBlock(new JavaScriptLine("var newLeft = (coord.getX() - parseInt(object.div.style.width) / 2) + object.translation.getX()"));
-            arelGlueMoveBlock.AddBlock(new JavaScriptLine("var newTop = (coord.getY() - parseInt(object.div.style.height) / 2) - object.translation.getY()"));
-            arelGlueMoveBlock.AddBlock(new JavaScriptLine("object.div.style.left = newLeft + 'px'"));
-            arelGlueMoveBlock.AddBlock(new JavaScriptLine("object.div.style.top = newTop + 'px'"));
+            arelGlueMoveBlock.AddBlock(new JavaScriptLine("var oldLeft = object.element.style.left"));
+            arelGlueMoveBlock.AddBlock(new JavaScriptLine("var oldTop = object.element.style.top"));
+            arelGlueMoveBlock.AddBlock(new JavaScriptLine("var newLeft = (coord.getX() - parseInt(object.element.style.width) / 2) + object.translation.getX()"));
+            arelGlueMoveBlock.AddBlock(new JavaScriptLine("var newTop = (coord.getY() - parseInt(object.element.style.height) / 2) - object.translation.getY()"));
+            arelGlueMoveBlock.AddBlock(new JavaScriptLine("object.element.style.left = newLeft + 'px'"));
+            arelGlueMoveBlock.AddBlock(new JavaScriptLine("object.element.style.top = newTop + 'px'"));
 
-            JavaScriptBlock arelGlueMoveLogBlock = new JavaScriptBlock("if (object.div.style.left != oldLeft || object.div.style.top != oldTop)", new BlockMarker("{", "}"));
+            JavaScriptBlock arelGlueMoveLogBlock = new JavaScriptBlock("if (object.element.style.left != oldLeft || object.element.style.top != oldTop)", new BlockMarker("{", "}"));
             arelGlueMoveBlock.AddBlock(arelGlueMoveLogBlock);
-            arelGlueMoveLogBlock.AddBlock(new JavaScriptLine("console.log(\"Moved \" + object.id + \" from (\" + oldLeft + \", \" + oldTop + \") to (\" + object.div.style.left + \", \" + object.div.style.top + \")\")"));
+            arelGlueMoveLogBlock.AddBlock(new JavaScriptLine("console.log(\"Moved \" + object.id + \" from (\" + oldLeft + \", \" + oldTop + \") to (\" + object.element.style.left + \", \" + object.element.style.top + \")\")"));
 
             JavaScriptBlock arelGlueMoveTimeoutBlock = new JavaScriptBlock("if (object.visible)", new BlockMarker("{", "}"));
             arelGlueMoveBlock.AddBlock(arelGlueMoveTimeoutBlock);
@@ -1256,7 +1256,7 @@ namespace ARdevKit.Controller.ProjectController
             string translationZ = htmlImage.Translation.Z.ToString("F1", CultureInfo.InvariantCulture);
             htmlImageFileDefineBlock.AddBlock(new JavaScriptInLine("translation : new arel.Vector3D(" + translationX + "," + translationY + "," + translationZ + ")", true));
             // htmlImage
-            htmlImageFileDefineBlock.AddBlock(new JavaScriptInLine("img : document.createElement(\"img\")", true));
+            htmlImageFileDefineBlock.AddBlock(new JavaScriptInLine("element : document.createElement(\"img\")", true));
 
             // Copy image to projectPath
             string newPath = "Assets";
@@ -1271,38 +1271,38 @@ namespace ARdevKit.Controller.ProjectController
             htmlImage.ResFilePath = Path.Combine(newPath, Path.GetFileName(htmlImage.ResFilePath));
 
             // Create
-            // Div
+            // element
             JavaScriptBlock htmlImageFileCreateBlock = new JavaScriptBlock("create : function()", new BlockMarker("{", "},"));
             htmlImageFileDefineBlock.AddBlock(htmlImageFileCreateBlock);
             htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.created = true"));
-            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.img.setAttribute(\"id\", this.id)"));
+            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.element.setAttribute(\"id\", this.id)"));
             switch (htmlImage.Positioning.PositioningMode)
             {
                 case (HtmlPositioning.PositioningModes.STATIC):
-                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.img.style.position = \"static\""));
+                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.position = \"static\""));
                     break;
                 case (HtmlPositioning.PositioningModes.ABSOLUTE):
                 case (HtmlPositioning.PositioningModes.RELATIVE):
-                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.img.style.position = \"absolute\""));
+                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.position = \"absolute\""));
                     break;
             }
 
             if (htmlImage.Positioning.PositioningMode == HtmlPositioning.PositioningModes.ABSOLUTE)
             {
                 if (htmlImage.Positioning.Top > 0)
-                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.img.style.top = \"" + htmlImage.Positioning.Top + "px\""));
+                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.top = \"" + htmlImage.Positioning.Top + "px\""));
                 if (htmlImage.Positioning.Left > 0)
-                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.img.style.left = \"" + htmlImage.Positioning.Left + "px\""));
+                    htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.left = \"" + htmlImage.Positioning.Left + "px\""));
             }
 
-            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.img.style.width = \"" + htmlImage.Width + "px\""));
-            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.img.style.height = \"" + htmlImage.Height + "px\""));
+            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.width = \"" + htmlImage.Width + "px\""));
+            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.height = \"" + htmlImage.Height + "px\""));
             
             //set ImageBackground
-            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.img.src =" + Path.GetFileName(htmlImage.ResFilePath) + "\""));
+            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.element.src =\"" + htmlImage.ResFilePath.Replace('\\', '/') + "\""));
             //TODO
            
-            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("document.documentElement.appendChild(this.img)"));
+            htmlImageFileCreateBlock.AddLine(new JavaScriptLine("document.documentElement.appendChild(this.element)"));
 
             // Show            
             JavaScriptBlock htmlImageShowBlock = new JavaScriptBlock("show : function()", new BlockMarker("{", "},"));

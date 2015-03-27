@@ -543,7 +543,6 @@ namespace ARdevKit
             try
             {
                 initializeLoadedProject(SaveLoadController.loadProject(openFileDialog1.FileName));
-                previewController.shutDownWebserver();
                 this.initializeControllers();
                 //this.updatePanels();
                 //previewController.Index = -1;
@@ -858,6 +857,8 @@ namespace ARdevKit
         /// </summary>
         private void initializeControllers()
         {
+            if (previewController != null)
+                previewController.shutDownWebserver();
             this.elementSelectionController = new ElementSelectionController(this);
             this.previewController = new PreviewController(this);
             this.propertyController = new PropertyController(this);
