@@ -1250,9 +1250,9 @@ namespace ARdevKit.Controller.ProjectController
             htmlImageFileDefineBlock.AddLine(new JavaScriptInLine("id : \"" + htmlImageID + "\"", true));
             // CoordinateSystemID
             htmlImageFileDefineBlock.AddLine(new JavaScriptInLine("coordinateSystemID : " + coordinateSystemID, true));
-            // Translation
-            string translationX = htmlImage.Translation.X.ToString("F1", CultureInfo.InvariantCulture);
-            string translationY = htmlImage.Translation.Y.ToString("F1", CultureInfo.InvariantCulture);
+            // Translation in this Case Ignore translations and us positioning
+            string translationX = htmlImage.Positioning.Left.ToString("F1", CultureInfo.InvariantCulture);
+            string translationY = htmlImage.Positioning.Top.ToString("F1", CultureInfo.InvariantCulture);
             string translationZ = htmlImage.Translation.Z.ToString("F1", CultureInfo.InvariantCulture);
             htmlImageFileDefineBlock.AddBlock(new JavaScriptInLine("translation : new arel.Vector3D(" + translationX + "," + translationY + "," + translationZ + ")", true));
             // htmlImage

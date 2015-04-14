@@ -18,11 +18,16 @@ namespace ARdevKit.Controller.EditorController
         /// <summary>
         /// A list of all Bitmaps, which are included in the Websites
         /// </summary>
-        public List<System.Drawing.Bitmap> previews; 
+        public List<System.Drawing.Bitmap> previews;
+        /// <summary>
+        /// A list of all JSchartFiles, which are used by the Websites's charts
+        /// </summary>
+        public Dictionary<string, string> chartFiles;
         /// <summary>
         /// The website texts
         /// </summary>
         public string[] websiteTexts;
+        
         /// <summary>
         /// The main container width
         /// </summary>
@@ -71,6 +76,7 @@ namespace ARdevKit.Controller.EditorController
             previews = new List<System.Drawing.Bitmap>();
             mainContainerWidth = 0;
             mainContainerHeigth = 0;
+            chartFiles = new Dictionary<string, string>();
         }
         /// <summary>
         /// builds a html document or loads the existing one at the 
@@ -215,6 +221,12 @@ namespace ARdevKit.Controller.EditorController
                         return;
                     }
                 }
+                if(chartFiles.ContainsKey(extension))
+                {
+                    p.writeSuccess("application/javascript");
+                    p.outputStream.Write(chartFiles[extension]);
+                    return;
+                }
                 if(extension == "jquery")
                 {
                     p.writeSuccess();
@@ -253,6 +265,13 @@ namespace ARdevKit.Controller.EditorController
         public override void handlePOSTRequest(HttpProcessor p, StreamReader inputData)
         {
             throw new NotImplementedException();
+        }
+
+        internal void addElementAt(mshtml.IHTMLElement htmlChart, int index)
+        {
+            string conWrap = containmentWrapper.Match(websiteTexts[index]).Value;
+            string[] splittedPage = containmentWrapper.Split(websiteTexts[index]);
+            websiteTexts[index] = splittedPage[0] + conWrap + htmlChart.outerHTML + splittedPage[1];
         }
     }
 }

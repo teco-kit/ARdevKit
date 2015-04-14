@@ -389,10 +389,24 @@ namespace ARdevKit.Controller.EditorController
             else if (currentElement is Chart)
             {
                 Chart chart = ((Chart)currentElement);
-                HtmlElement htmlChart = htmlPreview.Document.CreateElement("div");
-                htmlChart.Id = chart.ID;
-                htmlChart.SetAttribute("class", "augmentation");
-                htmlChart.Style = String.Format("width: {0}; height: {1}; margin-left: {2}; margin-top: {3}", chart.Width, chart.Height, chart.Positioning.Left, chart.Positioning.Top);
+                IHTMLElement htmlChart = (IHTMLElement)htmlPreview.Document.CreateElement("div").DomElement;
+                htmlChart.id = chart.ID;
+                htmlChart.className = "augmentation";
+                htmlChart.style.width = chart.Width;
+                htmlChart.style.height = chart.Height;
+                htmlChart.style.marginTop = chart.Positioning.Top;
+                htmlChart.style.marginLeft = chart.Positioning.Left;
+                if (chart.ResFilePath != null)
+                {
+                    htmlChart.innerText = "<script type=\"text/javascript\">$.getScript(http://localhost:" + PREVIEW_PORT + "/options" + chart.ID + ", 'function(){$(#" + chart.ID + "').highcharts(init());});</script>";
+                }   
+                if(chart.Source!=null)
+                {
+                    if(chart.Source.Query!=null)
+                    {
+                        
+                    }
+                }
                 Websites.addElementAt(htmlChart, index);
             }
             else if (currentElement is Abstract2DAugmentation && !(currentElement is AbstractHtmlElement))
