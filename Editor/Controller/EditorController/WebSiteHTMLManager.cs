@@ -117,7 +117,12 @@ namespace ARdevKit.Controller.EditorController
         {
             string conWrap = containmentWrapper.Match(websiteTexts[index]).Value;
             string[] splittedPage = containmentWrapper.Split(websiteTexts[index]);
-            websiteTexts[index] = splittedPage[0] +conWrap + element.OuterHtml + splittedPage[1];
+            string wholeElement = element.OuterHtml;
+            if(element.InnerHtml != null)
+            {
+                wholeElement.Replace("</" + element.TagName + ">", element.InnerHtml + "</" + element.TagName + ">");                
+            }
+            websiteTexts[index] = splittedPage[0] +conWrap + wholeElement + splittedPage[1];
         }
 
         /// <summary>
@@ -221,10 +226,11 @@ namespace ARdevKit.Controller.EditorController
                         return;
                     }
                 }
-                if(chartFiles.ContainsKey(extension))
+                if(extension.Contains('?'))
+                if(chartFiles.ContainsKey(extension.Remove(extension.IndexOf('?'))))
                 {
                     p.writeSuccess("application/javascript");
-                    p.outputStream.Write(chartFiles[extension]);
+                    p.outputStream.Write(chartFiles[extension.Remove(extension.IndexOf('?'))]);
                     return;
                 }
                 if(extension == "jquery")

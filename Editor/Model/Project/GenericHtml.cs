@@ -98,6 +98,7 @@ namespace ARdevKit.Model.Project
         /// </returns>
         public override bool initElement(EditorWindow ew)
         {
+            
             if (ResFilePath == null)
             {
                 OpenFileDialog openFileDialog = new OpenFileDialog();

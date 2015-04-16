@@ -389,16 +389,19 @@ namespace ARdevKit.Controller.EditorController
             else if (currentElement is Chart)
             {
                 Chart chart = ((Chart)currentElement);
-                IHTMLElement htmlChart = (IHTMLElement)htmlPreview.Document.CreateElement("div").DomElement;
-                htmlChart.id = chart.ID;
-                htmlChart.className = "augmentation";
-                htmlChart.style.width = chart.Width;
-                htmlChart.style.height = chart.Height;
-                htmlChart.style.marginTop = chart.Positioning.Top;
-                htmlChart.style.marginLeft = chart.Positioning.Left;
+                HtmlElement htmlChart = htmlPreview.Document.CreateElement("div");
+                htmlChart.SetAttribute("id", chart.ID);
+                htmlChart.SetAttribute("class","augmentation");
+                htmlChart.SetAttribute("title", "augmentation");
+                htmlChart.Style = String.Format(@"width: {0}px; height: {1}px; margin-left: {2}px; margin-top: {3}px; position: absolute",
+                chart.Width, chart.Height, chart.Positioning.Top, chart.Positioning.Left);
                 if (chart.ResFilePath != null)
                 {
-                    htmlChart.innerText = "<script type=\"text/javascript\">$.getScript(http://localhost:" + PREVIEW_PORT + "/options" + chart.ID + ", 'function(){$(#" + chart.ID + "').highcharts(init());});</script>";
+                    Websites.chartFiles.Add("options"+chart.ID, File.ReadAllText(chart.ResFilePath));
+                    HtmlElement script = htmlPreview.Document.CreateElement("script");
+                    ((IHTMLScriptElement)script.DomElement).type = "text/javascript";
+                    ((IHTMLScriptElement)script.DomElement).text = "$.getScript(\"http://localhost:" + PREVIEW_PORT + "/options" + chart.ID + "\", function(){$(\"#" + chart.ID + "\").highcharts(init());});";
+                    htmlChart.AppendChild(script);
                 }   
                 if(chart.Source!=null)
                 {
@@ -447,7 +450,27 @@ namespace ARdevKit.Controller.EditorController
             {
 
             }
-            else
+            else if (currentElement is GenericHtml)
+            {
+                GenericHtml element = ((GenericHtml)currentElement);
+                if (element.ResFilePath != null)
+                {
+                    string elementText = File.ReadAllText(element.ResFilePath);
+                    if(elementText.Contains("<"))
+                    {
+                        HtmlElement htmlElement = htmlPreview.Document.CreateElement(elementText.IndexOf("<"));
+                    }
+                    else
+                    {
+                        MessageBox.Show("Es gibt kein öffnendes Tag in ihrer Datei");
+                    }
+                } 
+                else
+                {
+                    MessageBox.Show("sie müssen eine dazugehörige HTML Datei mit einem Element darin bestimmen");
+                }
+            } 
+            else 
             {
                 throw new NotSupportedException("Other then Abstract2DAugmentation/Abstract2DTrackable not yet supported");
             }
