@@ -223,7 +223,7 @@ namespace ARdevKit
             this.tss_editor_menu_file_connection_exit,
             this.tsm_editor_menu_file_exit});
             this.tsm_editor_menu_file.Name = "tsm_editor_menu_file";
-            this.tsm_editor_menu_file.Size = new System.Drawing.Size(44, 20);
+            this.tsm_editor_menu_file.Size = new System.Drawing.Size(46, 20);
             this.tsm_editor_menu_file.Text = "Datei";
             this.tsm_editor_menu_file.Click += new System.EventHandler(this.tsm_editor_menu_file_Click);
             // 
@@ -232,7 +232,7 @@ namespace ARdevKit
             this.tsm_editor_menu_file_new.Name = "tsm_editor_menu_file_new";
             this.tsm_editor_menu_file_new.ShortcutKeyDisplayString = "STRG+N";
             this.tsm_editor_menu_file_new.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-            this.tsm_editor_menu_file_new.Size = new System.Drawing.Size(168, 22);
+            this.tsm_editor_menu_file_new.Size = new System.Drawing.Size(175, 22);
             this.tsm_editor_menu_file_new.Text = "Neu";
             this.tsm_editor_menu_file_new.Click += new System.EventHandler(this.tsm_editor_menu_file_new_Click);
             // 
@@ -241,42 +241,42 @@ namespace ARdevKit
             this.tsm_editor_menu_file_open.Name = "tsm_editor_menu_file_open";
             this.tsm_editor_menu_file_open.ShortcutKeyDisplayString = "STRG+O";
             this.tsm_editor_menu_file_open.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.tsm_editor_menu_file_open.Size = new System.Drawing.Size(168, 22);
+            this.tsm_editor_menu_file_open.Size = new System.Drawing.Size(175, 22);
             this.tsm_editor_menu_file_open.Text = "Öffnen";
             this.tsm_editor_menu_file_open.Click += new System.EventHandler(this.tsm_editor_menu_file_open_Click_1);
             // 
             // tss_editor_menu_file_opnen_save
             // 
             this.tss_editor_menu_file_opnen_save.Name = "tss_editor_menu_file_opnen_save";
-            this.tss_editor_menu_file_opnen_save.Size = new System.Drawing.Size(165, 6);
+            this.tss_editor_menu_file_opnen_save.Size = new System.Drawing.Size(172, 6);
             // 
             // tsm_editor_menu_file_save
             // 
             this.tsm_editor_menu_file_save.Name = "tsm_editor_menu_file_save";
             this.tsm_editor_menu_file_save.ShortcutKeyDisplayString = "STRG+S";
             this.tsm_editor_menu_file_save.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.tsm_editor_menu_file_save.Size = new System.Drawing.Size(168, 22);
+            this.tsm_editor_menu_file_save.Size = new System.Drawing.Size(175, 22);
             this.tsm_editor_menu_file_save.Text = "Speichern";
             this.tsm_editor_menu_file_save.Click += new System.EventHandler(this.tsm_editor_menu_file_save_Click);
             // 
             // tsm_editor_menu_file_saveAs
             // 
             this.tsm_editor_menu_file_saveAs.Name = "tsm_editor_menu_file_saveAs";
-            this.tsm_editor_menu_file_saveAs.Size = new System.Drawing.Size(168, 22);
+            this.tsm_editor_menu_file_saveAs.Size = new System.Drawing.Size(175, 22);
             this.tsm_editor_menu_file_saveAs.Text = "Speichern unter...";
             this.tsm_editor_menu_file_saveAs.Click += new System.EventHandler(this.tsm_editor_menu_file_saveAs_Click);
             // 
             // tsm_editor_menu_file_export
             // 
             this.tsm_editor_menu_file_export.Name = "tsm_editor_menu_file_export";
-            this.tsm_editor_menu_file_export.Size = new System.Drawing.Size(168, 22);
+            this.tsm_editor_menu_file_export.Size = new System.Drawing.Size(175, 22);
             this.tsm_editor_menu_file_export.Text = "Exportieren";
             this.tsm_editor_menu_file_export.Click += new System.EventHandler(this.tsm_editor_menu_file_export_Click);
             // 
             // tss_editor_menu_file_export_sendTo
             // 
             this.tss_editor_menu_file_export_sendTo.Name = "tss_editor_menu_file_export_sendTo";
-            this.tss_editor_menu_file_export_sendTo.Size = new System.Drawing.Size(165, 6);
+            this.tss_editor_menu_file_export_sendTo.Size = new System.Drawing.Size(172, 6);
             // 
             // sendProjectMenu
             // 
@@ -287,52 +287,52 @@ namespace ARdevKit
             this.sendProject,
             this.DeviceDebug});
             this.sendProjectMenu.Name = "sendProjectMenu";
-            this.sendProjectMenu.Size = new System.Drawing.Size(168, 22);
+            this.sendProjectMenu.Size = new System.Drawing.Size(175, 22);
             this.sendProjectMenu.Text = "Projekt versenden";
             // 
             // DeviceList
             // 
             this.DeviceList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.DeviceList.Name = "DeviceList";
-            this.DeviceList.Size = new System.Drawing.Size(150, 21);
+            this.DeviceList.Size = new System.Drawing.Size(150, 23);
             // 
             // refreshDeviceList
             // 
             this.refreshDeviceList.Name = "refreshDeviceList";
-            this.refreshDeviceList.Size = new System.Drawing.Size(210, 22);
+            this.refreshDeviceList.Size = new System.Drawing.Size(218, 22);
             this.refreshDeviceList.Text = "Liste akualisieren";
             this.refreshDeviceList.Click += new System.EventHandler(this.refreshDeviceList_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(207, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(215, 6);
             // 
             // sendProject
             // 
             this.sendProject.Name = "sendProject";
-            this.sendProject.Size = new System.Drawing.Size(210, 22);
+            this.sendProject.Size = new System.Drawing.Size(218, 22);
             this.sendProject.Text = "Projekt an Gerät senden";
             this.sendProject.Click += new System.EventHandler(this.sendProject_Click);
             // 
             // DeviceDebug
             // 
             this.DeviceDebug.Name = "DeviceDebug";
-            this.DeviceDebug.Size = new System.Drawing.Size(210, 22);
+            this.DeviceDebug.Size = new System.Drawing.Size(218, 22);
             this.DeviceDebug.Text = "Gerätedebugmodus starten";
             this.DeviceDebug.Click += new System.EventHandler(this.DeviceDebug_Click);
             // 
             // tss_editor_menu_file_connection_exit
             // 
             this.tss_editor_menu_file_connection_exit.Name = "tss_editor_menu_file_connection_exit";
-            this.tss_editor_menu_file_connection_exit.Size = new System.Drawing.Size(165, 6);
+            this.tss_editor_menu_file_connection_exit.Size = new System.Drawing.Size(172, 6);
             // 
             // tsm_editor_menu_file_exit
             // 
             this.tsm_editor_menu_file_exit.Name = "tsm_editor_menu_file_exit";
             this.tsm_editor_menu_file_exit.ShortcutKeyDisplayString = "STRG+Q";
             this.tsm_editor_menu_file_exit.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
-            this.tsm_editor_menu_file_exit.Size = new System.Drawing.Size(168, 22);
+            this.tsm_editor_menu_file_exit.Size = new System.Drawing.Size(175, 22);
             this.tsm_editor_menu_file_exit.Text = "Beenden";
             this.tsm_editor_menu_file_exit.Click += new System.EventHandler(this.tsm_editor_menu_file_exit_Click);
             // 
@@ -343,7 +343,7 @@ namespace ARdevKit
             this.tsm_editor_menu_edit_paste,
             this.tsm_editor_menu_edit_delete});
             this.tsm_editor_menu_edit.Name = "tsm_editor_menu_edit";
-            this.tsm_editor_menu_edit.Size = new System.Drawing.Size(71, 20);
+            this.tsm_editor_menu_edit.Size = new System.Drawing.Size(75, 20);
             this.tsm_editor_menu_edit.Text = "Bearbeiten";
             // 
             // tsm_editor_menu_edit_copie
@@ -352,7 +352,7 @@ namespace ARdevKit
             this.tsm_editor_menu_edit_copie.Name = "tsm_editor_menu_edit_copie";
             this.tsm_editor_menu_edit_copie.ShortcutKeyDisplayString = "STRG+C";
             this.tsm_editor_menu_edit_copie.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.tsm_editor_menu_edit_copie.Size = new System.Drawing.Size(172, 22);
+            this.tsm_editor_menu_edit_copie.Size = new System.Drawing.Size(181, 22);
             this.tsm_editor_menu_edit_copie.Text = "Kopieren";
             // 
             // tsm_editor_menu_edit_paste
@@ -361,7 +361,7 @@ namespace ARdevKit
             this.tsm_editor_menu_edit_paste.Name = "tsm_editor_menu_edit_paste";
             this.tsm_editor_menu_edit_paste.ShortcutKeyDisplayString = "STRG+V";
             this.tsm_editor_menu_edit_paste.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
-            this.tsm_editor_menu_edit_paste.Size = new System.Drawing.Size(172, 22);
+            this.tsm_editor_menu_edit_paste.Size = new System.Drawing.Size(181, 22);
             this.tsm_editor_menu_edit_paste.Text = "Einfügen";
             // 
             // tsm_editor_menu_edit_delete
@@ -370,7 +370,7 @@ namespace ARdevKit
             this.tsm_editor_menu_edit_delete.Name = "tsm_editor_menu_edit_delete";
             this.tsm_editor_menu_edit_delete.ShortcutKeyDisplayString = "STRG+DEL";
             this.tsm_editor_menu_edit_delete.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Delete)));
-            this.tsm_editor_menu_edit_delete.Size = new System.Drawing.Size(172, 22);
+            this.tsm_editor_menu_edit_delete.Size = new System.Drawing.Size(181, 22);
             this.tsm_editor_menu_edit_delete.Text = "Löschen";
             // 
             // tsm_editor_menu_test
@@ -383,46 +383,46 @@ namespace ARdevKit
             this.tsm_editor_menu_test_togleDebug,
             this.trackableDruckenToolStripMenuItem});
             this.tsm_editor_menu_test.Name = "tsm_editor_menu_test";
-            this.tsm_editor_menu_test.Size = new System.Drawing.Size(40, 20);
+            this.tsm_editor_menu_test.Size = new System.Drawing.Size(41, 20);
             this.tsm_editor_menu_test.Text = "Test";
             // 
             // tsm_editor_menu_test_startImage
             // 
             this.tsm_editor_menu_test_startImage.Name = "tsm_editor_menu_test_startImage";
-            this.tsm_editor_menu_test_startImage.Size = new System.Drawing.Size(166, 22);
+            this.tsm_editor_menu_test_startImage.Size = new System.Drawing.Size(176, 22);
             this.tsm_editor_menu_test_startImage.Text = "Bild laden";
             this.tsm_editor_menu_test_startImage.Click += new System.EventHandler(this.tsm_editor_menu_test_startImage_Click);
             // 
             // tsm_editor_menu_test_startVideo
             // 
             this.tsm_editor_menu_test_startVideo.Name = "tsm_editor_menu_test_startVideo";
-            this.tsm_editor_menu_test_startVideo.Size = new System.Drawing.Size(166, 22);
+            this.tsm_editor_menu_test_startVideo.Size = new System.Drawing.Size(176, 22);
             this.tsm_editor_menu_test_startVideo.Text = "Video laden";
             this.tsm_editor_menu_test_startVideo.Click += new System.EventHandler(this.tsm_editor_menu_test_startVideo_Click);
             // 
             // tsm_editor_menu_test_startWithVirtualCamera
             // 
             this.tsm_editor_menu_test_startWithVirtualCamera.Name = "tsm_editor_menu_test_startWithVirtualCamera";
-            this.tsm_editor_menu_test_startWithVirtualCamera.Size = new System.Drawing.Size(166, 22);
+            this.tsm_editor_menu_test_startWithVirtualCamera.Size = new System.Drawing.Size(176, 22);
             this.tsm_editor_menu_test_startWithVirtualCamera.Text = "vCam nutzen";
             this.tsm_editor_menu_test_startWithVirtualCamera.Click += new System.EventHandler(this.tsm_editor_menu_test_startWithVirtualCamera_Click);
             // 
             // tss_editor_meu_test_loadVideo_togleDebug
             // 
             this.tss_editor_meu_test_loadVideo_togleDebug.Name = "tss_editor_meu_test_loadVideo_togleDebug";
-            this.tss_editor_meu_test_loadVideo_togleDebug.Size = new System.Drawing.Size(163, 6);
+            this.tss_editor_meu_test_loadVideo_togleDebug.Size = new System.Drawing.Size(173, 6);
             // 
             // tsm_editor_menu_test_togleDebug
             // 
             this.tsm_editor_menu_test_togleDebug.CheckOnClick = true;
             this.tsm_editor_menu_test_togleDebug.Name = "tsm_editor_menu_test_togleDebug";
-            this.tsm_editor_menu_test_togleDebug.Size = new System.Drawing.Size(166, 22);
+            this.tsm_editor_menu_test_togleDebug.Size = new System.Drawing.Size(176, 22);
             this.tsm_editor_menu_test_togleDebug.Text = "Debug";
             // 
             // trackableDruckenToolStripMenuItem
             // 
             this.trackableDruckenToolStripMenuItem.Name = "trackableDruckenToolStripMenuItem";
-            this.trackableDruckenToolStripMenuItem.Size = new System.Drawing.Size(166, 22);
+            this.trackableDruckenToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
             this.trackableDruckenToolStripMenuItem.Text = "Trackables drucken";
             this.trackableDruckenToolStripMenuItem.Click += new System.EventHandler(this.trackableDruckenToolStripMenuItem_Click);
             // 
@@ -432,20 +432,20 @@ namespace ARdevKit
             this.tsm_editor_menu_help_help,
             this.tsm_editor_menu_help_info});
             this.tsm_editor_menu_help.Name = "tsm_editor_menu_help";
-            this.tsm_editor_menu_help.Size = new System.Drawing.Size(40, 20);
+            this.tsm_editor_menu_help.Size = new System.Drawing.Size(44, 20);
             this.tsm_editor_menu_help.Text = "Hilfe";
             // 
             // tsm_editor_menu_help_help
             // 
             this.tsm_editor_menu_help_help.Name = "tsm_editor_menu_help_help";
-            this.tsm_editor_menu_help_help.Size = new System.Drawing.Size(95, 22);
+            this.tsm_editor_menu_help_help.Size = new System.Drawing.Size(99, 22);
             this.tsm_editor_menu_help_help.Text = "Hilfe";
             this.tsm_editor_menu_help_help.Click += new System.EventHandler(this.tsm_editor_menu_help_help_Click);
             // 
             // tsm_editor_menu_help_info
             // 
             this.tsm_editor_menu_help_info.Name = "tsm_editor_menu_help_info";
-            this.tsm_editor_menu_help_info.Size = new System.Drawing.Size(95, 22);
+            this.tsm_editor_menu_help_info.Size = new System.Drawing.Size(99, 22);
             this.tsm_editor_menu_help_info.Text = "Info";
             this.tsm_editor_menu_help_info.Click += new System.EventHandler(this.tsm_editor_menu_help_info_Click);
             // 

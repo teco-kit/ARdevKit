@@ -170,7 +170,7 @@ namespace ARdevKit.Controller.EditorController
                 {
                     IHTMLElement selectedElement = (IHTMLElement)findElement(this.ew.CurrentElement).DomElement;
                     selectedElement.style.border = "solid 2.5px #F39814";
-                   selectedElement.style.zIndex = "10";
+                    selectedElement.style.zIndex = "10";
                 }
             }
         }
@@ -448,6 +448,15 @@ namespace ARdevKit.Controller.EditorController
             } 
             else if (currentElement is HtmlVideo)
             {
+                HtmlVideo video = ((HtmlVideo)currentElement);
+                HtmlElement htmlVideo = htmlPreview.Document.CreateElement("video");
+                htmlVideo.Id = video.ID;
+                htmlVideo.SetAttribute("title", "augmentation");
+                htmlVideo.Style = String.Format(@"width: {0}px; height: {1}px; z-index:{2}; margin-left: {3}px; margin-top: {4}px; position: absolute",
+                video.Width, video.Height,
+                nativeToHtmlCoordinates(vector).Z,
+                video.Positioning.Left, video.Positioning.Top);
+                Websites.addElementAt(htmlVideo, index);
 
             }
             else if (currentElement is GenericHtml)
@@ -456,13 +465,41 @@ namespace ARdevKit.Controller.EditorController
                 if (element.ResFilePath != null)
                 {
                     string elementText = File.ReadAllText(element.ResFilePath);
-                    if(elementText.Contains("<"))
+                    int bracketsCount = 0;
+                    foreach (char Char in elementText.ToCharArray())
+	                {
+		                if(Char.Equals('<'))++bracketsCount;
+                        if(Char.Equals('>'))--bracketsCount;
+	                }
+                    if(bracketsCount == 0)
                     {
-                        HtmlElement htmlElement = htmlPreview.Document.CreateElement(elementText.IndexOf("<"));
+                        //get the ID and set as active element
+                        System.Text.RegularExpressions.Regex idRex = new System.Text.RegularExpressions.Regex(@"\s*<[^>]*id\s*=\s*""?(?<id>[^""\s]+)(""|\s)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                        string elementId = idRex.Match(elementText).Groups["id"].Value;
+
+                        if (changeAugIDFromTo(element, elementId))
+                        {
+                            
+                            if (elementText.Contains("title"))
+                            {
+                                System.Text.RegularExpressions.Regex titleRex = new System.Text.RegularExpressions.Regex(@"title\s*=\s*""[^""]*""");
+                                elementText = titleRex.Replace(elementText, @"title=""augmentation""", 1);
+                            }
+                            else
+                            {
+                                System.Text.RegularExpressions.Regex titleRex = new System.Text.RegularExpressions.Regex(@"(?<id>id\s*=\s*""[^""]*"")");
+                                elementText = titleRex.Replace(elementText, @"${id} title=""augmentation"" ");
+                            }
+                            Websites.insertRawTextElement(elementText, index);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Es gibt die von ihnen vergebene id bereits");
+                        }
                     }
                     else
                     {
-                        MessageBox.Show("Es gibt kein öffnendes Tag in ihrer Datei");
+                        MessageBox.Show("Es gibt gibt eine ungleiche Anzahl öffnender und schließender Tags");
                     }
                 } 
                 else
@@ -475,6 +512,26 @@ namespace ARdevKit.Controller.EditorController
                 throw new NotSupportedException("Other then Abstract2DAugmentation/Abstract2DTrackable not yet supported");
             }
             reloadCurrentWebsite();
+        }
+
+        private bool changeAugIDFromTo(AbstractAugmentation element, string newId)
+        {
+            foreach (AbstractTrackable t in ew.project.Trackables)
+            {
+                foreach (AbstractAugmentation a in t.Augmentations)
+                {
+                    if (a.ID == newId) return false;
+                }
+            }
+            if(!htmlPreview.IsBusy)
+            {
+                foreach (HtmlElement htmlElement in htmlPreview.Document.All)
+                {
+                    if (htmlElement.Id == newId) return false;
+                }
+            }
+            element.ID = newId;
+            return true;
         }
 
         private Vector3D nativeToHtmlCoordinates(Vector3D native)
@@ -1031,6 +1088,9 @@ namespace ARdevKit.Controller.EditorController
                 {
                     element = htmlPreview.Document.GetElementById(((AbstractAugmentation)prev).ID);
                 }
+            } else
+            {
+                throw new Exception("Cannot find Element while Webbrowser is still loading.");
             }
             return element;
         }
@@ -1551,6 +1611,10 @@ namespace ARdevKit.Controller.EditorController
         {
             if (ew.CurrentElement != null)
             {
+                while (htmlPreview.IsBusy)
+                {
+                    Application.DoEvents();
+                }
                 HtmlElement changedElement = findElement(ew.CurrentElement);
                 if (changedElement.GetAttribute("title") == "augmentation")
                 {

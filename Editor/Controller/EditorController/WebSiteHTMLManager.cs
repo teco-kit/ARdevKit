@@ -273,11 +273,11 @@ namespace ARdevKit.Controller.EditorController
             throw new NotImplementedException();
         }
 
-        internal void addElementAt(mshtml.IHTMLElement htmlChart, int index)
+        public void insertRawTextElement(string elementText, int index)
         {
             string conWrap = containmentWrapper.Match(websiteTexts[index]).Value;
             string[] splittedPage = containmentWrapper.Split(websiteTexts[index]);
-            websiteTexts[index] = splittedPage[0] + conWrap + htmlChart.outerHTML + splittedPage[1];
+            websiteTexts[index] = splittedPage[0] + conWrap + elementText + splittedPage[1];
         }
     }
 }
