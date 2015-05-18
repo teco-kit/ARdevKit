@@ -18,11 +18,11 @@ namespace ARdevKit.Controller.EditorController
         /// <summary>
         /// A list of all Bitmaps, which are included in the Websites
         /// </summary>
-        public List<System.Drawing.Bitmap> previews;
+        public volatile List<System.Drawing.Bitmap> previews;
         /// <summary>
         /// A list of all JSchartFiles, which are used by the Websites's charts
         /// </summary>
-        public Dictionary<string, string> chartFiles;
+        public volatile Dictionary<string, string> chartFiles;
         /// <summary>
         /// The website texts
         /// </summary>
@@ -128,12 +128,28 @@ namespace ARdevKit.Controller.EditorController
         /// <summary>
         /// removes the HTMLText of the given <para>element</para> from the htmlDoc and removes associated previews
         /// </summary>
-        /// <param name="element">the HtmlElement that should be removed</param>
+        /// <param name="element">the HtmlElement that should be removed</param> 
         /// <param name="index">The index.</param>
         public void removeElementAt(HtmlElement element, int index)
         {
+            //previews should be dleeted beforehand, this is just for double checking
             previews.RemoveAll(x => x.Tag.Equals(element.Id));
-            Regex RexElement = new Regex(@"<[^>]*id\s*=\s*" + element.Id + "[^>]*>");
+            if(element.Children != null)
+            {
+                foreach (HtmlElement item in element.Children)
+	            {
+                    removeElementAt(item, index);		 
+	            }
+            }
+            Regex RexElement;
+            if(element.OuterHtml.Contains(@"</"+element.TagName+">"))
+            {
+                RexElement = new Regex(@"<[^>]*id\s*=\s*""?" + element.Id + @"""?[^>]*>[^<]*</"+element.TagName+@"\s*>", RegexOptions.IgnoreCase);
+            }
+            else 
+            {
+                RexElement = new Regex(@"<[^>]*id\s*=\s*""?" + element.Id + @"""?[^>]*>", RegexOptions.IgnoreCase);
+            }
             websiteTexts[index] = RexElement.Replace(websiteTexts[index],"");
         }
 

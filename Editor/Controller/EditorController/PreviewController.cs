@@ -10,6 +10,7 @@ using System.Diagnostics;
 using ARdevKit.Model.Project.File;
 using System.Threading;
 using mshtml;
+using System.Collections.Generic;
 
 namespace ARdevKit.Controller.EditorController
 {
@@ -26,7 +27,7 @@ namespace ARdevKit.Controller.EditorController
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>  The path where the temp data is stored. </summary>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        public readonly string TEMP_PATH = Directory.GetCurrentDirectory() + "/temp/";
+        public readonly string TEMP_PATH = Directory.GetCurrentDirectory() + "\\temp\\";
         
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   The MetaCategory of the current element. </summary>
@@ -88,6 +89,10 @@ namespace ARdevKit.Controller.EditorController
         private bool markCurrentElementInPreview;
 
         private Thread webServerThread;
+
+        private FileSystemWatcher fileWatcher;
+
+        private Dictionary<string, IPreviewable> fileLookup;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
@@ -152,6 +157,62 @@ namespace ARdevKit.Controller.EditorController
             this.ew.Tsm_editor_menu_edit_delete.Click += new System.EventHandler(this.delete_current_element);
 
             markCurrentElementInPreview = false;
+
+            //establish file management
+            Directory.CreateDirectory(Directory.GetCurrentDirectory() + "\\temp");
+            fileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory() + "\\temp");
+            fileWatcher.IncludeSubdirectories = true;
+            fileWatcher.Created += fileWatcher_Created;
+            fileWatcher.Changed += fileWatcher_Changed;
+            fileWatcher.Renamed +=fileWatcher_Renamed;
+            fileWatcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite;
+            fileWatcher.Filter = "";
+            fileWatcher.IncludeSubdirectories = true;
+            fileWatcher.SynchronizingObject = ew.Html_preview;
+            fileWatcher.EnableRaisingEvents = true;
+            fileLookup = new Dictionary<string,IPreviewable>();
+        }
+
+        private void fileWatcher_Created(object sender, FileSystemEventArgs e)
+        {
+            //throw new NotImplementedException();
+        }
+
+        void fileWatcher_Renamed(object sender, RenamedEventArgs e)
+        {
+ 	        //throw new NotImplementedException();
+        }
+
+        void fileWatcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            if(fileLookup.ContainsKey(e.FullPath))
+            {
+                IPreviewable changedPrev = fileLookup[e.FullPath];
+                if(changedPrev is AbstractAugmentation)
+                {
+                    if (trackable.Augmentations.Contains((AbstractAugmentation)changedPrev))
+                    {
+                        reloadPreviewable((AbstractAugmentation)fileLookup[e.FullPath]);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Es wurden Änderungen an einer Augmentation in einer anderen Szene vorgenommen,"
+                        + "diese Änderungen werden erst angezeigt, wenn sie wieder Änderungen vornehmen, wenn die zu verändernde Szene die aktuell angezeigte ist.");
+                    }
+                   
+                } else if(changedPrev is AbstractTrackable)
+                {
+                    if(trackable.Equals(changedPrev))
+                    {
+                        reloadPreviewable(changedPrev);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Es wurden Änderungen an einem Trackable in einer anderen Szene vorgenommen,"
+                        + "diese Änderungen werden erst angezeigt, wenn sie wieder Änderungen vornehmen, wenn die zu verändernde Szene die aktuell angezeigte ist.");
+                    }
+                }                
+            }
         }
 
         private void htmlPreview_DocumentFirstCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
@@ -254,9 +315,6 @@ namespace ARdevKit.Controller.EditorController
 
                 dragStartPosition = e.MousePosition;
             }       
-            //its still to decide when to do this
-            //this.setCoordinates(this.ew.CurrentElement, new Vector3D((int)((draggedElement.OffsetRectangle.Width + e.ClientMousePosition.X)),
-            //(int)((draggedElement.OffsetRectangle.Height + e.ClientMousePosition.Y)), 0)); 
         }
 
 
@@ -347,8 +405,10 @@ namespace ARdevKit.Controller.EditorController
                 {
                     //set references 
                     trackable.Augmentations.Add((AbstractAugmentation)currentElement);
-                    this.setCoordinates(currentElement, v);
-                    this.addElement(currentElement, v);
+                    this.setCoordinates(currentElement, new Vector3D(0, 0, 0));
+                    this.addElement(currentElement, new Vector3D(0, 0, 0));
+                    //this.setCoordinates(currentElement, v);
+                    //this.addElement(currentElement, v);
                     ((AbstractAugmentation)currentElement).Trackable = this.trackable;
                 }
             }
@@ -372,11 +432,48 @@ namespace ARdevKit.Controller.EditorController
                 }
                 else
                 {
+                    if(currentElement is PictureMarker)
+                    {
+                        //adding to tempFile
+                        fileWatcher.EnableRaisingEvents = false;
+                        if(!Helper.Copy(((PictureMarker)currentElement).PicturePath, TEMP_PATH))
+                        {
+                            MessageBox.Show("Es konnte keine Kopie der genutzten Bilddatei in " + TEMP_PATH + " angelegt werden");
+                            return;
+                        }
+                        ((PictureMarker)currentElement).PicturePath = TEMP_PATH + Path.GetFileName(((PictureMarker)currentElement).PicturePath);
+                        fileLookup.Add(((PictureMarker)currentElement).PicturePath, currentElement);
+                        fileWatcher.EnableRaisingEvents = true;
+                    }
+                    if(currentElement is ImageTrackable)
+                    {
+                        //adding to tempFile
+                        fileWatcher.EnableRaisingEvents = false;
+                        if (!Helper.Copy(((ImageTrackable)currentElement).ImagePath, TEMP_PATH))
+                        {
+                            MessageBox.Show("Es konnte keine Kopie der genutzten Bilddatei in "+TEMP_PATH+" angelegt werden");
+                            return;
+                        }
+                        ((ImageTrackable)currentElement).ImagePath = TEMP_PATH + Path.GetFileName(((ImageTrackable)currentElement).ImagePath);
+                        fileLookup.Add(((ImageTrackable)currentElement).ImagePath, currentElement);
+                        fileWatcher.EnableRaisingEvents = true;
+                    }
                     height = trackable.HeightMM;
                     width = trackable.WidthMM;
-                }
+                }               
                 //tempPreview in WebsiteManager
-                Bitmap preview = trackable.getPreview(ew.project.ProjectPath);
+                Bitmap preview;
+                try
+                {
+                    preview = trackable.getPreview(ew.project.ProjectPath);
+                }
+                catch(System.IO.IOException e)
+                {
+                    MessageBox.Show(e.Message + " Versuchen Sie den Fehler zu beheben. Mit dem Drücken von ok, wird ein neuer Versuch gestartet.", "Fehler");
+                    RemoveByValue<string, IPreviewable>(fileLookup, currentElement);
+                    addElement(currentElement, vector);
+                    return;
+                }
                 preview.Tag = trackable.SensorCosID;
                 Websites.previews.Add(preview);
                 htmlTrackable.SetAttribute("src", "http://localhost:" + PREVIEW_PORT + "/" + trackable.SensorCosID);
@@ -397,7 +494,15 @@ namespace ARdevKit.Controller.EditorController
                 chart.Width, chart.Height, chart.Positioning.Top, chart.Positioning.Left);
                 if (chart.ResFilePath != null)
                 {
+                    string chartTempFolderPath = TEMP_PATH + chart.ID;
+                    fileWatcher.EnableRaisingEvents = false;
+                    if (!Directory.Exists(chartTempFolderPath))
+                        Directory.CreateDirectory(chartTempFolderPath);
+                    Helper.Copy(chart.ResFilePath, chartTempFolderPath, "options.js");
+                    chart.ResFilePath = chartTempFolderPath + "\\options.js";
+                    fileLookup.Add(chart.ResFilePath, currentElement);
                     Websites.chartFiles.Add("options"+chart.ID, File.ReadAllText(chart.ResFilePath));
+                    fileWatcher.EnableRaisingEvents = true;
                     HtmlElement script = htmlPreview.Document.CreateElement("script");
                     ((IHTMLScriptElement)script.DomElement).type = "text/javascript";
                     ((IHTMLScriptElement)script.DomElement).text = "$.getScript(\"http://localhost:" + PREVIEW_PORT + "/options" + chart.ID + "\", function(){$(\"#" + chart.ID + "\").highcharts(init());});";
@@ -431,20 +536,26 @@ namespace ARdevKit.Controller.EditorController
             {
                 HtmlImage image = ((HtmlImage)currentElement);
                 HtmlElement htmlImage = htmlPreview.Document.CreateElement("img");
+                //adding to tempFolder
+                fileWatcher.EnableRaisingEvents = false;
+                Helper.Copy(image.ResFilePath, TEMP_PATH);
+                image.ResFilePath = TEMP_PATH + Path.GetFileName(image.ResFilePath);
+                fileLookup.Add(image.ResFilePath, image);
+                fileWatcher.EnableRaisingEvents = true;
+
                 Bitmap preview = image.getPreview(ew.project.ProjectPath);
                 htmlImage.Id = image.ID;
                 htmlImage.SetAttribute("title", "augmentation");
                 preview.Tag = image.ID;
                 image.Width = preview.Width;
                 image.Height = preview.Height;
-                Websites.previews.Add(preview);
                 htmlImage.SetAttribute("src", "http://localhost:" + PREVIEW_PORT + "/" + image.ID);
                 htmlImage.Style = String.Format(@"width: {0}px; height: {1}px; z-index:{2}; margin-left: {3}px; margin-top: {4}px; position: absolute",
                 image.Width, image.Height,
                 nativeToHtmlCoordinates(vector).Z,
                 image.Positioning.Left , image.Positioning.Top);
                 Websites.addElementAt(htmlImage, index);
-                
+                Websites.previews.Add(preview);                
             } 
             else if (currentElement is HtmlVideo)
             {
@@ -464,7 +575,11 @@ namespace ARdevKit.Controller.EditorController
                 GenericHtml element = ((GenericHtml)currentElement);
                 if (element.ResFilePath != null)
                 {
+                    fileWatcher.EnableRaisingEvents = false;
+                    Helper.Copy(element.ResFilePath, TEMP_PATH);
+                    element.ResFilePath = TEMP_PATH + Path.GetFileName(element.ResFilePath);
                     string elementText = File.ReadAllText(element.ResFilePath);
+                    fileWatcher.EnableRaisingEvents = true;
                     int bracketsCount = 0;
                     foreach (char Char in elementText.ToCharArray())
 	                {
@@ -477,19 +592,18 @@ namespace ARdevKit.Controller.EditorController
                         System.Text.RegularExpressions.Regex idRex = new System.Text.RegularExpressions.Regex(@"\s*<[^>]*id\s*=\s*""?(?<id>[^""\s]+)(""|\s)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
                         string elementId = idRex.Match(elementText).Groups["id"].Value;
 
-                        if (changeAugIDFromTo(element, elementId))
-                        {
-                            
+                        if (changeAugIDFromTo(element, elementId))                        {                           
                             if (elementText.Contains("title"))
                             {
-                                System.Text.RegularExpressions.Regex titleRex = new System.Text.RegularExpressions.Regex(@"title\s*=\s*""[^""]*""");
-                                elementText = titleRex.Replace(elementText, @"title=""augmentation""", 1);
+                                System.Text.RegularExpressions.Regex titleRex = new System.Text.RegularExpressions.Regex(@"title\s*=\s*""?[^""]*""?");
+                                elementText = titleRex.Replace(elementText, @"title=augmentation ", 1);
                             }
                             else
                             {
-                                System.Text.RegularExpressions.Regex titleRex = new System.Text.RegularExpressions.Regex(@"(?<id>id\s*=\s*""[^""]*"")");
-                                elementText = titleRex.Replace(elementText, @"${id} title=""augmentation"" ");
+                                System.Text.RegularExpressions.Regex titleRex = new System.Text.RegularExpressions.Regex(@"(?<id>id\s*=\s*""?[^""]*""?)");
+                                elementText = titleRex.Replace(elementText, @"${id} title=augmentation ");
                             }
+                            fileLookup.Add(element.ResFilePath, element);
                             Websites.insertRawTextElement(elementText, index);
                         }
                         else
@@ -520,16 +634,16 @@ namespace ARdevKit.Controller.EditorController
             {
                 foreach (AbstractAugmentation a in t.Augmentations)
                 {
-                    if (a.ID == newId) return false;
+                    if (a.ID == newId && a != element) return false;
                 }
             }
-            if(!htmlPreview.IsBusy)
-            {
-                foreach (HtmlElement htmlElement in htmlPreview.Document.All)
-                {
-                    if (htmlElement.Id == newId) return false;
-                }
-            }
+            //if(!htmlPreview.IsBusy)
+            //{
+            //    foreach (HtmlElement htmlElement in htmlPreview.Document.All)
+            //    {
+            //        if (htmlElement.Id == newId) return false;
+            //    }
+            //}
             element.ID = newId;
             return true;
         }
@@ -639,7 +753,7 @@ namespace ARdevKit.Controller.EditorController
                             source.Augmentation = ((AbstractDynamic2DAugmentation)currentElement);
 
                             string newQueryPath = Path.Combine(Environment.CurrentDirectory, "tmp\\" + source.Augmentation.ID);
-                            ARdevKit.Model.Project.File.Helper.Copy(openFileDialog.FileName, newQueryPath, "query.js");
+                            Helper.Copy(openFileDialog.FileName, newQueryPath, "query.js");
                             ((DbSource)source).Query = Path.Combine(newQueryPath, "query.js");
                             
                             Helper.Copy(Path.Combine(Environment.CurrentDirectory, "res", "templates", "chart(source).html"), newQueryPath, "chart.html");
@@ -697,6 +811,21 @@ namespace ARdevKit.Controller.EditorController
 
             if (currentElement is AbstractTrackable && trackable != null)
             {
+                List<string> FilesToDelete = RemoveByValue<string, IPreviewable>(fileLookup, currentElement);
+                foreach (string filepath in FilesToDelete)
+                {
+                    if(System.IO.File.Exists(filepath))
+                    System.IO.File.Delete(filepath);
+                }
+                foreach(AbstractAugmentation aug in trackable.Augmentations)
+                {
+                    FilesToDelete = RemoveByValue<string, IPreviewable>(fileLookup, aug);
+                    foreach (string filepath in FilesToDelete)
+                    {
+                        if (System.IO.File.Exists(filepath))
+                            System.IO.File.Delete(filepath);
+                    }
+                }
                 Websites.resetPage(index);
                 reloadCurrentWebsite();
                 this.trackable = null;
@@ -712,6 +841,12 @@ namespace ARdevKit.Controller.EditorController
             }
             else if (currentElement is AbstractAugmentation && trackable != null)
             {
+                List<string> FilesToDelete = RemoveByValue<string, IPreviewable>(fileLookup, currentElement);
+                foreach (string filepath in FilesToDelete)
+                {
+                    if (System.IO.File.Exists(filepath))
+                        System.IO.File.Delete(filepath);
+                }
                 Websites.removeElementAt(findElement(currentElement), index);
                 reloadCurrentWebsite();
                 this.ew.project.RemoveAugmentation((AbstractAugmentation)currentElement);
@@ -780,8 +915,6 @@ namespace ARdevKit.Controller.EditorController
             {
                 this.index = index;
                 this.trackable = null;
-                //TODO
-                //this.panel.Controls.Clear();
                 this.Websites.resetPage(index);
                 this.ew.project.Trackables.Add(trackable);
             }
@@ -823,20 +956,49 @@ namespace ARdevKit.Controller.EditorController
             this.addElement(trackable, trackable.vector);
         }
 
+        private static List<TKey> RemoveByValue<TKey, TValue>(Dictionary<TKey, TValue> dictionary, TValue someValue)
+        {
+            List<TKey> itemsToRemove = new List<TKey>();
+
+            foreach (var pair in dictionary)
+            {
+                if (pair.Value.Equals(someValue))
+                    itemsToRemove.Add(pair.Key);
+            }
+
+            foreach (TKey item in itemsToRemove)
+            {
+                dictionary.Remove(item);
+            }
+            return itemsToRemove;
+        }
+
         /// <summary>
         /// Reloads a single previewable.
         /// </summary>
         /// <param name="prev">The previous.</param>
-        public void reloadPreviewable(AbstractAugmentation prev)
+        public void reloadPreviewable(IPreviewable prev)
         {
-            Websites.removeElementAt(findElement(prev), index);
-            if (prev is Chart ||prev is AbstractHtmlElement)
+            RemoveByValue<string, IPreviewable>(fileLookup, prev);
+            if (prev is Chart)
             {
-                this.addElement(prev, recalculateChartVector(prev.Translation));
+                Websites.chartFiles.Remove("options" + ((Chart)prev).ID);
             }
             else
             {
-                this.addElement(prev, recalculateVector(prev.Translation));
+                Websites.removeElementAt(findElement(prev), index);
+            }
+            if (prev is Chart || prev is AbstractHtmlElement)
+            {
+                this.addElement(prev, recalculateChartVector(((Abstract2DAugmentation)prev).Translation));
+            }
+            else if (prev is AbstractTrackable)
+            {
+                this.addElement(prev, new Vector3D(0, 0, 0));
+            }
+            else
+            {
+                this.addElement(prev, recalculateVector(((Abstract2DAugmentation)prev).Translation));
             }
 
             if (typeof(AbstractDynamic2DAugmentation).IsAssignableFrom(prev.GetType()) && ((AbstractDynamic2DAugmentation)prev).Source != null)
@@ -1077,8 +1239,8 @@ namespace ARdevKit.Controller.EditorController
         {
             if (prev == null)
                 throw new ArgumentException("parameter prev was null.");
-            HtmlElement element = null;
-            if(!htmlPreview.IsBusy)
+            HtmlElement element = null;          
+            if (!htmlPreview.IsBusy)
             {
                 if (prev is Abstract2DTrackable)
                 {
@@ -1088,7 +1250,8 @@ namespace ARdevKit.Controller.EditorController
                 {
                     element = htmlPreview.Document.GetElementById(((AbstractAugmentation)prev).ID);
                 }
-            } else
+            }
+            else
             {
                 throw new Exception("Cannot find Element while Webbrowser is still loading.");
             }
@@ -1158,9 +1321,12 @@ namespace ARdevKit.Controller.EditorController
             //if there is no currentElement we'll mark the box and set the currentElement in EditorWindow.
             else
             {
-                IHTMLElement previouslySelectedElement = (IHTMLElement)findElement(this.ew.CurrentElement).DomElement;
-                previouslySelectedElement.style.border = null;
-                this.ew.CurrentElement = null;
+                if (this.ew.CurrentElement != null)
+                {
+                    IHTMLElement previouslySelectedElement = (IHTMLElement)findElement(this.ew.CurrentElement).DomElement;
+                    previouslySelectedElement.style.border = null;
+                    this.ew.CurrentElement = null;
+                }            
                 //Websites.deleteSelection(index);
                 this.ew.Tsm_editor_menu_edit_copie.Enabled = false;
             }
@@ -1633,45 +1799,8 @@ namespace ARdevKit.Controller.EditorController
         private void reloadCurrentWebsite()
         {
             markCurrentElementInPreview = true;
+            WebBrowserHelper.ClearCache();
             htmlPreview.Navigate(htmlPreview.Url);
-        }
-
-        /// <summary>
-        /// Drags the element.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="HtmlElementEventArgs"/> instance containing the event data.</param>
-        /// <exception cref="System.NotImplementedException"></exception>
-        private void dragElement(object sender, HtmlElementEventArgs e)
-        {
-            System.Text.StringBuilder messageBoxCS = new System.Text.StringBuilder();
-            messageBoxCS.AppendFormat("{0} = {1}", "MouseButtonsPressed", e.MouseButtonsPressed);
-            messageBoxCS.AppendLine();
-            messageBoxCS.AppendFormat("{0} = {1}", "ClientMousePosition", e.ClientMousePosition);
-            messageBoxCS.AppendLine();
-            messageBoxCS.AppendFormat("{0} = {1}", "OffsetMousePosition", e.OffsetMousePosition);
-            messageBoxCS.AppendLine();
-            messageBoxCS.AppendFormat("{0} = {1}", "MousePosition", e.MousePosition);
-            messageBoxCS.AppendLine();
-            messageBoxCS.AppendFormat("{0} = {1}", "BubbleEvent", e.BubbleEvent);
-            messageBoxCS.AppendLine();
-            messageBoxCS.AppendFormat("{0} = {1}", "KeyPressedCode", e.KeyPressedCode);
-            messageBoxCS.AppendLine();
-            messageBoxCS.AppendFormat("{0} = {1}", "AltKeyPressed", e.AltKeyPressed);
-            messageBoxCS.AppendLine();
-            messageBoxCS.AppendFormat("{0} = {1}", "CtrlKeyPressed", e.CtrlKeyPressed);
-            messageBoxCS.AppendLine();
-            messageBoxCS.AppendFormat("{0} = {1}", "ShiftKeyPressed", e.ShiftKeyPressed);
-            messageBoxCS.AppendLine();
-            messageBoxCS.AppendFormat("{0} = {1}", "EventType", e.EventType);
-            messageBoxCS.AppendLine();
-            messageBoxCS.AppendFormat("{0} = {1}", "ReturnValue", e.ReturnValue);
-            messageBoxCS.AppendLine();
-            messageBoxCS.AppendFormat("{0} = {1}", "FromElement", e.FromElement);
-            messageBoxCS.AppendLine();
-            messageBoxCS.AppendFormat("{0} = {1}", "ToElement", e.ToElement);
-            messageBoxCS.AppendLine();
-            MessageBox.Show(messageBoxCS.ToString(), "Click Event");
         }
 
         //TODO
@@ -2051,7 +2180,9 @@ namespace ARdevKit.Controller.EditorController
 
         public void Dispose()
         {
+            fileWatcher.EnableRaisingEvents = false;
             shutDownWebserver();
+
         }
     }
 }

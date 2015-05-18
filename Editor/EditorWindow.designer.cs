@@ -488,7 +488,7 @@ namespace ARdevKit
             // 
             // html_preview
             // 
-            this.html_preview.AllowWebBrowserDrop = false;
+            //this.html_preview.AllowWebBrowserDrop = false;
             this.html_preview.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));

@@ -88,6 +88,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controller\Connections\SimpleHttpServer.cs" />
+    <Compile Include="Controller\EditorController\WebBrowserHelper.cs" />
     <Compile Include="Controller\EditorController\ObjectCopier.cs" />
     <Compile Include="Controller\EditorController\ThumbCreator.cs" />
     <Compile Include="Controller\EditorController\WebSiteHTMLManager.cs" />

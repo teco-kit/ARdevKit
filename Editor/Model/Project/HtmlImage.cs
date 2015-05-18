@@ -68,9 +68,9 @@ namespace ARdevKit.Model.Project
             string absolutePath = Path.Combine(projectPath == null ? "" : projectPath, resFilePath);
             if (System.IO.File.Exists(absolutePath))
                 if (Height == 0 || Width == 0)
-                    return new Bitmap(absolutePath);
+                    return (Bitmap)Bitmap.FromStream(new MemoryStream(System.IO.File.ReadAllBytes(absolutePath)));
                 else
-                    return new Bitmap(new Bitmap(absolutePath), Width, Height);
+                    return new Bitmap((Bitmap)Bitmap.FromStream(new MemoryStream(System.IO.File.ReadAllBytes(absolutePath))), Width, Height);
             else
                 throw new ArgumentException("Projekt-Datei beschädigt");
         }
