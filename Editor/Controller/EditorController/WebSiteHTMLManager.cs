@@ -295,24 +295,24 @@ namespace ARdevKit.Controller.EditorController
                     p.outputStream.Write(chartFiles[extension.Remove(extension.IndexOf('?'))]);
                     return;
                 }
-                if(extension == "jquery")
-                {
-                    p.writeSuccess("application/javascript");
-                    p.outputStream.Write(ARdevKit.Properties.Resources.jquery_1_11_1);
-                    return;
-                }
-                if(extension == "jquery-ui")
-                {
-                    p.writeSuccess("application/javascript");
-                    p.outputStream.Write(ARdevKit.Properties.Resources.jquery_ui);
-                    return;
-                }
-                if(extension == "highcharts")
-                {
-                    p.writeSuccess("application/javascript");
-                    p.outputStream.Write(ARdevKit.Properties.Resources.highcharts);
-                    return;
-                }
+                //if(extension == "jquery")
+                //{
+                //    p.writeSuccess("application/javascript");
+                //    p.outputStream.Write(ARdevKit.Properties.Resources.jquery_1_11_1);
+                //    return;
+                //}
+                //if(extension == "jquery-ui")
+                //{
+                //    p.writeSuccess("application/javascript");
+                //    p.outputStream.Write(ARdevKit.Properties.Resources.jquery_ui);
+                //    return;
+                //}
+                //if(extension == "highcharts")
+                //{
+                //    p.writeSuccess("application/javascript");
+                //    p.outputStream.Write(ARdevKit.Properties.Resources.highcharts);
+                //    return;
+                //}
                 int index = Convert.ToInt32(extension);
                 if (index > 9 || index < 0)
                 {

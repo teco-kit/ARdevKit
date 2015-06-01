@@ -800,7 +800,7 @@ namespace ARdevKit.Controller.EditorController
             if (currentElement == null)
                 throw new ArgumentException("parameter currentElement was null.");
 
-            if (source != null && currentElement is AbstractDynamic2DAugmentation)
+            if (currentElement is AbstractDynamic2DAugmentation)
             {
 
                 if (this.trackable != null && trackable.existAugmentation((AbstractAugmentation)currentElement)
@@ -2082,7 +2082,15 @@ namespace ARdevKit.Controller.EditorController
             if (currentMetaCategory == MetaCategory.Source)
             {
                 ElementIcon icon = (ElementIcon)e.Data.GetData(typeof(ElementIcon));
-                AbstractAugmentation augmentation = (AbstractAugmentation)((PictureBox)sender).Tag;
+                HtmlElement element;
+                if (htmlPreview.Document == null)
+                    return;
+                element = htmlPreview.Document.GetElementFromPoint(htmlPreview.PointToClient(new Point(e.X, e.Y)));
+                if (element == null)
+                    return;
+                AbstractAugmentation augmentation = trackable.Augmentations.Find(x => x.ID == element.Id);
+                if (!(augmentation is Chart))
+                    return;
                 AbstractSource source = (AbstractSource)icon.Element.Prototype.Clone();
                 addSource(source, augmentation);
             }

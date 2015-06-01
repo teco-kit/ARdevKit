@@ -846,6 +846,10 @@ namespace ARdevKit
                     icon.EditorWindow.PreviewController.addPreviewable(element, new Vector3D(p.X, p.Y, 0));
                 }
             }
+            else
+            {
+                previewController.onAugmentationDrop(sender, e);
+            }
             if (sender == this.pnl_preview_overlay)
             {
                 ((Panel)sender).Visible = false;
