@@ -15,6 +15,7 @@ namespace ARdevKit.Model.Project
     [TypeConverterAttribute(typeof(ExpandableObjectConverter))]
     public class GenericHtml : AbstractHtmlElement
     {
+        public string Tag { get; set; }
         /// <summary>
         /// default constructor
         /// </summary>
@@ -91,5 +92,6 @@ namespace ARdevKit.Model.Project
             }
             return base.initElement(ew);
         }
+
     }
 }

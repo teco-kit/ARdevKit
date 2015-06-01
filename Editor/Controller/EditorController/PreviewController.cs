@@ -234,6 +234,76 @@ namespace ARdevKit.Controller.EditorController
                     selectedElement.style.zIndex = "10";
                 }
             }
+            //attach Eventhandlers to all charts attached to the current trackable directly
+            if(trackable != null)
+            foreach (Chart chart in trackable.Augmentations.FindAll(x => x is Chart))
+            {
+                HtmlElement htmlChart = htmlPreview.Document.GetElementById(chart.ID);
+                htmlChart.MouseDown -= chartMouseDown;
+                htmlChart.MouseMove -= chartMouseMove;
+                htmlChart.MouseDown += chartMouseDown;
+                htmlChart.MouseMove += chartMouseMove;
+            }
+        }
+
+        private void elem_KeyDown(object sender, HtmlElementEventArgs e)
+        {
+            IHTMLElement draggedDomElement = (IHTMLElement)((HtmlElement)sender).DomElement;
+            
+            string oldMarginLeft = draggedDomElement.style.marginLeft;
+            string oldMarginTop = draggedDomElement.style.marginTop;
+            if (oldMarginLeft == null)
+                oldMarginLeft = "0px";
+            if (oldMarginTop == null)
+                oldMarginTop = "0px";
+            Debug.Print(String.Format("MousePosX = {0}; StartPositionX = {1}; currentMarginLeft = {2}\n", e.MousePosition.X, dragStartPosition.X, oldMarginLeft));
+            Debug.Print(String.Format("MousePosY = {0}; StartPositionY = {1}; currentMarginTop = {2}\n", e.MousePosition.Y, dragStartPosition.Y, oldMarginTop));
+            int newMarginLeft = Int16.Parse((oldMarginLeft).Replace("px", "")) + 10;
+            int newMarginTop = Int16.Parse((oldMarginTop).Replace("px", "")) + 20;
+            //if (newMarginLeft >= 0 && newMarginLeft + draggedElement.ClientRectangle.Width < getMainContainerSize().Width)
+            draggedDomElement.style.marginLeft = newMarginLeft + "px";
+
+            //if (newMarginTop >= 0 && newMarginTop + draggedElement.ClientRectangle.Height < getMainContainerSize().Height)
+            draggedDomElement.style.marginTop = newMarginTop + "px";
+        }
+
+        private void chartMouseMove(object sender, HtmlElementEventArgs e)
+        {
+            HtmlElement draggedElement = (HtmlElement)sender;
+            if (e.MouseButtonsPressed == MouseButtons.Left)
+            {
+                IHTMLElement draggedDomElement = (IHTMLElement)draggedElement.DomElement;
+
+                string oldMarginLeft = draggedDomElement.style.marginLeft;
+                string oldMarginTop = draggedDomElement.style.marginTop;
+                if (oldMarginLeft == null)
+                    oldMarginLeft = "0px";
+                if (oldMarginTop == null)
+                    oldMarginTop = "0px";
+                Debug.Print(String.Format("MousePosX = {0}; StartPositionX = {1}; currentMarginLeft = {2}\n", e.MousePosition.X, dragStartPosition.X, oldMarginLeft));
+                Debug.Print(String.Format("MousePosY = {0}; StartPositionY = {1}; currentMarginTop = {2}\n", e.MousePosition.Y, dragStartPosition.Y, oldMarginTop));
+                int newMarginLeft = e.OffsetMousePosition.X + Int16.Parse((oldMarginLeft).Replace("px", "")) - dragStartPosition.X;
+                int newMarginTop = e.OffsetMousePosition.Y + Int16.Parse((oldMarginTop).Replace("px", "")) - dragStartPosition.Y;
+                //if (newMarginLeft >= 0 && newMarginLeft + draggedElement.ClientRectangle.Width < getMainContainerSize().Width)
+                draggedDomElement.style.marginLeft = newMarginLeft + "px";
+
+                //if (newMarginTop >= 0 && newMarginTop + draggedElement.ClientRectangle.Height < getMainContainerSize().Height)
+                draggedDomElement.style.marginTop = newMarginTop + "px";
+            }
+        }
+
+        private void chartMouseDown(object sender, HtmlElementEventArgs e)
+        {
+            AbstractAugmentation aug = trackable.Augmentations.Find(augmentation => { return augmentation.ID == ((HtmlElement)sender).Id; });
+            setCurrentElement(aug);
+            if(e.MouseButtonsPressed == MouseButtons.Right)
+            {
+
+            }
+            if(e.MouseButtonsPressed == MouseButtons.Left)
+            {
+                dragStartPosition = e.MousePosition;
+            }
         }
 
         private void handleDocumentMouseDown(object sender, HtmlElementEventArgs e)
@@ -270,6 +340,7 @@ namespace ARdevKit.Controller.EditorController
                         {
                             if (aug is Chart)
                             {
+                                return;
                                 if (((Chart)aug).Source != null)
                                 {
                                     if (((Chart)aug).Source is FileSource)
@@ -305,6 +376,8 @@ namespace ARdevKit.Controller.EditorController
             if (e.MouseButtonsPressed == MouseButtons.Left && draggedElement.GetAttribute("title") == "augmentation")
             {
                 IHTMLElement draggedDomElement = ((IHTMLElement)draggedElement.DomElement);
+                Debug.Print(String.Format("MousePosX = {0}; StartPositionX = {1}; currentMarginLeft = {2}\n", e.MousePosition.X, dragStartPosition.X, (float)draggedDomElement.offsetLeft));
+                Debug.Print(String.Format("MousePosY = {0}; StartPositionY = {1}; currentMarginTop = {2}\n", e.MousePosition.Y, dragStartPosition.Y, (float)draggedDomElement.offsetTop));
                 int newMarginLeft = (e.MousePosition.X - dragStartPosition.X) + draggedDomElement.offsetLeft;
                 int newMarginTop = (e.MousePosition.Y - dragStartPosition.Y) + draggedDomElement.offsetTop;
                 //if (newMarginLeft >= 0 && newMarginLeft + draggedElement.ClientRectangle.Width < getMainContainerSize().Width)
@@ -414,6 +487,38 @@ namespace ARdevKit.Controller.EditorController
             }
         }
 
+        private string addToFileSystemWithoutNotification(string originalPath, IPreviewable element)
+        {
+            fileWatcher.EnableRaisingEvents = false;
+            string newName = Path.GetFileName(originalPath);
+            while(fileLookup.ContainsKey(TEMP_PATH + newName))
+            {
+                NewNameInput NameDialog = new NewNameInput();                    
+                if (NameDialog.ShowDialog(this.ew) == DialogResult.OK)
+                {
+                    // Read the contents of testDialog's TextBox.
+                    newName = NameDialog.TextBox1.Text;
+                }
+                else
+                {
+                    fileWatcher.EnableRaisingEvents = true;
+                    return originalPath;
+                }
+                NameDialog.Dispose();                  
+            }
+            if(Helper.Copy(originalPath, TEMP_PATH, newName))
+            {
+                fileLookup.Add(TEMP_PATH + newName, element);
+                fileWatcher.EnableRaisingEvents = true;
+                return TEMP_PATH + newName;
+            }
+            else
+            {
+                fileWatcher.EnableRaisingEvents = true;
+                return originalPath;
+            }
+        }
+
         //adds elements to website and navigates again to new Website
         //adds the according preview to 
         private void addElement(IPreviewable currentElement, Vector3D vector)
@@ -435,28 +540,24 @@ namespace ARdevKit.Controller.EditorController
                     if(currentElement is PictureMarker)
                     {
                         //adding to tempFile
-                        fileWatcher.EnableRaisingEvents = false;
-                        if(!Helper.Copy(((PictureMarker)currentElement).PicturePath, TEMP_PATH))
+                        string newPath = addToFileSystemWithoutNotification(((PictureMarker)currentElement).PicturePath, currentElement);
+                        if(((PictureMarker)currentElement).PicturePath.Equals(newPath));
                         {
                             MessageBox.Show("Es konnte keine Kopie der genutzten Bilddatei in " + TEMP_PATH + " angelegt werden");
                             return;
                         }
-                        ((PictureMarker)currentElement).PicturePath = TEMP_PATH + Path.GetFileName(((PictureMarker)currentElement).PicturePath);
-                        fileLookup.Add(((PictureMarker)currentElement).PicturePath, currentElement);
-                        fileWatcher.EnableRaisingEvents = true;
+                        ((PictureMarker)currentElement).PicturePath = newPath;
                     }
                     if(currentElement is ImageTrackable)
                     {
                         //adding to tempFile
-                        fileWatcher.EnableRaisingEvents = false;
-                        if (!Helper.Copy(((ImageTrackable)currentElement).ImagePath, TEMP_PATH))
+                        string newPath = addToFileSystemWithoutNotification(((PictureMarker)currentElement).PicturePath, currentElement);
+                        if (((PictureMarker)currentElement).PicturePath.Equals(newPath))
                         {
                             MessageBox.Show("Es konnte keine Kopie der genutzten Bilddatei in "+TEMP_PATH+" angelegt werden");
                             return;
                         }
-                        ((ImageTrackable)currentElement).ImagePath = TEMP_PATH + Path.GetFileName(((ImageTrackable)currentElement).ImagePath);
-                        fileLookup.Add(((ImageTrackable)currentElement).ImagePath, currentElement);
-                        fileWatcher.EnableRaisingEvents = true;
+                        ((ImageTrackable)currentElement).ImagePath = newPath;
                     }
                     height = trackable.HeightMM;
                     width = trackable.WidthMM;
@@ -537,11 +638,13 @@ namespace ARdevKit.Controller.EditorController
                 HtmlImage image = ((HtmlImage)currentElement);
                 HtmlElement htmlImage = htmlPreview.Document.CreateElement("img");
                 //adding to tempFolder
-                fileWatcher.EnableRaisingEvents = false;
-                Helper.Copy(image.ResFilePath, TEMP_PATH);
-                image.ResFilePath = TEMP_PATH + Path.GetFileName(image.ResFilePath);
-                fileLookup.Add(image.ResFilePath, image);
-                fileWatcher.EnableRaisingEvents = true;
+                string newPath = addToFileSystemWithoutNotification(image.ResFilePath, image);
+                if(image.ResFilePath == newPath)
+                {
+                    MessageBox.Show("Es konnte keine Kopie der genutzten Bilddatei in " + TEMP_PATH + " angelegt werden");
+                    return;
+                }
+                image.ResFilePath = newPath;
 
                 Bitmap preview = image.getPreview(ew.project.ProjectPath);
                 htmlImage.Id = image.ID;
@@ -575,11 +678,7 @@ namespace ARdevKit.Controller.EditorController
                 GenericHtml element = ((GenericHtml)currentElement);
                 if (element.ResFilePath != null)
                 {
-                    fileWatcher.EnableRaisingEvents = false;
-                    Helper.Copy(element.ResFilePath, TEMP_PATH);
-                    element.ResFilePath = TEMP_PATH + Path.GetFileName(element.ResFilePath);
                     string elementText = File.ReadAllText(element.ResFilePath);
-                    fileWatcher.EnableRaisingEvents = true;
                     int bracketsCount = 0;
                     foreach (char Char in elementText.ToCharArray())
 	                {
@@ -589,21 +688,29 @@ namespace ARdevKit.Controller.EditorController
                     if(bracketsCount == 0)
                     {
                         //get the ID and set as active element
-                        System.Text.RegularExpressions.Regex idRex = new System.Text.RegularExpressions.Regex(@"\s*<[^>]*id\s*=\s*""?(?<id>[^""\s]+)(""|\s)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                        System.Text.RegularExpressions.Regex idRex = new System.Text.RegularExpressions.Regex(@"\s*<\s*(?<tag>\S+)\s[^>]*id\s*=\s*""?(?<id>[^""\s]+)(""|\s)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
                         string elementId = idRex.Match(elementText).Groups["id"].Value;
 
-                        if (changeAugIDFromTo(element, elementId))                        {                           
+                        if (changeAugIDFromTo(element, elementId)){                           
                             if (elementText.Contains("title"))
                             {
                                 System.Text.RegularExpressions.Regex titleRex = new System.Text.RegularExpressions.Regex(@"title\s*=\s*""?[^""]*""?");
-                                elementText = titleRex.Replace(elementText, @"title=augmentation ", 1);
+                                elementText = titleRex.Replace(elementText, @"title=""augmentation"" ", 1);
                             }
                             else
                             {
-                                System.Text.RegularExpressions.Regex titleRex = new System.Text.RegularExpressions.Regex(@"(?<id>id\s*=\s*""?[^""]*""?)");
-                                elementText = titleRex.Replace(elementText, @"${id} title=augmentation ");
+                                System.Text.RegularExpressions.Regex titleRex = new System.Text.RegularExpressions.Regex(@"(?<id>id\s*=\s*""?[^""\s]*""?)");
+                                elementText = titleRex.Replace(elementText, @"${id} title=""augmentation"" ");
                             }
-                            fileLookup.Add(element.ResFilePath, element);
+                            //adding to fileSystem and websitepage
+                            string newPath = addToFileSystemWithoutNotification(element.ResFilePath, element);
+                            if (element.ResFilePath == newPath)
+                            {
+                                MessageBox.Show("Es konnte keine Kopie der genutzten HTMLDatei in " + TEMP_PATH + " angelegt werden");
+                                return;
+                            }
+                            element.ResFilePath = newPath;
+                            element.Tag = idRex.Match(elementText).Groups["tag"].Value;
                             Websites.insertRawTextElement(elementText, index);
                         }
                         else
@@ -1799,7 +1906,8 @@ namespace ARdevKit.Controller.EditorController
         private void reloadCurrentWebsite()
         {
             markCurrentElementInPreview = true;
-            WebBrowserHelper.ClearCache();
+            htmlPreview.Refresh(WebBrowserRefreshOption.Completely);
+            //WebBrowserHelper.ClearCache();
             htmlPreview.Navigate(htmlPreview.Url);
         }
 

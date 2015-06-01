@@ -87,10 +87,12 @@ namespace ARdevKit.Controller.ProjectController
         private int imageCount;
         /// <summary>   Number of bar charts. </summary>
         private int chartCount;
-        /// <summary>   Number of bar charts. </summary>
+        /// <summary>   Number of htmlImages. </summary>
         private int htmlImageCount;
-        /// <summary>   Number of bar charts. </summary>
+        /// <summary>   Number of htmlVideos. </summary>
         private int htmlVideoCount;
+        /// <summary>   Number of htmlGenerics. </summary>
+        private int htmlGenericCount;
         /// <summary>   Identifier for the coordinate system. </summary>
         private int coordinateSystemID;
         /// <summary>   True if jquery was already imported.    </summary>
@@ -1226,7 +1228,7 @@ namespace ARdevKit.Controller.ProjectController
 
             htmlImageIfPatternIsFoundShowBlock.AddLine(new JavaScriptLine(htmlImageID + ".show()"));
             if (htmlImage.Positioning.PositioningMode == HtmlPositioning.PositioningModes.RELATIVE)
-                htmlImageIfPatternIsFoundShowBlock.AddLine(new JavaScriptLine("arel.Scene.getScreenCoordinatesFrom3DPosition(COS" + coordinateSystemID + "Anchor.getTranslation(), " + htmlImageID + ".getCoordinateSystemID(), function(coord){move(COS"+ coordinateSystemID + "Anchor, " + htmlImageID + ", coord);})"));
+                htmlImageIfPatternIsFoundShowBlock.AddLine(new JavaScriptLine("arel.Scene.getScreenCoordinatesFrom3DPosition(COS" + coordinateSystemID + "Anchor.getTranslation(), " + htmlImageID + ".getCoordinateSystemID(), function(coord){move(COS" + coordinateSystemID + "Anchor, " + htmlImageID + ", coord);})"));
 
             // onTracking lost
             ifPatternIsLostBlock.AddLine(new JavaScriptLine(htmlImageID + ".hide()"));
@@ -1297,11 +1299,11 @@ namespace ARdevKit.Controller.ProjectController
 
             htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.width = \"" + htmlImage.Width + "px\""));
             htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.height = \"" + htmlImage.Height + "px\""));
-            
+
             //set ImageBackground
             htmlImageFileCreateBlock.AddLine(new JavaScriptLine("this.element.src =\"" + htmlImage.ResFilePath.Replace('\\', '/') + "\""));
             //TODO
-           
+
             htmlImageFileCreateBlock.AddLine(new JavaScriptLine("document.documentElement.appendChild(this.element)"));
 
             // Show            
@@ -1331,7 +1333,126 @@ namespace ARdevKit.Controller.ProjectController
 
         public override void Visit(GenericHtml htmlGeneric)
         {
-            throw new NotImplementedException();
+            string htmlGenericID = htmlGeneric.ID = htmlGeneric.ID == null ? "htmlGeneric" + htmlGenericCount : htmlGeneric.ID;
+            string htmlGenericPluginID = "arel.Plugin." + CultureInfo.CurrentCulture.TextInfo.ToTitleCase(htmlGenericID);
+
+            // arel[projectName].html
+            arelProjectFileHeadBlock.AddLine(new XMLLine(new XMLTag("script", "src=\"Assets/" + htmlGenericID + "/htmlGeneric.js\"")));
+
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            // arelGlue.js
+            JavaScriptBlock loadContentBlock = new JavaScriptBlock();
+            sceneReadyFunctionBlock.AddBlock(loadContentBlock);
+
+            arelGlueFile.AddBlock(new JavaScriptLine("var " + htmlGenericID));
+
+            loadContentBlock.AddLine(new JavaScriptLine(htmlGenericID + " = " + htmlGenericPluginID));
+
+            if (htmlGeneric.Events != null)
+            {
+                JavaScriptBlock loadEventsBlock = new JavaScriptBlock("$.getScript(\"Events/" + htmlGenericID + "_Event.js\", function()", new BlockMarker("{", "})"));
+                loadContentBlock.AddBlock(loadEventsBlock);
+                loadContentBlock.AddBlock(new JavaScriptInLine(".fail(function() { console.log(\"Failed to load events\")})", false));
+                loadContentBlock.AddBlock(new JavaScriptLine(".done(function() { console.log(\"Loaded events successfully\")})"));
+            }
+
+            loadContentBlock.AddLine(new JavaScriptLine(htmlGenericID + ".hide()"));
+
+            // onTracking
+            JavaScriptBlock htmlGenericIfPatternIsFoundShowBlock = new JavaScriptBlock("if (param[0].getCoordinateSystemID() == " + htmlGenericID + ".getCoordinateSystemID())", new BlockMarker("{", "}"));
+            ifPatternIsFoundBlock.AddBlock(htmlGenericIfPatternIsFoundShowBlock);
+            JavaScriptBlock htmlGenericIfPatternIsFoundCreateBlock = new JavaScriptBlock("if (!" + htmlGenericID + ".created || " + htmlGenericID + ".forceRecalculation)", new BlockMarker("{", "}"));
+            htmlGenericIfPatternIsFoundShowBlock.AddBlock(htmlGenericIfPatternIsFoundCreateBlock);
+            htmlGenericIfPatternIsFoundCreateBlock.AddLine(new JavaScriptLine(htmlGenericID + ".create()"));
+
+            htmlGenericIfPatternIsFoundShowBlock.AddLine(new JavaScriptLine(htmlGenericID + ".show()"));
+            if (htmlGeneric.Positioning.PositioningMode == HtmlPositioning.PositioningModes.RELATIVE)
+                htmlGenericIfPatternIsFoundShowBlock.AddLine(new JavaScriptLine("arel.Scene.getScreenCoordinatesFrom3DPosition(COS" + coordinateSystemID + "Anchor.getTranslation(), " + htmlGenericID + ".getCoordinateSystemID(), function(coord){move(COS" + coordinateSystemID + "Anchor, " + htmlGenericID + ", coord);})"));
+
+            // onTracking lost
+            ifPatternIsLostBlock.AddLine(new JavaScriptLine(htmlGenericID + ".hide()"));
+
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            // Create htmlGeneric.js
+            HtmlGenericFile htmlGenericFile = new HtmlGenericFile(project.ProjectPath, htmlGenericID);
+            files.Add(htmlGenericFile);
+
+            JavaScriptBlock htmlGenericFileVariablesBlock = new JavaScriptBlock();
+
+            JavaScriptBlock htmlGenericFileDefineBlock = new JavaScriptBlock(htmlGenericPluginID + " = ", new BlockMarker("{", "};"));
+            htmlGenericFile.AddBlock(htmlGenericFileDefineBlock);
+
+            // Ready
+            htmlGenericFileDefineBlock.AddLine(new JavaScriptInLine("created : false", true));
+            // Visibility
+            htmlGenericFileDefineBlock.AddLine(new JavaScriptInLine("visible : false", true));
+            // ID
+            htmlGenericFileDefineBlock.AddLine(new JavaScriptInLine("id : \"" + htmlGenericID + "\"", true));
+            // CoordinateSystemID
+            htmlGenericFileDefineBlock.AddLine(new JavaScriptInLine("coordinateSystemID : " + coordinateSystemID, true));
+            // Translation in this Case Ignore translations and us positioning
+            string translationX = htmlGeneric.Positioning.Left.ToString("F1", CultureInfo.InvariantCulture);
+            string translationY = htmlGeneric.Positioning.Top.ToString("F1", CultureInfo.InvariantCulture);
+            string translationZ = htmlGeneric.Translation.Z.ToString("F1", CultureInfo.InvariantCulture);
+            htmlGenericFileDefineBlock.AddBlock(new JavaScriptInLine("translation : new arel.Vector3D(" + translationX + "," + translationY + "," + translationZ + ")", true));
+            // htmlGeneric
+            htmlGenericFileDefineBlock.AddBlock(new JavaScriptInLine("element : document.createElement(\""+htmlGeneric.Tag+"\")", true));
+
+            // Create
+            // element
+            JavaScriptBlock htmlGenericFileCreateBlock = new JavaScriptBlock("create : function()", new BlockMarker("{", "},"));
+            htmlGenericFileDefineBlock.AddBlock(htmlGenericFileCreateBlock);
+            htmlGenericFileCreateBlock.AddLine(new JavaScriptLine("this.created = true"));
+            htmlGenericFileCreateBlock.AddLine(new JavaScriptLine("this.element.outerHtml = \""+File.ReadAllText(htmlGeneric.ResFilePath)+"\""));
+            //htmlGenericFileCreateBlock.AddLine(new JavaScriptLine("this.element.setAttribute(\"id\", this.id)"));
+            //switch (htmlGeneric.Positioning.PositioningMode)
+            //{
+            //    case (HtmlPositioning.PositioningModes.STATIC):
+            //        htmlGenericFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.position = \"static\""));
+            //        break;
+            //    case (HtmlPositioning.PositioningModes.ABSOLUTE):
+            //    case (HtmlPositioning.PositioningModes.RELATIVE):
+            //        htmlGenericFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.position = \"absolute\""));
+            //        break;
+            //}
+
+            if (htmlGeneric.Positioning.PositioningMode == HtmlPositioning.PositioningModes.ABSOLUTE)
+            {
+                if (htmlGeneric.Positioning.Top > 0)
+                    htmlGenericFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.top = \"" + htmlGeneric.Positioning.Top + "px\""));
+                if (htmlGeneric.Positioning.Left > 0)
+                    htmlGenericFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.left = \"" + htmlGeneric.Positioning.Left + "px\""));
+            }
+
+            //htmlGenericFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.width = \"" + htmlGeneric.Width + "px\""));
+            //htmlGenericFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.height = \"" + htmlGeneric.Height + "px\""));
+
+            //set ImageBackground
+            //htmlGenericFileCreateBlock.AddLine(new JavaScriptLine("this.element.src =\"" + htmlGeneric.ResFilePath.Replace('\\', '/') + "\""));
+            //TODO
+
+            htmlGenericFileCreateBlock.AddLine(new JavaScriptLine("document.documentElement.appendChild(this.element)"));
+
+            // Show            
+            JavaScriptBlock htmlGenericShowBlock = new JavaScriptBlock("show : function()", new BlockMarker("{", "},"));
+            htmlGenericFileDefineBlock.AddBlock(htmlGenericShowBlock);
+            htmlGenericShowBlock.AddLine(new JavaScriptLine("$('#' + this.id).show()"));
+            htmlGenericShowBlock.AddLine(new JavaScriptLine("this.visible = true"));
+
+            // Hide
+            JavaScriptBlock htmlGenericHideBlock = new JavaScriptBlock("hide : function()", new BlockMarker("{", "},"));
+            htmlGenericFileDefineBlock.AddBlock(htmlGenericHideBlock);
+            htmlGenericHideBlock.AddLine(new JavaScriptLine("$('#' + this.id).hide()"));
+            htmlGenericHideBlock.AddLine(new JavaScriptLine("this.visible = false"));
+
+            // Get coordinateSystemID
+            JavaScriptBlock htmlGenericGetCoordinateSystemIDBlock = new JavaScriptBlock("getCoordinateSystemID : function()", new BlockMarker("{", "}"));
+            htmlGenericFileDefineBlock.AddBlock(htmlGenericGetCoordinateSystemIDBlock);
+            htmlGenericGetCoordinateSystemIDBlock.AddLine(new JavaScriptLine("return this.coordinateSystemID"));
+
+            htmlGenericCount++;
         }
     }
 }

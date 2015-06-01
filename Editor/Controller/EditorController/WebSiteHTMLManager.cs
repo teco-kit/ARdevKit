@@ -210,10 +210,56 @@ namespace ARdevKit.Controller.EditorController
 
         public void changePositionOf(HtmlElement element, int index, string top, string left)
         {
+            string result = "";
+            //set margin-left if 1)it is present, 2)not present but style is there, 3)if neither is there
             Regex RegElementLeft = new Regex("(?<front><" + element.TagName + @"[^>]*id\s*=\s*""?" + element.Id + @"[^>]*margin-left\s*:\s*)(?<value>-?[0-9]*(?:\.[0-9]+)?\s*(px|em)?)(?<tail>(;|"")[^>]*>)", RegexOptions.IgnoreCase);
+            if(RegElementLeft.IsMatch(websiteTexts[index]))
+            {
+                result = RegElementLeft.Replace(websiteTexts[index], "${front}" + left + "${tail}");
+                //Regex.Replace(websiteTexts[index], RegElementLeft.ToString(), "${front}" + left + "${tail}", RegexOptions.IgnoreCase);
+            }
+            else
+            {
+                RegElementLeft = new Regex("(?<front><" + element.TagName + @"[^>]*id\s*=\s*""?" + element.Id + @"[^>]*style\s*=\s*"")(?<tail>[^>]*>)", RegexOptions.IgnoreCase);
+                if(RegElementLeft.IsMatch(websiteTexts[index]))
+                {
+                    result = RegElementLeft.Replace(websiteTexts[index], "${front}margin-left: " + left + "; ${tail}");
+                    //result = Regex.Replace(websiteTexts[index], RegElementLeft.ToString(), "${front}margin-left: " + left + "px; ${tail}", RegexOptions.IgnoreCase);
+                }
+                else
+                {
+                    RegElementLeft = new Regex("(?<front><" + element.TagName + @"[^>]*id\s*=\s*""?" + element.Id + @"""?)(?<tail>[^>]*>)", RegexOptions.IgnoreCase);
+                    if(RegElementLeft.IsMatch(websiteTexts[index]))
+                    {
+                        result = RegElementLeft.Replace(websiteTexts[index], @"${front} style="" margin-left: " + left + @""" ${tail}");
+                        //result = Regex.Replace(websiteTexts[index], RegElementLeft.ToString(), @"${front} style="" margin-left: " + left + @"px"" ${tail}", RegexOptions.IgnoreCase);
+                    }
+                    else
+                    {
+                        throw new NotSupportedException("This HtmlElement is not supported.");
+                    }
+                }
+            }
+            //set margin-top if 1)it is present, 2)not present but style is there, style is at least set before
             Regex RegElementTop = new Regex("(?<front><" + element.TagName + @"[^>]*id\s*=\s*""?" + element.Id + @"[^>]*margin-top\s*:\s*)(?<value>-?[0-9]*(?:\.[0-9]+)?\s*(px|em)?)(?<tail>(;|"")[^>]*>)", RegexOptions.IgnoreCase);
-            string result = Regex.Replace(websiteTexts[index], RegElementLeft.ToString(), "${front}" + left + "${tail}", RegexOptions.IgnoreCase);
-            result = Regex.Replace(result, RegElementTop.ToString(), "${front}" + top + "${tail}", RegexOptions.IgnoreCase);
+            if (RegElementTop.IsMatch(result))
+            {
+                result = RegElementTop.Replace(result, "${front}" + top + "${tail}");
+                //Regex.Replace(websiteTexts[index], RegElementLeft.ToString(), "${front}" + left + "${tail}", RegexOptions.IgnoreCase);
+            }
+            else
+            {
+                RegElementTop = new Regex("(?<front><" + element.TagName + @"[^>]*id\s*=\s*""?" + element.Id + @"[^>]*style\s*=\s*"")(?<tail>[^>]*>)", RegexOptions.IgnoreCase);
+                if (RegElementTop.IsMatch(result))
+                {
+                    result = RegElementTop.Replace(result, "${front}margin-top: " + top + "; ${tail}");
+                    //result = Regex.Replace(websiteTexts[index], RegElementLeft.ToString(), "${front}margin-left: " + left + "px; ${tail}", RegexOptions.IgnoreCase);
+                }
+                else
+                {
+                    throw new NotSupportedException("This HtmlElement is not supported.");
+                }
+            }
             websiteTexts[index] = result;
         }
 
@@ -251,14 +297,20 @@ namespace ARdevKit.Controller.EditorController
                 }
                 if(extension == "jquery")
                 {
-                    p.writeSuccess();
+                    p.writeSuccess("application/javascript");
                     p.outputStream.Write(ARdevKit.Properties.Resources.jquery_1_11_1);
                     return;
                 }
                 if(extension == "jquery-ui")
                 {
-                    p.writeSuccess();
+                    p.writeSuccess("application/javascript");
                     p.outputStream.Write(ARdevKit.Properties.Resources.jquery_ui);
+                    return;
+                }
+                if(extension == "highcharts")
+                {
+                    p.writeSuccess("application/javascript");
+                    p.outputStream.Write(ARdevKit.Properties.Resources.highcharts);
                     return;
                 }
                 int index = Convert.ToInt32(extension);

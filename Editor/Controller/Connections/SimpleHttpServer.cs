@@ -71,8 +71,11 @@ namespace ARdevKit.Controller.Connections
                 writeFailure();
             }
             if (socket.Connected)
-            outputStream.Flush();
-            // bs.Flush(); // flush any remaining output
+            {
+                try { outputStream.Flush(); }
+                catch (IOException e) { Console.WriteLine("Exception: " + e.ToString()); }
+            }
+            //bs.Flush(); // flush any remaining output
             inputStream = null; outputStream = null; // bs = null;            
             socket.Close();
         }

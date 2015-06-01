@@ -102,6 +102,7 @@
     <Compile Include="Model\Project\Event\CustomEvent.cs" />
     <Compile Include="Model\Project\Event\OnInvisibleEvent.cs" />
     <Compile Include="Model\Project\Event\OnTouchEndedEvent.cs" />
+    <Compile Include="Model\Project\File\HtmlGenericFile.cs" />
     <Compile Include="Model\Project\File\HtmlImageFile.cs" />
     <Compile Include="Model\Project\File\EventFile.cs" />
     <Compile Include="Model\Project\Event\OnTouchStartedEvent.cs" />
@@ -109,6 +110,12 @@
     <Compile Include="Model\Project\HtmlImage.cs" />
     <Compile Include="Model\Project\HtmlVideo.cs" />
     <Compile Include="View\EventTypeEditor.cs" />
+    <Compile Include="View\NewNameInput.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\NewNameInput.Designer.cs">
+      <DependentUpon>NewNameInput.cs</DependentUpon>
+    </Compile>
     <Compile Include="View\ProcessVideoWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -211,6 +218,9 @@
     <Compile Include="View\TransparentPanel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <EmbeddedResource Include="View\NewNameInput.resx">
+      <DependentUpon>NewNameInput.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="View\ProcessVideoWindow.resx">
       <DependentUpon>ProcessVideoWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -248,8 +258,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ARdevKit.ico" />
-    <None Include="Resources\jquery-ui.js" />
-    <None Include="Resources\jquery-1.11.1.js" />
     <None Include="Resources\htmlpreviewpage.html" />
     <None Include="Resources\HtmlImageAugmentation%28small%29.bmp" />
     <None Include="Resources\HtmlVideoAugmention%28small%29.bmp" />
