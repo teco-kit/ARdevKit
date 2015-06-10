@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using ARdevKit.Controller.Connections;
 using System.Text.RegularExpressions;
+using HtmlAgilityPack;
 
 namespace ARdevKit.Controller.EditorController
 {
@@ -132,25 +133,83 @@ namespace ARdevKit.Controller.EditorController
         /// <param name="index">The index.</param>
         public void removeElementAt(HtmlElement element, int index)
         {
+            HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+            doc.LoadHtml(websiteTexts[index]);
+            doc.GetElementbyId(element.Id).Remove();
+            websiteTexts[index] = doc.DocumentNode.OuterHtml;
+            //websiteTexts[index].Replace(doc.GetElementbyId(element.Id).OuterHtml,"");
+        //    XmlReaderSettings settings = new XmlReaderSettings();
+        //    settings.DtdProcessing = DtdProcessing.Ignore;
+        //    using (XmlReader reader = XmlReader.Create(new StringReader(websiteTexts[index]), settings))
+        //    {
+        //        while(reader.ReadToFollowing(element.TagName))
+        //        {
+        //            if (!(reader.GetAttribute(0) == element.Id)) continue;
+        //            websiteTexts[index].Replace(reader.ReadOuterXml(),"");
+        //            break;
+        //        }
+        //    }
             //previews should be dleeted beforehand, this is just for double checking
-            previews.RemoveAll(x => x.Tag.Equals(element.Id));
-            if(element.Children != null)
-            {
-                foreach (HtmlElement item in element.Children)
-	            {
-                    removeElementAt(item, index);		 
-	            }
-            }
-            Regex RexElement;
-            if(element.OuterHtml.Contains(@"</"+element.TagName+">"))
-            {
-                RexElement = new Regex(@"<[^>]*id\s*=\s*""?" + element.Id + @"""?[^>]*>[^<]*</"+element.TagName+@"\s*>", RegexOptions.IgnoreCase);
-            }
-            else 
-            {
-                RexElement = new Regex(@"<[^>]*id\s*=\s*""?" + element.Id + @"""?[^>]*>", RegexOptions.IgnoreCase);
-            }
-            websiteTexts[index] = RexElement.Replace(websiteTexts[index],"");
+            //previews.RemoveAll(x => x.Tag.Equals(element.Id));
+            //Regex elementStart = new Regex(@"<\s*" + element.TagName + @"[^><]*id\s*=\s*""?" + element.Id + @"""?[^><]*>");
+            //Match match = elementStart.Match(websiteTexts[index]);
+            //CharEnumerator charenum = websiteTexts[index].GetEnumerator();
+            //int openCount = 0;
+            //for (int i = 0; i < match.Index; i++)
+            //{
+            //    charenum.MoveNext();
+            //}
+            //char prevChar = ' ';
+            //int numberOfCharsToDelete = 0;
+            //do
+            //{
+            //    switch (charenum.Current)
+            //    {
+            //        case '<':
+            //            {
+            //                ++openCount;
+            //                break;
+            //            }
+            //        case '/':
+            //            {
+            //                if(prevChar == '<')
+            //                {
+            //                    openCount -= 2;
+            //                }
+            //                break;
+            //            }
+            //        case '>':
+            //            {
+            //                if(prevChar == '/')
+            //                {
+            //                    --openCount;
+            //                }
+            //                break;
+            //            }
+            //        default:
+            //            break;
+            //    }
+            //    prevChar = charenum.Current;
+            //    ++numberOfCharsToDelete;
+            //} while(openCount != 0 && charenum.MoveNext());
+            //websiteTexts[index].Remove(match.Index, numberOfCharsToDelete);
+            //if(element.Children != null)
+            //{
+            //    foreach (HtmlElement item in element.Children)
+            //    {
+            //        removeElementAt(item, index);		 
+            //    }
+            //}
+            //Regex RexElement;
+            //if(element.OuterHtml.Contains(@"</"+element.TagName+">"))
+            //{
+            //    RexElement = new Regex(@"<[^>]*id\s*=\s*""?" + element.Id + @"""?[^>]*>[^<]*</"+element.TagName+@"\s*>", RegexOptions.IgnoreCase);
+            //}
+            //else 
+            //{
+            //    RexElement = new Regex(@"<[^>]*id\s*=\s*""?" + element.Id + @"""?[^>]*>", RegexOptions.IgnoreCase);
+            //}
+            //websiteTexts[index] = RexElement.Replace(websiteTexts[index],"");
         }
 
         /// <summary>

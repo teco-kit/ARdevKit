@@ -229,7 +229,15 @@ namespace ARdevKit.Controller.EditorController
             {
                 if (ew.CurrentElement != null)
                 {
-                    IHTMLElement selectedElement = (IHTMLElement)findElement(this.ew.CurrentElement).DomElement;
+                    IHTMLElement selectedElement;
+                    if(ew.CurrentElement is AbstractSource)
+                    {
+                        selectedElement = (IHTMLElement)findElement(((AbstractSource)ew.CurrentElement).Augmentation).DomElement;
+                    }
+                    else
+                    {
+                        selectedElement = (IHTMLElement)findElement(this.ew.CurrentElement).DomElement;
+                    }
                     selectedElement.style.border = "solid 2.5px #F39814";
                     selectedElement.style.zIndex = "10";
                 }
@@ -870,9 +878,6 @@ namespace ARdevKit.Controller.EditorController
 
                             this.reloadPreviewable(currentElement);
                         }
-
-
-
                         source.Augmentation = ((AbstractDynamic2DAugmentation)currentElement);
                     }
                     ew.PropertyGrid1.SelectedObject = source;
@@ -895,11 +900,34 @@ namespace ARdevKit.Controller.EditorController
             if (currentElement == null)
                 throw new ArgumentException("parameter currentElement was null.");
 
-            if (currentElement is AbstractAugmentation)
+            if (currentElement is Chart)
             {
-                ((AbstractDynamic2DAugmentation)currentElement).Source = null;
+                Chart chart = ((Chart)currentElement);
+                chart.Source = null;
                 this.ew.project.Sources.Remove(source);
                 //TODO look into changes that my affect chart updates
+                List<string> FilesToDelete = RemoveByValue<string, IPreviewable>(fileLookup, source);
+                foreach (string filepath in FilesToDelete)
+                {
+                    if (System.IO.File.Exists(filepath))
+                        System.IO.File.Delete(filepath);
+                }
+                if (source is FileSource)
+                {
+                    Websites.chartFiles.Remove("data" + chart.ID);
+                    if (source.Query != null)
+                    {
+                        Websites.chartFiles.Remove("query" + chart.ID);
+                    }
+                }
+                else
+                {
+                    Websites.chartFiles.Remove("query" + chart.ID);
+                    if (String.IsNullOrEmpty(((DbSource)source).Url))
+                    {
+                        Websites.chartFiles.Remove("url" + chart.ID);
+                    }
+                }
                 //this.findElement(currentElement).Image = this.getSizedBitmap(currentElement);
                 //this.findElement(currentElement).Refresh();
             }
@@ -948,13 +976,36 @@ namespace ARdevKit.Controller.EditorController
             }
             else if (currentElement is AbstractAugmentation && trackable != null)
             {
+                //release all Chart JS and JSON Files from Websitemanager
+                if(currentElement is Chart)
+                {
+                    Chart chart = (Chart)currentElement;
+                    Websites.chartFiles.Remove("options"+chart.ID);
+                    if(chart.Source != null)
+                    {
+                        removeSource(chart.Source, chart);                      
+                    }
+                }
+                //delete all pictures saved in memory from Websitemanager
+                if (currentElement is HtmlImage)
+                {
+                    Websites.previews.RemoveAll(pic => pic.Tag == ((HtmlImage)currentElement).ID);
+                }
+                Websites.removeElementAt(findElement(currentElement), index);
+
+                //delete Files and release from Filelookup
                 List<string> FilesToDelete = RemoveByValue<string, IPreviewable>(fileLookup, currentElement);
                 foreach (string filepath in FilesToDelete)
                 {
                     if (System.IO.File.Exists(filepath))
                         System.IO.File.Delete(filepath);
                 }
-                Websites.removeElementAt(findElement(currentElement), index);
+                if(currentElement is Chart)
+                {
+                    string dirPath = TEMP_PATH + ((Chart)currentElement).ID;
+                    if (System.IO.Directory.Exists(dirPath))
+                        System.IO.Directory.Delete(dirPath);
+                }
                 reloadCurrentWebsite();
                 this.ew.project.RemoveAugmentation((AbstractAugmentation)currentElement);
             }
@@ -1089,12 +1140,18 @@ namespace ARdevKit.Controller.EditorController
             RemoveByValue<string, IPreviewable>(fileLookup, prev);
             if (prev is Chart)
             {
-                Websites.chartFiles.Remove("options" + ((Chart)prev).ID);
+                Chart chart = (Chart)prev;
+                Websites.chartFiles.Remove("options" + chart.ID);
+                if(chart.Source != null)
+                {
+                    removeSource(chart.Source, chart);
+                }
             }
-            else
+            if(prev is HtmlImage)
             {
-                Websites.removeElementAt(findElement(prev), index);
+                Websites.previews.RemoveAll(pic => pic.Tag == ((HtmlImage)prev).ID);
             }
+            Websites.removeElementAt(findElement(prev), index);
             if (prev is Chart || prev is AbstractHtmlElement)
             {
                 this.addElement(prev, recalculateChartVector(((Abstract2DAugmentation)prev).Translation));
@@ -1393,7 +1450,15 @@ namespace ARdevKit.Controller.EditorController
                         {
                             previouslySelectedElement.style.zIndex = 0;
                         }
-                        IHTMLElement unselectedElement = (IHTMLElement)findElement(currentElement).DomElement;
+                        IHTMLElement unselectedElement = null;
+                        if(currentElement is AbstractSource)
+                        {
+                            unselectedElement = (IHTMLElement)findElement(((AbstractSource)currentElement).Augmentation).DomElement;
+                        }
+                        else
+                        {
+                            unselectedElement = (IHTMLElement)findElement(currentElement).DomElement;
+                        }
                         unselectedElement.style.border = "solid 2.5px #F39814";
                         unselectedElement.style.zIndex = 10;
                         //Websites.removeElementAt(previouslySelectedElement, index);
@@ -1907,7 +1972,7 @@ namespace ARdevKit.Controller.EditorController
         {
             markCurrentElementInPreview = true;
             htmlPreview.Refresh(WebBrowserRefreshOption.Completely);
-            //WebBrowserHelper.ClearCache();
+            WebBrowserHelper.ClearCache();
             htmlPreview.Navigate(htmlPreview.Url);
         }
 
@@ -2088,6 +2153,10 @@ namespace ARdevKit.Controller.EditorController
                 element = htmlPreview.Document.GetElementFromPoint(htmlPreview.PointToClient(new Point(e.X, e.Y)));
                 if (element == null)
                     return;
+                while (element.Parent.Id != "containment-wrapper")
+                {
+                    element = element.Parent;
+                }
                 AbstractAugmentation augmentation = trackable.Augmentations.Find(x => x.ID == element.Id);
                 if (!(augmentation is Chart))
                     return;

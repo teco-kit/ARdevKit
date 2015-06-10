@@ -818,9 +818,13 @@ namespace ARdevKit
 
         private void pnl_editor_preview_DragEnter(object sender, DragEventArgs e)
         {
-            if (previewController.currentMetaCategory != MetaCategory.Source)
+            //if (previewController.currentMetaCategory != MetaCategory.Source)
             {
                 e.Effect = DragDropEffects.Move;
+            }
+            //else
+            {
+
             }
         }
 

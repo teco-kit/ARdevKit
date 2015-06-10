@@ -207,7 +207,7 @@ namespace ARdevKit.Model.Project
         public override bool initElement(EditorWindow ew)
         {
             bool result = base.initElement(ew);
-            string newPath = Path.Combine(Environment.CurrentDirectory, "tmp", id);
+            //string newPath = Path.Combine(Environment.CurrentDirectory, "tmp", id);
             if (ResFilePath == null)
             {
                 OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -216,23 +216,24 @@ namespace ARdevKit.Model.Project
                 openFileDialog.Title = "Wählen sie eine Options Datei";
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    Helper.Copy(openFileDialog.FileName, newPath, "options.js");
-                    ResFilePath = Path.Combine(newPath, "options.js");
+                    //Helper.Copy(openFileDialog.FileName, newPath, "options.js");
+                    //ResFilePath = Path.Combine(newPath, "options.js");
+                    ResFilePath = openFileDialog.FileName;
                 }
                 else
                 {
                     return false;
                 }
             }
-            else
-            {
-                Helper.Copy(ResFilePath, newPath, "options.js");
-                ResFilePath = Path.Combine(newPath, "options.js");
-            }
-            string res = Path.Combine(Environment.CurrentDirectory, "res");
-            Helper.Copy(Path.Combine(res, "jquery", "jquery-1.11.1.js"), newPath);
-            Helper.Copy(Path.Combine(res, "highcharts", "highcharts.js"), newPath);
-            Helper.Copy(Path.Combine(res, "templates", "chart.html"), newPath);
+            //else
+            //{
+            //    Helper.Copy(ResFilePath, newPath, "options.js");
+            //    ResFilePath = Path.Combine(newPath, "options.js");
+            //}
+            //string res = Path.Combine(Environment.CurrentDirectory, "res");
+            //Helper.Copy(Path.Combine(res, "jquery", "jquery-1.11.1.js"), newPath);
+            //Helper.Copy(Path.Combine(res, "highcharts", "highcharts.js"), newPath);
+            //Helper.Copy(Path.Combine(res, "templates", "chart.html"), newPath);
             return result;
         }
     }
