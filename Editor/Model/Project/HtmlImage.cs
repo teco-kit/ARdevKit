@@ -65,7 +65,7 @@ namespace ARdevKit.Model.Project
 
         public override System.Drawing.Bitmap getPreview(string projectPath)
         {
-            string absolutePath = Path.Combine(projectPath == null ? "" : projectPath, resFilePath);
+            string absolutePath = Path.Combine(projectPath == null && Path.IsPathRooted(resFilePath) ? "" : projectPath, resFilePath);
             if (System.IO.File.Exists(absolutePath))
                 if (Height == 0 || Width == 0)
                     return (Bitmap)Bitmap.FromStream(new MemoryStream(System.IO.File.ReadAllBytes(absolutePath)));

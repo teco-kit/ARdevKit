@@ -917,7 +917,7 @@ namespace ARdevKit.Controller.ProjectController
             XMLBlock sensorCOSBlock = new XMLBlock(new XMLTag("SensorCOS"));
             trackingDataFileSensorBlock.AddBlock(sensorCOSBlock);
 
-            idMarker.SensorCosID = IDFactory.CreateNewSensorCosID(idMarker);
+            //idMarker.SensorCosID = IDFactory.CreateNewSensorCosID(idMarker);
             sensorCOSBlock.AddLine(new XMLLine(new XMLTag("SensorCosID"), idMarker.SensorCosID));
 
             // Parameters
@@ -1253,8 +1253,8 @@ namespace ARdevKit.Controller.ProjectController
             // CoordinateSystemID
             htmlImageFileDefineBlock.AddLine(new JavaScriptInLine("coordinateSystemID : " + coordinateSystemID, true));
             // Translation in this Case Ignore translations and us positioning
-            string translationX = htmlImage.Positioning.Left.ToString("F1", CultureInfo.InvariantCulture);
-            string translationY = htmlImage.Positioning.Top.ToString("F1", CultureInfo.InvariantCulture);
+            string translationX = htmlImage.Translation.X.ToString("F1", CultureInfo.InvariantCulture);
+            string translationY = htmlImage.Translation.Y.ToString("F1", CultureInfo.InvariantCulture);
             string translationZ = htmlImage.Translation.Z.ToString("F1", CultureInfo.InvariantCulture);
             htmlImageFileDefineBlock.AddBlock(new JavaScriptInLine("translation : new arel.Vector3D(" + translationX + "," + translationY + "," + translationZ + ")", true));
             // htmlImage

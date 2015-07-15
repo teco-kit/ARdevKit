@@ -91,6 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controller\Connections\SimpleHttpServer.cs" />
+    <Compile Include="Controller\EditorController\PropertyController.cs" />
     <Compile Include="Controller\EditorController\WebBrowserHelper.cs" />
     <Compile Include="Controller\EditorController\ObjectCopier.cs" />
     <Compile Include="Controller\EditorController\ThumbCreator.cs" />
@@ -144,7 +145,6 @@
     <Compile Include="Model\Project\File\ARELConfigFile.cs" />
     <Compile Include="Controller\Connections\DeviceConnection\DeviceConnectionController.cs" />
     <Compile Include="Controller\EditorController\ElementSelectionController.cs" />
-    <Compile Include="Controller\EditorController\PropertyController.cs" />
     <Compile Include="Controller\EditorController\SceneElement.cs" />
     <Compile Include="Controller\EditorController\SceneElementCategory.cs" />
     <Compile Include="Controller\ProjectController\AbstractProjectVisitor.cs" />

@@ -29,7 +29,7 @@ namespace ARdevKit.Controller.TestController
         /// <summary>
         /// The location where the temporary frames where extracted to.
         /// </summary>
-        private const string TMP_VIDEO_PATH = "tmp\\video";
+        private const string TMP_VIDEO_PATH = "videoTemp\\video";
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
@@ -147,7 +147,7 @@ namespace ARdevKit.Controller.TestController
                     player = new Process();
                     player.EnableRaisingEvents = true;
                     player.Exited += player_Exited;
-                    player.StartInfo.Arguments = "-" + width + " -" + height + " -" + project.ProjectPath + " -" + mode;
+                    player.StartInfo.Arguments = "-" + width + " -" + height + " -" + "\"" + project.ProjectPath + "\"" + " -" + mode;
 
                     bool open = false;
                     switch (mode)
@@ -175,7 +175,7 @@ namespace ARdevKit.Controller.TestController
                                 if (Directory.Exists(TMP_VIDEO_PATH))
                                 {
                                     foreach (string path in Directory.GetFiles(TMP_VIDEO_PATH))
-                                        File.Delete(path);
+                                       File.Delete(path);
                                 }
                                 else
                                     Directory.CreateDirectory(TMP_VIDEO_PATH);

@@ -241,7 +241,6 @@ namespace ARdevKit
                     }
                 }
             }
-
             createNewProject("");
         }
 
@@ -363,8 +362,8 @@ namespace ARdevKit
             //{
                 this.previewController.changeSceneTo(temp - 1);
                 //this.previewController.reloadPreviewPanel(temp - 1);
-                this.PropertyGrid1.SelectedObject = null;
-                this.currentElement = null;
+                //this.PropertyGrid1.SelectedObject = null;
+                //this.currentElement = null;
 
             //}
             //else
@@ -467,8 +466,8 @@ namespace ARdevKit
             }
             this.resetButton();
             this.setButton(Convert.ToString("1"));
-            this.PropertyGrid1.SelectedObject = null;
-            this.currentElement = null;
+            //this.PropertyGrid1.SelectedObject = null;
+            //this.currentElement = null;
         }
 
         /// <summary>
@@ -544,12 +543,17 @@ namespace ARdevKit
             {
                 initializeLoadedProject(SaveLoadController.loadProject(openFileDialog1.FileName));
                 this.initializeControllers();
-                //this.updatePanels();
+                this.updatePanels();
                 //previewController.Index = -1;
-                previewController.reloadPreviewPanel(0);
+                for (int i = 0; i < project.Trackables.Count; i++)
+                {
+                    previewController.reloadPreviewPanel(i);
+                }
+                updateElementSelectionPanel();
                 this.updateSceneSelectionPanel();
                 this.updateScreenSize();
                 this.checksum = project.getChecksum();
+                previewController.changeSceneTo(0);
             }
             catch (System.ArgumentException a)
             {
@@ -857,7 +861,8 @@ namespace ARdevKit
             if (sender == this.pnl_preview_overlay)
             {
                 ((Panel)sender).Visible = false;
-            } 
+            }
+            updateElementSelectionPanel();
         }
 
         /// <summary>
@@ -866,7 +871,11 @@ namespace ARdevKit
         private void initializeControllers()
         {
             if (previewController != null)
-                previewController.shutDownWebserver();
+            {
+                previewController.Dispose();
+                previewController = null;
+                //previewController.trackable = null;
+            }
             this.elementSelectionController = new ElementSelectionController(this);
             this.previewController = new PreviewController(this);
             this.propertyController = new PropertyController(this);
@@ -928,7 +937,7 @@ namespace ARdevKit
                 this.project.Screensize.Height = MINSCREENHEIGHT;
             }
                 this.previewController.setMainContainerSize(project.Screensize);
-                this.previewController.rescalePreviewPanel();
+                //this.previewController.rescalePreviewPanel();
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1006,7 +1015,6 @@ namespace ARdevKit
                     }
                 }
             }
-
             this.loadProject();
         }
 

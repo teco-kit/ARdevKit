@@ -37,7 +37,9 @@ namespace ARdevKit.Controller.EditorController
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   The Trackable which hold the Augmentations and Sources. </summary>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        public AbstractTrackable trackable { get; set; }
+        public AbstractTrackable trackable { 
+            get; 
+            set; }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   The PreviewPanel which we need to add Previewables. </summary>
@@ -123,7 +125,7 @@ namespace ARdevKit.Controller.EditorController
             Directory.CreateDirectory(TEMP_PATH);
 
             //start the Websitemanager, which hosts the previewpages
-            if (ew.project.ProjectPath != null && ew.project.ProjectPath != "")
+            if (string.IsNullOrEmpty(ew.project.ProjectPath))
             {
                 this.Websites = new WebSiteHTMLManager(ew.project.ProjectPath,PREVIEW_PORT);
             }
@@ -218,7 +220,7 @@ namespace ARdevKit.Controller.EditorController
         private void htmlPreview_DocumentFirstCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             htmlPreview.DocumentCompleted -= htmlPreview_DocumentFirstCompleted;
-            htmlPreview.Document.MouseMove += dragHandler;
+            //htmlPreview.Document.MouseMove += dragHandler;
             htmlPreview.Document.MouseDown += handleDocumentMouseDown;
             htmlPreview.Document.MouseUp += writeBackChangesfromDOM;
         }
@@ -328,7 +330,9 @@ namespace ARdevKit.Controller.EditorController
                     break;
 
                 case "trackable":
-                    setCurrentElement(trackable);
+                    //used this, because it sets the right name and triggers setCurrentElement
+                    ew.Cmb_editor_properties_objectSelection.SelectedItem = trackable;
+                    //setCurrentElement(trackable);
                     if (e.MouseButtonsPressed == MouseButtons.Right)
                     {
                         trackableContextMenu.Show(ew.GetChildAtPoint(e.MousePosition), e.MousePosition);
@@ -369,6 +373,7 @@ namespace ARdevKit.Controller.EditorController
                     }
                     if (e.MouseButtonsPressed == MouseButtons.Left)
                     {
+                        htmlPreview.Document.MouseMove += dragHandler;
                         dragStartPosition = e.MousePosition;
                     } 
                     break;
@@ -497,6 +502,9 @@ namespace ARdevKit.Controller.EditorController
 
         private string addToFileSystemWithoutNotification(string originalPath, IPreviewable element)
         {
+            if (!Path.IsPathRooted(originalPath))
+                originalPath = ew.project.ProjectPath + "\\" + originalPath;
+
             fileWatcher.EnableRaisingEvents = false;
             string newName = Path.GetFileName(originalPath);
             while(fileLookup.ContainsKey(TEMP_PATH + newName))
@@ -510,7 +518,7 @@ namespace ARdevKit.Controller.EditorController
                 else
                 {
                     fileWatcher.EnableRaisingEvents = true;
-                    return originalPath;
+                    return null;
                 }
                 NameDialog.Dispose();                  
             }
@@ -523,7 +531,7 @@ namespace ARdevKit.Controller.EditorController
             else
             {
                 fileWatcher.EnableRaisingEvents = true;
-                return originalPath;
+                return null;
             }
         }
 
@@ -549,7 +557,7 @@ namespace ARdevKit.Controller.EditorController
                     {
                         //adding to tempFile
                         string newPath = addToFileSystemWithoutNotification(((PictureMarker)currentElement).PicturePath, currentElement);
-                        if(((PictureMarker)currentElement).PicturePath.Equals(newPath));
+                        if(newPath == null)
                         {
                             MessageBox.Show("Es konnte keine Kopie der genutzten Bilddatei in " + TEMP_PATH + " angelegt werden");
                             return;
@@ -560,7 +568,7 @@ namespace ARdevKit.Controller.EditorController
                     {
                         //adding to tempFile
                         string newPath = addToFileSystemWithoutNotification(((PictureMarker)currentElement).PicturePath, currentElement);
-                        if (((PictureMarker)currentElement).PicturePath.Equals(newPath))
+                        if (newPath == null)
                         {
                             MessageBox.Show("Es konnte keine Kopie der genutzten Bilddatei in "+TEMP_PATH+" angelegt werden");
                             return;
@@ -591,6 +599,7 @@ namespace ARdevKit.Controller.EditorController
                 nativeToHtmlCoordinates(vector).Z,
                 nativeToHtmlCoordinates(vector).X - width / 2, nativeToHtmlCoordinates(vector).Y - height / 2);
                 Websites.addElementAt(htmlTrackable, index);
+                this.trackable = trackable;
             }
             else if (currentElement is Chart)
             {
@@ -607,7 +616,10 @@ namespace ARdevKit.Controller.EditorController
                     fileWatcher.EnableRaisingEvents = false;
                     if (!Directory.Exists(chartTempFolderPath))
                         Directory.CreateDirectory(chartTempFolderPath);
-                    Helper.Copy(chart.ResFilePath, chartTempFolderPath, "options.js");
+                    if(string.IsNullOrEmpty(ew.project.ProjectPath))
+                        Helper.Copy(chart.ResFilePath, chartTempFolderPath, "options.js");
+                    else
+                        Helper.Copy(ew.project.ProjectPath + chart.ResFilePath, chartTempFolderPath, "options.js");  
                     chart.ResFilePath = chartTempFolderPath + "\\options.js";
                     fileLookup.Add(chart.ResFilePath, currentElement);
                     Websites.chartFiles.Add("options"+chart.ID, File.ReadAllText(chart.ResFilePath));
@@ -647,7 +659,7 @@ namespace ARdevKit.Controller.EditorController
                 HtmlElement htmlImage = htmlPreview.Document.CreateElement("img");
                 //adding to tempFolder
                 string newPath = addToFileSystemWithoutNotification(image.ResFilePath, image);
-                if(image.ResFilePath == newPath)
+                if(newPath == null)
                 {
                     MessageBox.Show("Es konnte keine Kopie der genutzten Bilddatei in " + TEMP_PATH + " angelegt werden");
                     return;
@@ -686,7 +698,9 @@ namespace ARdevKit.Controller.EditorController
                 GenericHtml element = ((GenericHtml)currentElement);
                 if (element.ResFilePath != null)
                 {
-                    string elementText = File.ReadAllText(element.ResFilePath);
+                    string elementText = Path.IsPathRooted(ew.project.ProjectPath) ? 
+                        File.ReadAllText(element.ResFilePath) :
+                        File.ReadAllText(ew.project.ProjectPath + element.ResFilePath);
                     int bracketsCount = 0;
                     foreach (char Char in elementText.ToCharArray())
 	                {
@@ -711,8 +725,8 @@ namespace ARdevKit.Controller.EditorController
                                 elementText = titleRex.Replace(elementText, @"${id} title=""augmentation"" ");
                             }
                             //adding to fileSystem and websitepage
-                            string newPath = addToFileSystemWithoutNotification(element.ResFilePath, element);
-                            if (element.ResFilePath == newPath)
+                            string newPath =  addToFileSystemWithoutNotification(element.ResFilePath, element);
+                            if (newPath == null)
                             {
                                 MessageBox.Show("Es konnte keine Kopie der genutzten HTMLDatei in " + TEMP_PATH + " angelegt werden");
                                 return;
@@ -747,6 +761,7 @@ namespace ARdevKit.Controller.EditorController
         {
             foreach (AbstractTrackable t in ew.project.Trackables)
             {
+                if(t != null)
                 foreach (AbstractAugmentation a in t.Augmentations)
                 {
                     if (a.ID == newId && a != element) return false;
@@ -963,15 +978,15 @@ namespace ARdevKit.Controller.EditorController
                 }
                 Websites.resetPage(index);
                 reloadCurrentWebsite();
-                this.trackable = null;
-                this.ew.project.Trackables[index] = null;
+                //this.trackable = null;
+                //this.ew.project.Trackables[index] = null;
                 updateElementCombobox(trackable);
-                if (!this.ew.project.hasTrackable())
-                {
-                    this.ew.ElementSelectionController.setElementEnable(typeof(PictureMarker), true);
-                    this.ew.ElementSelectionController.setElementEnable(typeof(IDMarker), true);
-                    this.ew.ElementSelectionController.setElementEnable(typeof(ImageTrackable), true);
-                }
+                //if (!this.ew.project.hasTrackable())
+                //{
+                //    this.ew.ElementSelectionController.setElementEnable(typeof(PictureMarker), true);
+                //    this.ew.ElementSelectionController.setElementEnable(typeof(IDMarker), true);
+                //    this.ew.ElementSelectionController.setElementEnable(typeof(ImageTrackable), true);
+                //}
                 this.ew.Tsm_editor_menu_edit_delete.Enabled = false;
             }
             else if (currentElement is AbstractAugmentation && trackable != null)
@@ -1436,77 +1451,102 @@ namespace ARdevKit.Controller.EditorController
                 {
                     markCurrentElementInPreview = true;
                 }
-                else {
-
-                    if (this.ew.CurrentElement != currentElement && this.ew.CurrentElement != null)
+                else
+                {
+                    if (this.ew.CurrentElement != currentElement)
                     {
-                        IHTMLElement previouslySelectedElement = (IHTMLElement)findElement(this.ew.CurrentElement).DomElement;
-                        previouslySelectedElement.style.border = null;
-                        if (currentElement is AbstractAugmentation)
+                        //try to reset the borderstyle of the currentElement
+                        if (this.ew.CurrentElement != null)
                         {
-                            previouslySelectedElement.style.zIndex = ((AbstractAugmentation)currentElement).Translation.Z;
+                            IHTMLElement previouslySelectedElement = (IHTMLElement)findElement(this.ew.CurrentElement).DomElement;
+                            previouslySelectedElement.style.border = null;
+                            if (currentElement is AbstractAugmentation)
+                            {
+                                previouslySelectedElement.style.zIndex = ((AbstractAugmentation)currentElement).Translation.Z;
+                            }
+                            else
+                            {
+                                previouslySelectedElement.style.zIndex = 0;
+                            }
                         }
+
+                        HtmlElement unselectedElement = null;
+                        //set the elements to be shown in the propertygrid and in the EditorWindow to be the actual ones
+                        ew.CurrentElement = currentElement;
+                        ew.PropertyGrid1.SelectedObject = currentElement;
+                        updateElementCombobox(trackable);
+                        //next line is commented because this triggers another listener, which calls this setCurrentElement method
+                        //ew.Cmb_editor_properties_objectSelection.SelectedItem = currentElement;
+
+                        //if it is a source the corresponding chart has to be marked, but the source has to be shown in the property grid
+                        if (currentElement is AbstractSource)
+                        {
+                            currentElement = ((AbstractSource)currentElement).Augmentation;
+                        }
+
+                        unselectedElement = findElement(currentElement);
+                        //this means it could not be found, so its setting true for it to be marked in DocumentCompleted
+                        if (unselectedElement == null)
+                        {
+                            markCurrentElementInPreview = true;
+                        }
+                        //this means it could be found and the dynamic properties to show the mark are set
                         else
                         {
-                            previouslySelectedElement.style.zIndex = 0;
+                            IHTMLElement unselectedDomElement = (IHTMLElement)unselectedElement.DomElement;
+                            unselectedDomElement.style.border = "solid 2.5px #F39814";
+                            unselectedDomElement.style.zIndex = 10;
                         }
-                        IHTMLElement unselectedElement = null;
-                        if(currentElement is AbstractSource)
-                        {
-                            unselectedElement = (IHTMLElement)findElement(((AbstractSource)currentElement).Augmentation).DomElement;
-                        }
-                        else
-                        {
-                            unselectedElement = (IHTMLElement)findElement(currentElement).DomElement;
-                        }
-                        unselectedElement.style.border = "solid 2.5px #F39814";
-                        unselectedElement.style.zIndex = 10;
                         //Websites.removeElementAt(previouslySelectedElement, index);
                         //previouslySelectedElement.SetAttribute("class", "");
                         //Websites.addElementAt(previouslySelectedElement, index);
+                        //}
+                        //IHTMLElement unselectedElement = (IHTMLElement)findElement(currentElement).DomElement;
+                        ////Websites.removeElementAt(unselectedElement, index);
+                        //unselectedElement.style.border = "solid 2.5px #F39814";
+                        //Websites.addElementAt(unselectedElement, index);
+                        //if (currentElement is AbstractSource)
+                        //{
+                        //    this.ew.CurrentElement = ((AbstractSource)currentElement).Augmentation;
+                        //}
+                        //else
+                        //{
+                        //    this.ew.CurrentElement = currentElement;
+                        //}
+
+                        //if (this.ew.CurrentElement is AbstractAugmentation)
+                        //{
+                        //    this.ew.Tsm_editor_menu_edit_copie.Enabled = true;
+                        //}
+                        //else if (this.ew.CurrentElement is AbstractTrackable)
+                        //{
+                        //    this.ew.Tsm_editor_menu_edit_copie.Enabled = false;
+                        //}           
+                        //}
                     }
-                    //IHTMLElement unselectedElement = (IHTMLElement)findElement(currentElement).DomElement;
-                    ////Websites.removeElementAt(unselectedElement, index);
-                    //unselectedElement.style.border = "solid 2.5px #F39814";
-                    //Websites.addElementAt(unselectedElement, index);
-                    //if (currentElement is AbstractSource)
-                    //{
-                    //    this.ew.CurrentElement = ((AbstractSource)currentElement).Augmentation;
-                    //}
+                    //if there is no currentElement we'll mark the box and set the currentElement in EditorWindow.
                     //else
                     //{
-                    //    this.ew.CurrentElement = currentElement;
-                    //}
-
-                    //if (this.ew.CurrentElement is AbstractAugmentation)
-                    //{
-                    //    this.ew.Tsm_editor_menu_edit_copie.Enabled = true;
-                    //}
-                    //else if (this.ew.CurrentElement is AbstractTrackable)
-                    //{
+                    //    if (this.ew.CurrentElement != null)
+                    //    {
+                    //        IHTMLElement previouslySelectedElement = (IHTMLElement)findElement(this.ew.CurrentElement).DomElement;
+                    //        previouslySelectedElement.style.border = null;
+                    //        this.ew.CurrentElement = null;
+                    //    }
+                    //    //Websites.deleteSelection(index);
                     //    this.ew.Tsm_editor_menu_edit_copie.Enabled = false;
-                    //}           
+                    //}
+                    if (this.ew.CurrentElement != null)
+                    {
+                        this.ew.Tsm_editor_menu_edit_delete.Enabled = true;
+                    }
                 }
-                ew.CurrentElement = currentElement;
-                ew.PropertyGrid1.SelectedObject = currentElement;
             }
-            //if there is no currentElement we'll mark the box and set the currentElement in EditorWindow.
+            //we want to set the currentElement to null, indicating no element is currently selected
             else
             {
-                if (this.ew.CurrentElement != null)
-                {
-                    IHTMLElement previouslySelectedElement = (IHTMLElement)findElement(this.ew.CurrentElement).DomElement;
-                    previouslySelectedElement.style.border = null;
-                    this.ew.CurrentElement = null;
-                }            
-                //Websites.deleteSelection(index);
-                this.ew.Tsm_editor_menu_edit_copie.Enabled = false;
-            }
-            updateElementCombobox(trackable);
-            ew.Cmb_editor_properties_objectSelection.SelectedItem = currentElement;
-            if (this.ew.CurrentElement != null)
-            {
-                this.ew.Tsm_editor_menu_edit_delete.Enabled = true;
+                ew.CurrentElement = null;
+                this.ew.Tsm_editor_menu_edit_delete.Enabled = false;
             }
         }
         /// <summary>
@@ -1725,7 +1765,7 @@ namespace ARdevKit.Controller.EditorController
                         if (aug is Chart)
                         {
                             ((Chart)aug).Positioning.Left = (int)((aug.Translation.X + getMainContainerSize().Width / 2));
-                            ((Chart)aug).Positioning.Top = (int)((aug.Translation.Y + getMainContainerSize().Width / 2));
+                            ((Chart)aug).Positioning.Top = (int)((aug.Translation.Y + getMainContainerSize().Height / 2));
                         }
                     }
                 }
@@ -1757,10 +1797,10 @@ namespace ARdevKit.Controller.EditorController
                 ((Chart)prev).Positioning.Left = (int)newV.X;
                 ((Chart)prev).Positioning.Top = (int)newV.Y;
 
-                Vector3D result = new Vector3D(0, 0, 0);
-                result.X = (int)((newV.X - getMainContainerSize().Width / 2));
-                result.Y = (int)((getMainContainerSize().Height / 2 - newV.Y));
-                ((AbstractAugmentation)prev).Translation = result;
+                Vector3D result = new Vector3D(0, 0, ((Chart)prev).Translation.Z);
+                result.X = (int)(newV.X - getMainContainerSize().Width / 2 + ((Chart)prev).Width / 2);
+                result.Y = (int)(getMainContainerSize().Height / 2 - newV.Y - ((Chart)prev).Height / 2);
+                ((Chart)prev).Translation = result;
             }
             else if (prev is AbstractHtmlElement)
             {
@@ -1768,10 +1808,10 @@ namespace ARdevKit.Controller.EditorController
                ((AbstractHtmlElement)prev).Positioning.Left = (int)newV.X;
                ((AbstractHtmlElement)prev).Positioning.Top = (int)newV.Y;
 
-                Vector3D result = new Vector3D(0, 0, 0);
-                result.X = (int)(newV.X - getMainContainerSize().Width / 2);
-                result.Y = (int)(newV.Y - getMainContainerSize().Height / 2);
-                ((AbstractAugmentation)prev).Translation = result;
+                Vector3D result = new Vector3D(0, 0, ((AbstractHtmlElement)prev).Translation.Z);
+                result.X = (int)(newV.X - getMainContainerSize().Width / 2 + ((AbstractHtmlElement)prev).Width / 2);
+                result.Y = (int)(getMainContainerSize().Height / 2 - newV.Y - ((AbstractHtmlElement)prev).Height / 2);
+                ((AbstractHtmlElement)prev).Translation = result;
             }
             else
             {
@@ -1965,7 +2005,8 @@ namespace ARdevKit.Controller.EditorController
                     setCoordinates(ew.CurrentElement, new Vector3D(newLeft, newTop, ((AbstractAugmentation)ew.CurrentElement).Translation.Z));
                     ew.PropertyGrid1.SelectedObject = ew.CurrentElement;
                 }
-            } 
+            }
+            htmlPreview.Document.MouseMove -= dragHandler;
         }
 
         private void reloadCurrentWebsite()
@@ -2186,7 +2227,7 @@ namespace ARdevKit.Controller.EditorController
             try
             {
                 string path = ((AbstractDynamic2DAugmentation)this.ew.CurrentElement).Source.Query;
-                path = ew.project.ProjectPath == null ? path : Path.Combine(ew.project.ProjectPath, path);
+                path = ew.project.ProjectPath == null && Path.IsPathRooted(path) ? path : Path.Combine(ew.project.ProjectPath, path);
                 TextEditorForm tef = new TextEditorForm(path);
                 if (tef.ShowDialog() == DialogResult.OK)
                 {
@@ -2315,6 +2356,9 @@ namespace ARdevKit.Controller.EditorController
             this.trackable = ew.project.Trackables[index];
             ew.Cmb_editor_properties_objectSelection.Items.Clear();
             updateElementCombobox(trackable);
+            //in order to prevent setCurrentElement from trying to delete the mark on the 
+            ew.CurrentElement = null;
+            setCurrentElement(trackable);       
         }
         /// <summary>
         /// iterates upwords through html stucture and sums up the offsets
@@ -2366,8 +2410,9 @@ namespace ARdevKit.Controller.EditorController
         public void Dispose()
         {
             fileWatcher.EnableRaisingEvents = false;
+            fileWatcher.Dispose();
+            if(Websites != null)
             shutDownWebserver();
-
         }
     }
 }

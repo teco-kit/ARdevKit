@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using System.IO;
 using System.Windows.Forms;
 using ARdevKit;
@@ -235,7 +234,7 @@ namespace Controller.EditorController
             {
                 if (string.Equals((string)e.ChangedItem.Value, "", StringComparison.Ordinal))
                 {
-                        ((ImageTrackable)ew.CurrentElement).ImagePath = e.OldValue.ToString();
+                    ((ImageTrackable)ew.CurrentElement).ImagePath = e.OldValue.ToString();
                 }
                 else
                 {
@@ -279,7 +278,7 @@ namespace Controller.EditorController
                         /* PictureBox temp = this.ew.PreviewController.findElement(this.ew.CurrentElement);
                         temp.BorderStyle = BorderStyle.Fixed3D;
                         temp.BringToFront();*/
-                    }   
+                    }
                     return;
                 }
             }
@@ -326,7 +325,7 @@ namespace Controller.EditorController
             if ((String.Equals(e.ChangedItem.Label.ToString(), "X", StringComparison.Ordinal)
                 || String.Equals(e.ChangedItem.Label.ToString(), "Y", StringComparison.Ordinal))
                 && !(String.Equals(e.ChangedItem.Parent.Label.ToString(), "Rotating", StringComparison.Ordinal)))
-            {              
+            {
                 this.ew.PreviewController.reloadPreviewable((AbstractAugmentation)this.ew.CurrentElement);
                 this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
                 //this replaces TODO: check if there are unexpected changes or if its even neede
