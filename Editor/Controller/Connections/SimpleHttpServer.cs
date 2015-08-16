@@ -217,7 +217,6 @@ namespace ARdevKit.Controller.Connections
             listener.Start();
             while (is_active)
             {
-
                 try
                 {
                     TcpClient s = listener.AcceptTcpClient();

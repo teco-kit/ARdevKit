@@ -222,7 +222,7 @@ namespace Controller.EditorController
                 else
                 {
                     ((PictureMarker)ew.CurrentElement).PicturePath = e.ChangedItem.Value.ToString();
-                    this.ew.PreviewController.updateElement(this.ew.CurrentElement);
+                    this.ew.PreviewController.reloadPreviewable(this.ew.CurrentElement);
                     this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
                 }
 
@@ -239,7 +239,7 @@ namespace Controller.EditorController
                 else
                 {
                     ((ImageTrackable)ew.CurrentElement).ImagePath = e.ChangedItem.Value.ToString();
-                    this.ew.PreviewController.updateElement(this.ew.CurrentElement);
+                    this.ew.PreviewController.reloadPreviewable(this.ew.CurrentElement);
                     this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
                 }
                 return;
@@ -371,8 +371,8 @@ namespace Controller.EditorController
             // Checks if the size of a trackable has been changed.
             if (string.Equals(e.ChangedItem.Label.ToString(), "Size", StringComparison.Ordinal))
             {
-                ew.PreviewController.reloadPreviewPanel(ew.PreviewController.Index);
-
+                this.ew.PreviewController.reloadPreviewable(this.ew.CurrentElement);
+                this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
                 return;
             }
 
@@ -389,11 +389,11 @@ namespace Controller.EditorController
                     IDMarker marker = (IDMarker)ew.CurrentElement;
                     marker.MatrixID = ew.project.nextID();
                 }
-                IPreviewable temp = this.ew.CurrentElement;
                 //ATTENTION could cause onforsighted problems
                 //this.ew.PreviewController.findElement(temp).Image = this.ew.PreviewController.scaleIPreviewable(temp);
-                this.ew.PreviewController.reloadPreviewPanel(this.ew.PreviewController.Index);
-                this.ew.PreviewController.setCurrentElement(temp);
+                //this.ew.PreviewController.reloadPreviewPanel(this.ew.PreviewController.Index);
+                this.ew.PreviewController.reloadPreviewable(this.ew.CurrentElement);
+                this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
                 return;
             }
         }

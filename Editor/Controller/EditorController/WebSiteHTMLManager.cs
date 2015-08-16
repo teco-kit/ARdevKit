@@ -96,6 +96,7 @@ namespace ARdevKit.Controller.EditorController
             previews = new List<System.Drawing.Bitmap>();
             mainContainerWidth = 0;
             mainContainerHeigth = 0;
+            chartFiles = new Dictionary<string, string>();
             //int i = 0;
             //while (File.Exists(projectPath + "htmlWebsites/" + i + ".html"))
             //{
@@ -342,7 +343,12 @@ namespace ARdevKit.Controller.EditorController
                     {
                         System.Drawing.ImageConverter converter = new System.Drawing.ImageConverter();
                         byte[] toWrite = (byte[])converter.ConvertTo(bitmap, typeof(byte[]));
-		                p.writeSuccess("image/bmp");
+                        if(bitmap.RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Bmp))
+		                    p.writeSuccess("image/bmp");
+                        else if (bitmap.RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Png))
+                            p.writeSuccess("image/png");
+                        else if (bitmap.RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Jpeg))
+                            p.writeSuccess("image/jpg");
                         p.outputStream.BaseStream.Write(toWrite, 0, toWrite.Length);
                         return;
                     }

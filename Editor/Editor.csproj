@@ -110,6 +110,7 @@
     <Compile Include="Model\Project\File\HtmlImageFile.cs" />
     <Compile Include="Model\Project\File\EventFile.cs" />
     <Compile Include="Model\Project\Event\OnTouchStartedEvent.cs" />
+    <Compile Include="Model\Project\File\SceneFile.cs" />
     <Compile Include="Model\Project\GenericHtml.cs" />
     <Compile Include="Model\Project\HtmlImage.cs" />
     <Compile Include="Model\Project\HtmlVideo.cs" />

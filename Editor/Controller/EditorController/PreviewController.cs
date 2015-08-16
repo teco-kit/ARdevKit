@@ -96,6 +96,8 @@ namespace ARdevKit.Controller.EditorController
 
         private Dictionary<string, IPreviewable> fileLookup;
 
+        private bool disposed = false;
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
         /// Constructor.
@@ -111,7 +113,6 @@ namespace ARdevKit.Controller.EditorController
 
             this.ew = ew;
             this.htmlPreview = this.ew.Html_preview;
-            htmlPreview.DocumentCompleted += htmlPreview_DocumentCompleted;
             htmlPreview.DocumentCompleted += htmlPreview_DocumentFirstCompleted;
            
 
@@ -135,8 +136,12 @@ namespace ARdevKit.Controller.EditorController
             }
             Websites.changeMainContainerSize(EditorWindow.MINSCREENWIDHT, EditorWindow.MINSCREENHEIGHT);
             webServerThread = new Thread(new ThreadStart(Websites.listen));
+            webServerThread.Name = "WebServerThread";
+            webServerThread.IsBackground = true;
             webServerThread.Start();
 
+            if (htmlPreview.Document != null)
+                reloadCurrentWebsite();
             this.htmlPreview.Navigate("http://localhost:" + PREVIEW_PORT + "/" + index);
 
             //initialize mainContainerContextMenu
@@ -220,6 +225,7 @@ namespace ARdevKit.Controller.EditorController
         private void htmlPreview_DocumentFirstCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             htmlPreview.DocumentCompleted -= htmlPreview_DocumentFirstCompleted;
+            htmlPreview.DocumentCompleted += htmlPreview_DocumentCompleted;
             //htmlPreview.Document.MouseMove += dragHandler;
             htmlPreview.Document.MouseDown += handleDocumentMouseDown;
             htmlPreview.Document.MouseUp += writeBackChangesfromDOM;
@@ -227,6 +233,15 @@ namespace ARdevKit.Controller.EditorController
 
         private void htmlPreview_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
+            //to determine of this previewController should be currently used
+            if (!this.ew.PreviewController.Equals(this) || disposed)
+                throw new Exception("This PreviewController should not be atached to the htmlPreview!");
+
+            htmlPreview.Document.MouseDown -= handleDocumentMouseDown;
+            htmlPreview.Document.MouseUp -= writeBackChangesfromDOM;
+            htmlPreview.Document.MouseDown += handleDocumentMouseDown;
+            htmlPreview.Document.MouseUp += writeBackChangesfromDOM;
+
             if (markCurrentElementInPreview)
             {
                 if (ew.CurrentElement != null)
@@ -305,7 +320,7 @@ namespace ARdevKit.Controller.EditorController
         private void chartMouseDown(object sender, HtmlElementEventArgs e)
         {
             AbstractAugmentation aug = trackable.Augmentations.Find(augmentation => { return augmentation.ID == ((HtmlElement)sender).Id; });
-            setCurrentElement(aug);
+            ew.Cmb_editor_properties_objectSelection.SelectedItem = aug;
             if(e.MouseButtonsPressed == MouseButtons.Right)
             {
 
@@ -345,7 +360,8 @@ namespace ARdevKit.Controller.EditorController
 
                 case "augmentation":
                     AbstractAugmentation aug = trackable.Augmentations.Find(augmentation => { return augmentation.ID == clickedElement.Id; });
-                    setCurrentElement(aug);
+                    //used this, because it sets the right name and triggers setCurrentElement
+                    ew.Cmb_editor_properties_objectSelection.SelectedItem = aug;
                     if (e.MouseButtonsPressed == MouseButtons.Right)
                     {
                         if (aug is Abstract2DAugmentation)
@@ -477,8 +493,9 @@ namespace ARdevKit.Controller.EditorController
 
                             this.trackable = (AbstractTrackable)currentElement;
                             this.ew.project.Trackables[index] = (AbstractTrackable)currentElement;
+                            updateElementCombobox(trackable);
                             this.addElement(currentElement, center);
-                            setCurrentElement(currentElement);                           
+                            ew.Cmb_editor_properties_objectSelection.SelectedItem = currentElement;                           
                             break;
                         }
                     }
@@ -496,6 +513,8 @@ namespace ARdevKit.Controller.EditorController
                     //this.setCoordinates(currentElement, v);
                     //this.addElement(currentElement, v);
                     ((AbstractAugmentation)currentElement).Trackable = this.trackable;
+                    updateElementCombobox(trackable);
+                    ew.Cmb_editor_properties_objectSelection.SelectedItem = currentElement;
                 }
             }
         }
@@ -553,10 +572,11 @@ namespace ARdevKit.Controller.EditorController
                 }
                 else
                 {
+                    string newPath = null;
                     if(currentElement is PictureMarker)
                     {
                         //adding to tempFile
-                        string newPath = addToFileSystemWithoutNotification(((PictureMarker)currentElement).PicturePath, currentElement);
+                        newPath = addToFileSystemWithoutNotification(((PictureMarker)currentElement).PicturePath, currentElement);
                         if(newPath == null)
                         {
                             MessageBox.Show("Es konnte keine Kopie der genutzten Bilddatei in " + TEMP_PATH + " angelegt werden");
@@ -567,7 +587,7 @@ namespace ARdevKit.Controller.EditorController
                     if(currentElement is ImageTrackable)
                     {
                         //adding to tempFile
-                        string newPath = addToFileSystemWithoutNotification(((PictureMarker)currentElement).PicturePath, currentElement);
+                        newPath = addToFileSystemWithoutNotification(((ImageTrackable)currentElement).ImagePath, currentElement);
                         if (newPath == null)
                         {
                             MessageBox.Show("Es konnte keine Kopie der genutzten Bilddatei in "+TEMP_PATH+" angelegt werden");
@@ -616,10 +636,10 @@ namespace ARdevKit.Controller.EditorController
                     fileWatcher.EnableRaisingEvents = false;
                     if (!Directory.Exists(chartTempFolderPath))
                         Directory.CreateDirectory(chartTempFolderPath);
-                    if(string.IsNullOrEmpty(ew.project.ProjectPath))
+                    if(Path.IsPathRooted(chart.ResFilePath))
                         Helper.Copy(chart.ResFilePath, chartTempFolderPath, "options.js");
                     else
-                        Helper.Copy(ew.project.ProjectPath + chart.ResFilePath, chartTempFolderPath, "options.js");  
+                        Helper.Copy(ew.project.ProjectPath + "\\" +chart.ResFilePath, chartTempFolderPath, "options.js");  
                     chart.ResFilePath = chartTempFolderPath + "\\options.js";
                     fileLookup.Add(chart.ResFilePath, currentElement);
                     Websites.chartFiles.Add("options"+chart.ID, File.ReadAllText(chart.ResFilePath));
@@ -949,7 +969,6 @@ namespace ARdevKit.Controller.EditorController
             updateElementCombobox(trackable);
         }
 
-
         /// <summary>
         /// Removes the Previewable and the Objekt, what is linked to the Previewable.  
         /// </summary>
@@ -978,15 +997,14 @@ namespace ARdevKit.Controller.EditorController
                 }
                 Websites.resetPage(index);
                 reloadCurrentWebsite();
-                //this.trackable = null;
-                //this.ew.project.Trackables[index] = null;
-                updateElementCombobox(trackable);
-                //if (!this.ew.project.hasTrackable())
-                //{
-                //    this.ew.ElementSelectionController.setElementEnable(typeof(PictureMarker), true);
-                //    this.ew.ElementSelectionController.setElementEnable(typeof(IDMarker), true);
-                //    this.ew.ElementSelectionController.setElementEnable(typeof(ImageTrackable), true);
-                //}
+                this.trackable = null;
+                this.ew.project.Trackables[index] = null;
+                if (!this.ew.project.hasTrackable())
+                {
+                    this.ew.ElementSelectionController.setElementEnable(typeof(PictureMarker), true);
+                    this.ew.ElementSelectionController.setElementEnable(typeof(IDMarker), true);
+                    this.ew.ElementSelectionController.setElementEnable(typeof(ImageTrackable), true);
+                }
                 this.ew.Tsm_editor_menu_edit_delete.Enabled = false;
             }
             else if (currentElement is AbstractAugmentation && trackable != null)
@@ -1025,6 +1043,12 @@ namespace ARdevKit.Controller.EditorController
                 this.ew.project.RemoveAugmentation((AbstractAugmentation)currentElement);
             }
             updateElementCombobox(trackable);
+            if(ew.CurrentElement == currentElement)
+            {
+                setCurrentElement(trackable);
+                ew.PropertyGrid1.SelectedObject = trackable;
+                ew.Cmb_editor_properties_objectSelection.SelectedItem = trackable;
+            }
             this.ew.Tsm_editor_menu_edit_delete.Enabled = false;
         }
 
@@ -1147,12 +1171,13 @@ namespace ARdevKit.Controller.EditorController
         }
 
         /// <summary>
-        /// Reloads a single previewable.
+        /// Reloads a single previewable. deletes all not needed files associated with it 
+        /// call this method if something changed, that need associated files to be renewed
         /// </summary>
-        /// <param name="prev">The previous.</param>
+        /// <param name="prev">The previewable.</param>
         public void reloadPreviewable(IPreviewable prev)
         {
-            RemoveByValue<string, IPreviewable>(fileLookup, prev);
+            List<string> filesToDelete = RemoveByValue<string, IPreviewable>(fileLookup, prev);
             if (prev is Chart)
             {
                 Chart chart = (Chart)prev;
@@ -1165,6 +1190,10 @@ namespace ARdevKit.Controller.EditorController
             if(prev is HtmlImage)
             {
                 Websites.previews.RemoveAll(pic => pic.Tag == ((HtmlImage)prev).ID);
+            }
+            if(prev is Abstract2DTrackable)
+            {
+                Websites.previews.RemoveAll(pic => pic.Tag == ((Abstract2DTrackable)prev).SensorCosID);
             }
             Websites.removeElementAt(findElement(prev), index);
             if (prev is Chart || prev is AbstractHtmlElement)
@@ -1184,6 +1213,22 @@ namespace ARdevKit.Controller.EditorController
             {
                 this.setSourcePreview(prev);
             }
+            //if the same Files are referenced by the new elements they must not be deleted, thats why is is tested here
+            fileWatcher.EnableRaisingEvents = false;
+            foreach (string path in filesToDelete)
+            {
+                try
+                {
+                    if (path.Contains(TEMP_PATH) && !fileLookup.ContainsKey(path))
+                        File.Delete(path);
+                }
+                catch (IOException ex)
+                {
+                    MessageBox.Show(ex.StackTrace + ":\n" + ex.Message);
+                }
+            }
+            fileWatcher.EnableRaisingEvents = true;
+
         }
 
 
@@ -1951,34 +1996,6 @@ namespace ARdevKit.Controller.EditorController
 
         //////////////////////////////////////////////////////////////////////////////////EVENTS/////////////////////////////////////////////////////////////////////////////////////////////
 
-
-        /// <summary>
-        /// Select element (Event).
-        /// </summary>
-        /// <param name="sender">Source of the event.</param>
-        /// <param name="e">Mouse event information.</param>
-
-        private void selectElement(object sender, HtmlElementEventArgs e)
-        {
-            if (((Abstract2DTrackable)trackable).SensorCosID == ((HtmlElement)sender).Id)
-            {
-                ew.PropertyGrid1.SelectedObject = trackable;
-                this.setCurrentElement((IPreviewable)trackable);
-            }
-            else
-            {
-                foreach(AbstractAugmentation aug in trackable.Augmentations)
-                {
-                    if (aug.ID == ((HtmlElement)sender).Id)
-                    {
-                        ew.PropertyGrid1.SelectedObject = trackable;
-                        this.setCurrentElement((IPreviewable)trackable);
-                    }
-                }
-
-            }
-        }
-
         /// <summary>
         /// Writes the back changesfrom DOM.
         /// </summary>
@@ -2322,7 +2339,6 @@ namespace ARdevKit.Controller.EditorController
         private void delete_current_element(object sender, EventArgs e)
         {
             this.removePreviewable(this.ew.CurrentElement);
-            ew.CurrentElement = null;
         }
 
        
@@ -2358,7 +2374,7 @@ namespace ARdevKit.Controller.EditorController
             updateElementCombobox(trackable);
             //in order to prevent setCurrentElement from trying to delete the mark on the 
             ew.CurrentElement = null;
-            setCurrentElement(trackable);       
+            ew.Cmb_editor_properties_objectSelection.SelectedItem = trackable;       
         }
         /// <summary>
         /// iterates upwords through html stucture and sums up the offsets
@@ -2409,10 +2425,29 @@ namespace ARdevKit.Controller.EditorController
 
         public void Dispose()
         {
+
+            //this listener keeps calling disposed Previewcontroller, so it must be released
+            htmlPreview.DocumentCompleted -= htmlPreview_DocumentCompleted;
+            htmlPreview.DocumentCompleted -= htmlPreview_DocumentFirstCompleted;
+            htmlPreview.Document.MouseDown -= handleDocumentMouseDown;
+            htmlPreview.Document.MouseUp -= writeBackChangesfromDOM;
+            htmlPreview = null;
+            this.ew.Tsm_editor_menu_edit_paste.Click -= new System.EventHandler(this.paste_augmentation_center);
+            this.ew.Tsm_editor_menu_edit_copie.Click -= new System.EventHandler(this.copy_augmentation);
+            this.ew.Tsm_editor_menu_edit_delete.Click -= new System.EventHandler(this.delete_current_element);
+            fileWatcher.Created -= fileWatcher_Created;
+            fileWatcher.Changed -= fileWatcher_Changed;
+            fileWatcher.Renamed -= fileWatcher_Renamed;
+
             fileWatcher.EnableRaisingEvents = false;
             fileWatcher.Dispose();
+            fileWatcher = null;
+
             if(Websites != null)
             shutDownWebserver();
+            this.ew = null;
+            this.webServerThread = null;
+            this.disposed = true;
         }
     }
 }
