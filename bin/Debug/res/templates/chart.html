@@ -1,19 +1,66 @@
-<!doctype html>
+<!-- <!doctype html>
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-    <title>chart</title>
-	<script src="options.js"></script>
-	<script src="jquery-1.11.1.js"></script>
-	<script src="highcharts.js"></script>
+    <title>chart</title>	
+</head>
+<body> -->
+<div id = "chart" style="height: 300px; width: 300px">
+	<script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
 	<script type='text/javascript'>
 	//<![CDATA[
-	function startChart() {
-		$('#chart').highcharts(init());
-	}//]]>
-	</script>
-</head>
-<body>
-	<div id = "chart"</div>
-</body>
-</html>
+		$('#chart').highcharts(init());     
+        function init() {
+            return {
+                chart: {
+                    type: 'spline'
+                },
+                title: {
+                    text: 'Temperatures'
+                },
+                xAxis: {
+                    type: 'datetime',
+                    text: 'Zeit'
+                },
+                yAxis: {
+                    title: {
+                        text: 'Einheiten'
+                    },
+                    labels: {
+                        formatter: function() {
+                            return this.value + '°C';
+                        }
+                    }
+                },
+                plotOptions: {
+                    series: {
+                        marker: {
+                            enabled: false,
+                            states: {
+                                hover: {
+                                    enabled: true
+                                }
+                            }
+                        }
+                    }
+                },
+                series: [{
+                    color: {
+                        linearGradient: { x1: 0, x2: 0, y1: 0, y1: 1 },
+                        stops: [
+                            [0, '#0000FF'],
+                            [1, '#DD210E']
+                        ]
+                    },
+                    name: 'Serie 1',
+                    data: []
+                }],
+                credits: {
+                    enabled: false
+                }
+            }
+        };
+	//]]>
+	</script></div>
+<!-- </body>
+</html> -->

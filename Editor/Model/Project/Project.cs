@@ -180,6 +180,7 @@ namespace ARdevKit.Model.Project
             visitor.Visit(this);
             foreach (AbstractTrackable t in Trackables)
             {
+                if(t != null)
                 t.Accept(visitor);
             }
             sensor.Accept(visitor);

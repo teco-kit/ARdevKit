@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using System.IO;
 using System.Windows.Forms;
 using ARdevKit;
@@ -208,9 +207,11 @@ namespace Controller.EditorController
                     return;
                 }
                 this.ew.PreviewController.reloadPreviewable((AbstractAugmentation)this.ew.CurrentElement);
-                PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
+                this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
+                //this replaces TODO: check if there are unexpected changes or if its even neede
+                /* PictureBox temp = this.ew.PreviewController.findElement(this.ew.CurrentElement);
                 temp.BorderStyle = BorderStyle.Fixed3D;
-                temp.BringToFront();
+                temp.BringToFront();*/
             }
 
             // Checks if picturePath has been changed
@@ -221,12 +222,8 @@ namespace Controller.EditorController
                 else
                 {
                     ((PictureMarker)ew.CurrentElement).PicturePath = e.ChangedItem.Value.ToString();
-                    this.ew.Pnl_editor_preview.Controls.Remove(this.ew.PreviewController.findBox(this.ew.CurrentElement));
-                    this.ew.PreviewController.addPictureBox(this.ew.CurrentElement,
-                        new Vector3D(this.ew.Pnl_editor_preview.Width / 2, this.ew.Pnl_editor_preview.Height / 2, 0));
-                    PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
-                    temp.BorderStyle = BorderStyle.Fixed3D;
-                    temp.BringToFront();
+                    this.ew.PreviewController.reloadPreviewable(this.ew.CurrentElement);
+                    this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
                 }
 
                 return;
@@ -237,17 +234,13 @@ namespace Controller.EditorController
             {
                 if (string.Equals((string)e.ChangedItem.Value, "", StringComparison.Ordinal))
                 {
-                        ((ImageTrackable)ew.CurrentElement).ImagePath = e.OldValue.ToString();
+                    ((ImageTrackable)ew.CurrentElement).ImagePath = e.OldValue.ToString();
                 }
                 else
                 {
                     ((ImageTrackable)ew.CurrentElement).ImagePath = e.ChangedItem.Value.ToString();
-                    this.ew.Pnl_editor_preview.Controls.Remove(this.ew.PreviewController.findBox(this.ew.CurrentElement));
-                    this.ew.PreviewController.addPictureBox(this.ew.CurrentElement,
-                        new Vector3D(this.ew.Pnl_editor_preview.Width / 2, this.ew.Pnl_editor_preview.Height / 2, 0));
-                    PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
-                    temp.BorderStyle = BorderStyle.Fixed3D;
-                    temp.BringToFront();
+                    this.ew.PreviewController.reloadPreviewable(this.ew.CurrentElement);
+                    this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
                 }
                 return;
             }
@@ -263,9 +256,11 @@ namespace Controller.EditorController
                 {
                     ((Abstract2DAugmentation)ew.CurrentElement).ResFilePath = e.ChangedItem.Value.ToString();
                     this.ew.PreviewController.reloadPreviewable((AbstractAugmentation)this.ew.CurrentElement);
-                    PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
+                    this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
+                    //this replaces TODO: check if there are unexpected changes or if its even neede
+                    /* PictureBox temp = this.ew.PreviewController.findElement(this.ew.CurrentElement);
                     temp.BorderStyle = BorderStyle.Fixed3D;
-                    temp.BringToFront();
+                    temp.BringToFront();*/
                 }
             }
 
@@ -278,10 +273,12 @@ namespace Controller.EditorController
                     {
                         ((FileSource)((Chart)ew.CurrentElement).Source).Data = e.OldValue.ToString();
                         this.ew.PreviewController.reloadPreviewable((Chart)this.ew.CurrentElement);
-                        PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
+                        this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
+                        //this replaces TODO: check if there are unexpected changes or if its even neede
+                        /* PictureBox temp = this.ew.PreviewController.findElement(this.ew.CurrentElement);
                         temp.BorderStyle = BorderStyle.Fixed3D;
-                        temp.BringToFront();
-                    }   
+                        temp.BringToFront();*/
+                    }
                     return;
                 }
             }
@@ -294,22 +291,28 @@ namespace Controller.EditorController
             {
                 if (string.Equals((string)e.ChangedItem.Value, "", StringComparison.Ordinal))
                 {
-                    (ew.PreviewController.findBox(ew.CurrentElement).ContextMenu).MenuItems[5].Enabled = false;
+                    //attaches eventhandlers each time when the site is loaded, which does reloadPreviewable
+                    //(ew.PreviewController.findElement(ew.CurrentElement).ContextMenu).MenuItems[5].Enabled = false;
                     this.ew.PreviewController.reloadPreviewable((Chart)this.ew.CurrentElement);
-                    PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
+                    this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
+                    //this replaces TODO: check if there are unexpected changes or if its even neede
+                    /* PictureBox temp = this.ew.PreviewController.findElement(this.ew.CurrentElement);
                     temp.BorderStyle = BorderStyle.Fixed3D;
-                    temp.BringToFront();
+                    temp.BringToFront();*/
 
                     return;
                 }
 
                 if (e.OldValue == null || string.Equals(e.OldValue.ToString(), "", StringComparison.Ordinal))
                 {
-                    (ew.PreviewController.findBox(ew.CurrentElement).ContextMenu).MenuItems[5].Enabled = true;
+                    //attaches eventhandlers each time when the site is loaded, which does reloadPreviewable
+                    //(ew.PreviewController.findElement(ew.CurrentElement).ContextMenu).MenuItems[5].Enabled = true;
                     this.ew.PreviewController.reloadPreviewable((Chart)this.ew.CurrentElement);
-                    PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
+                    this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
+                    //this replaces TODO: check if there are unexpected changes or if its even neede
+                    /* PictureBox temp = this.ew.PreviewController.findElement(this.ew.CurrentElement);
                     temp.BorderStyle = BorderStyle.Fixed3D;
-                    temp.BringToFront();
+                    temp.BringToFront();*/
 
                     return;
                 }
@@ -324,9 +327,11 @@ namespace Controller.EditorController
                 && !(String.Equals(e.ChangedItem.Parent.Label.ToString(), "Rotating", StringComparison.Ordinal)))
             {
                 this.ew.PreviewController.reloadPreviewable((AbstractAugmentation)this.ew.CurrentElement);
-                PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
+                this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
+                //this replaces TODO: check if there are unexpected changes or if its even neede
+                /* PictureBox temp = this.ew.PreviewController.findElement(this.ew.CurrentElement);
                 temp.BorderStyle = BorderStyle.Fixed3D;
-                temp.BringToFront();
+                temp.BringToFront();*/
 
                 return;
             }
@@ -347,18 +352,27 @@ namespace Controller.EditorController
                     || string.Equals(e.ChangedItem.Label.ToString(), "Width", StringComparison.Ordinal))
                 {
                     this.ew.PreviewController.reloadPreviewable((AbstractAugmentation)this.ew.CurrentElement);
-                    PictureBox temp = this.ew.PreviewController.findBox(this.ew.CurrentElement);
+                    this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
+                    //this replaces TODO: check if there are unexpected changes or if its even neede
+                    /* PictureBox temp = this.ew.PreviewController.findElement(this.ew.CurrentElement);
                     temp.BorderStyle = BorderStyle.Fixed3D;
-                    temp.BringToFront();
-                    return;
+                    temp.BringToFront();*/
                 }
+            }
+
+            // Checks if the position of a htmlAUgmentation has been changed.
+            if (string.Equals(e.ChangedItem.Label.ToString(), "Top", StringComparison.Ordinal)
+                || string.Equals(e.ChangedItem.Label.ToString(), "Left", StringComparison.Ordinal))
+            {
+                this.ew.PreviewController.reloadPreviewable((AbstractAugmentation)this.ew.CurrentElement);
+                this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
             }
 
             // Checks if the size of a trackable has been changed.
             if (string.Equals(e.ChangedItem.Label.ToString(), "Size", StringComparison.Ordinal))
             {
-                ew.PreviewController.reloadPreviewPanel(ew.PreviewController.index);
-
+                this.ew.PreviewController.reloadPreviewable(this.ew.CurrentElement);
+                this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
                 return;
             }
 
@@ -375,10 +389,11 @@ namespace Controller.EditorController
                     IDMarker marker = (IDMarker)ew.CurrentElement;
                     marker.MatrixID = ew.project.nextID();
                 }
-                IPreviewable temp = this.ew.CurrentElement;
-                this.ew.PreviewController.findBox(temp).Image = this.ew.PreviewController.scaleIPreviewable(temp);
-                this.ew.PreviewController.reloadPreviewPanel(this.ew.PreviewController.index);
-                this.ew.PreviewController.setCurrentElement(temp);
+                //ATTENTION could cause onforsighted problems
+                //this.ew.PreviewController.findElement(temp).Image = this.ew.PreviewController.scaleIPreviewable(temp);
+                //this.ew.PreviewController.reloadPreviewPanel(this.ew.PreviewController.Index);
+                this.ew.PreviewController.reloadPreviewable(this.ew.CurrentElement);
+                this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
                 return;
             }
         }

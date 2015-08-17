@@ -71,13 +71,13 @@ namespace ARdevKit
         /// The minscreenwidht
         /// </summary>
         /// <remarks>geht 28.01.2014 15:12</remarks>
-        private const uint MINSCREENWIDHT = 320;
+        public const uint MINSCREENWIDHT = 320;
 
         /// <summary>
         /// The minscreenheight
         /// </summary>
         /// <remarks>geht 28.01.2014 15:12</remarks>
-        private const uint MINSCREENHEIGHT = 240;
+        public const uint MINSCREENHEIGHT = 240;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
@@ -241,7 +241,6 @@ namespace ARdevKit
                     }
                 }
             }
-
             createNewProject("");
         }
 
@@ -359,17 +358,20 @@ namespace ARdevKit
         private void btn_editor_scene_scene_change(object sender, EventArgs e)
         {
             int temp = Convert.ToInt32(((Button)sender).Text);
-            if (this.project.Trackables.Count > 1)
-            {
-                this.previewController.reloadPreviewPanel(temp - 1);
-                this.PropertyGrid1.SelectedObject = null;
+            //if (this.project.Trackables.Count > 1)
+            //{
+                this.previewController.changeSceneTo(temp - 1);
+                //this.previewController.reloadPreviewPanel(temp - 1);
+                //this.PropertyGrid1.SelectedObject = null;
+                //this.currentElement = null;
 
-            }
-            else
-            {
-                this.previewController.reloadPreviewPanel(0);
-                this.PropertyGrid1.SelectedObject = null;
-            }
+            //}
+            //else
+            //{
+            //    this.previewController.showSceneNr(0);
+            //    //this.previewController.reloadPreviewPanel(0);
+            //    this.PropertyGrid1.SelectedObject = null;
+            //}
 
             this.resetButton();
             this.setButton(((Button)sender).Text);
@@ -405,8 +407,11 @@ namespace ARdevKit
                 tempButton.ContextMenu.MenuItems.Add("Duplicate", new EventHandler(this.pnl_editor_scene_duplicate));
 
                 this.pnl_editor_scenes.Controls.Add(tempButton);
-                this.previewController.reloadPreviewPanel(this.project.Trackables.Count);
-                this.PropertyGrid1.SelectedObject = null;
+                this.project.Trackables.Add(null);
+                this.previewController.changeSceneTo(this.project.Trackables.Count - 1);
+                //this.previewController.reloadPreviewPanel(temp - 1);
+                this.PropertyGrid1.SelectedObject = project.Trackables[this.project.Trackables.Count - 1];
+                this.currentElement = project.Trackables[this.project.Trackables.Count - 1];
                 this.resetButton();
                 this.setButton(tempButton.Text);
             }
@@ -433,11 +438,11 @@ namespace ARdevKit
         {
             if (this.project.Trackables.Count > 1)
             {
-                this.project.Trackables.Remove(this.previewController.trackable);
-                this.previewController.trackable = this.project.Trackables[0];
+                this.previewController.deleteCurrentScene();
+                this.project.Trackables.RemoveAt(previewController.Index);
                 this.reloadSelectionPanel();
-                this.previewController.index = -1;
-                this.previewController.reloadPreviewPanel(0);
+                this.PropertyGrid1.SelectedObject = project.Trackables[0];
+                this.previewController.changeSceneTo(0);
                 if (!this.project.hasTrackable())
                 {
                     this.ElementSelectionController.setElementEnable(typeof(PictureMarker), true);
@@ -461,7 +466,8 @@ namespace ARdevKit
             }
             this.resetButton();
             this.setButton(Convert.ToString("1"));
-            this.PropertyGrid1.SelectedObject = null;
+            //this.PropertyGrid1.SelectedObject = null;
+            //this.currentElement = null;
         }
 
         /// <summary>
@@ -538,11 +544,16 @@ namespace ARdevKit
                 initializeLoadedProject(SaveLoadController.loadProject(openFileDialog1.FileName));
                 this.initializeControllers();
                 this.updatePanels();
-                previewController.index = -1;
-                previewController.reloadPreviewPanel(0);
+                //previewController.Index = -1;
+                for (int i = 0; i < project.Trackables.Count; i++)
+                {
+                    previewController.reloadPreviewPanel(i);
+                }
+                updateElementSelectionPanel();
                 this.updateSceneSelectionPanel();
                 this.updateScreenSize();
                 this.checksum = project.getChecksum();
+                previewController.changeSceneTo(0);
             }
             catch (System.ArgumentException a)
             {
@@ -572,8 +583,11 @@ namespace ARdevKit
             sources.addElement(new SceneElement("File Source", new FileSource(""), this));
             SceneElementCategory augmentations = new SceneElementCategory(MetaCategory.Augmentation, "Augmentations");
             augmentations.addElement(new SceneElement("Chart", new Chart(), this));
-            augmentations.addElement(new SceneElement("Image", new ImageAugmentation(), this));
-            augmentations.addElement(new SceneElement("Video", new VideoAugmentation(), this));
+            //augmentations.addElement(new SceneElement("Image", new ImageAugmentation(), this));
+            //augmentations.addElement(new SceneElement("Video", new VideoAugmentation(), this));
+            augmentations.addElement(new SceneElement("HtmlImage", new HtmlImage(), this));
+            augmentations.addElement(new SceneElement("HtmlVideo", new HtmlVideo(), this));
+            augmentations.addElement(new SceneElement("HtmlGeneric", new GenericHtml(), this));
             SceneElementCategory trackables = new SceneElementCategory(MetaCategory.Trackable, "Trackables");
             trackables.addElement(new SceneElement("Picture Marker", new PictureMarker(), this));
             trackables.addElement(new SceneElement("IDMarker", new IDMarker(1), this));
@@ -808,9 +822,13 @@ namespace ARdevKit
 
         private void pnl_editor_preview_DragEnter(object sender, DragEventArgs e)
         {
-            if (previewController.currentMetaCategory != MetaCategory.Source)
+            //if (previewController.currentMetaCategory != MetaCategory.Source)
             {
                 e.Effect = DragDropEffects.Move;
+            }
+            //else
+            {
+
             }
         }
 
@@ -830,12 +848,21 @@ namespace ARdevKit
                 if (((ElementIcon)e.Data.GetData(typeof(ElementIcon)) != null))
                 {
                     ElementIcon icon = (ElementIcon)e.Data.GetData(typeof(ElementIcon));
-                    Point p = pnl_editor_preview.PointToClient(Cursor.Position);
+                    Point p = html_preview.PointToClient(Cursor.Position);
 
                     IPreviewable element = (IPreviewable)icon.Element.Prototype.Clone();
                     icon.EditorWindow.PreviewController.addPreviewable(element, new Vector3D(p.X, p.Y, 0));
                 }
             }
+            else
+            {
+                previewController.onAugmentationDrop(sender, e);
+            }
+            if (sender == this.pnl_preview_overlay)
+            {
+                ((Panel)sender).Visible = false;
+            }
+            updateElementSelectionPanel();
         }
 
         /// <summary>
@@ -843,6 +870,12 @@ namespace ARdevKit
         /// </summary>
         private void initializeControllers()
         {
+            if (previewController != null)
+            {
+                previewController.Dispose();
+                previewController = null;
+                //previewController.trackable = null;
+            }
             this.elementSelectionController = new ElementSelectionController(this);
             this.previewController = new PreviewController(this);
             this.propertyController = new PropertyController(this);
@@ -861,9 +894,7 @@ namespace ARdevKit
             this.elementCategories = new List<SceneElementCategory>();
             this.exportVisitor = new ExportVisitor();
             this.currentElement = null;
-            this.project.Screensize = new ScreenSize();
-            this.project.Screensize.Height = Convert.ToUInt32(pnl_editor_preview.Size.Height);
-            this.project.Screensize.Width = Convert.ToUInt32(pnl_editor_preview.Size.Width);
+            this.project.Screensize = new ScreenSize(MINSCREENWIDHT, MINSCREENHEIGHT);
             this.project.Screensize.SizeChanged += new System.EventHandler(this.pnl_editor_preview_SizeChanged);
             registerElements();
         }
@@ -900,20 +931,13 @@ namespace ARdevKit
             if (project.Screensize.Width < MINSCREENWIDHT)
             {
                 this.project.Screensize.Width = MINSCREENWIDHT;
-                this.pnl_editor_preview.Size = new Size((int)project.Screensize.Width, (int)project.Screensize.Height);
-                this.previewController.rescalePreviewPanel();
             }
-            else if (project.Screensize.Height < MINSCREENHEIGHT)
+            if (project.Screensize.Height < MINSCREENHEIGHT)
             {
                 this.project.Screensize.Height = MINSCREENHEIGHT;
-                this.pnl_editor_preview.Size = new Size((int)project.Screensize.Width, (int)project.Screensize.Height);
-                this.previewController.rescalePreviewPanel();
             }
-            else
-            {
-                this.pnl_editor_preview.Size = new Size((int)project.Screensize.Width, (int)project.Screensize.Height);
-                this.previewController.rescalePreviewPanel();
-            }
+                this.previewController.setMainContainerSize(project.Screensize);
+                //this.previewController.rescalePreviewPanel();
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -991,7 +1015,6 @@ namespace ARdevKit
                     }
                 }
             }
-
             this.loadProject();
         }
 
@@ -1053,7 +1076,7 @@ namespace ARdevKit
         public void setPasteButtonEnabled()
         {
             this.tsm_editor_menu_edit_paste.Enabled = true;
-            this.pnl_editor_preview.ContextMenu.MenuItems[0].Enabled = true;
+            //TODO enable contextmenu paste in MainContainer Conetextmenu
         }
 
         /// <summary>
@@ -1105,7 +1128,7 @@ namespace ARdevKit
                     }
                     if (!this.project.existTrackable(tempTrack))
                     {
-                        tempTrack.vector = new Vector3D(this.pnl_editor_preview.Size.Width / 2, this.pnl_editor_preview.Size.Height / 2, 0);
+                        tempTrack.vector = new Vector3D(previewController.getMainContainerSize().Width / 2, previewController.getMainContainerSize().Height / 2, 0);
                         this.project.Trackables.Add(tempTrack);
                         foreach (AbstractAugmentation a in tempTrack.Augmentations)
                         {
@@ -1203,7 +1226,10 @@ namespace ARdevKit
         private void EditorWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!ProjectChanged())
+            {
+                previewController.shutDownWebserver();
                 return;
+            }
 
             DialogResult dlg = MessageBox.Show("Möchten Sie das aktuelle Projekt abspeichern, bevor ARdevKit beendet wird?", "Projekt speichern?", MessageBoxButtons.YesNoCancel);
             if (dlg == DialogResult.Yes)
@@ -1242,6 +1268,7 @@ namespace ARdevKit
                     MessageBox.Show("Could not delete tmp folder.\n" + uae.Message, "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+            previewController.shutDownWebserver();
         }
 
         /// <summary>
@@ -1409,5 +1436,9 @@ namespace ARdevKit
             }
         }
 
+        internal void enableDragnNDropOverlay()
+        {
+            this.pnl_preview_overlay.Visible = true;
+        }
     }
 }

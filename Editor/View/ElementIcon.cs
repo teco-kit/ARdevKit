@@ -130,8 +130,8 @@ namespace ARdevKit.View
         {
             if (editorWindow.PreviewController.currentMetaCategory != MetaCategory.Source)
             {
-                int y = editorWindow.Pnl_editor_preview.Height / 2;
-                int x = editorWindow.Pnl_editor_preview.Width / 2;
+                int y = (int)editorWindow.PreviewController.getMainContainerSize().Height / 2;
+                int x = (int)editorWindow.PreviewController.getMainContainerSize().Width / 2;
                 IPreviewable element = (IPreviewable)this.element.Prototype.Clone();
                 editorWindow.PreviewController.addPreviewable(element, new ARdevKit.Model.Project.Vector3D(x, y, 1));
             }
@@ -171,7 +171,7 @@ namespace ARdevKit.View
             }
             else
             {
-                DoDragDrop(this, DragDropEffects.Move);
+                    DoDragDrop(this, DragDropEffects.Move);        
             }
         }
 
@@ -191,6 +191,7 @@ namespace ARdevKit.View
                 Point current = PointToClient(Cursor.Position);
                 if (Math.Abs(clickPoint.X - current.X) > 10 || Math.Abs(clickPoint.Y - current.Y) > 10)
                 {
+                    editorWindow.enableDragnNDropOverlay();
                     DoDragDrop(this, DragDropEffects.Move);
                 }
             }

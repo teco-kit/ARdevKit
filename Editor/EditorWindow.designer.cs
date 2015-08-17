@@ -71,16 +71,15 @@ namespace ARdevKit
             this.tsm_editor_menu_help = new System.Windows.Forms.ToolStripMenuItem();
             this.tsm_editor_menu_help_help = new System.Windows.Forms.ToolStripMenuItem();
             this.tsm_editor_menu_help_info = new System.Windows.Forms.ToolStripMenuItem();
-            this.pnl_editor_preview = new System.Windows.Forms.Panel();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.miniToolStrip = new System.Windows.Forms.MenuStrip();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.pnl_preview_overlay = new ARdevKit.View.TransparentPanel();
+            this.html_preview = new System.Windows.Forms.WebBrowser();
             this.pnl_editor_selection.SuspendLayout();
             this.pnl_editor_status.SuspendLayout();
             this.pnl_editor_scenes.SuspendLayout();
             this.pnl_editor_properties.SuspendLayout();
             this.mst_editor_menu.SuspendLayout();
-            this.pnl_editor_preview.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -113,16 +112,16 @@ namespace ARdevKit
             // 
             this.pnl_editor_status.Controls.Add(this.lbl_version);
             this.pnl_editor_status.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.pnl_editor_status.Location = new System.Drawing.Point(0, 707);
+            this.pnl_editor_status.Location = new System.Drawing.Point(0, 718);
             this.pnl_editor_status.Name = "pnl_editor_status";
-            this.pnl_editor_status.Size = new System.Drawing.Size(1008, 23);
+            this.pnl_editor_status.Size = new System.Drawing.Size(1016, 23);
             this.pnl_editor_status.TabIndex = 3;
             // 
             // lbl_version
             // 
             this.lbl_version.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.lbl_version.AutoSize = true;
-            this.lbl_version.Location = new System.Drawing.Point(931, 10);
+            this.lbl_version.Location = new System.Drawing.Point(939, 10);
             this.lbl_version.Name = "lbl_version";
             this.lbl_version.Size = new System.Drawing.Size(76, 13);
             this.lbl_version.TabIndex = 0;
@@ -206,7 +205,7 @@ namespace ARdevKit
             this.tsm_editor_menu_help});
             this.mst_editor_menu.Location = new System.Drawing.Point(0, 0);
             this.mst_editor_menu.Name = "mst_editor_menu";
-            this.mst_editor_menu.Size = new System.Drawing.Size(1008, 24);
+            this.mst_editor_menu.Size = new System.Drawing.Size(1016, 24);
             this.mst_editor_menu.TabIndex = 0;
             this.mst_editor_menu.Text = "menuStrip1";
             // 
@@ -450,31 +449,6 @@ namespace ARdevKit
             this.tsm_editor_menu_help_info.Text = "Info";
             this.tsm_editor_menu_help_info.Click += new System.EventHandler(this.tsm_editor_menu_help_info_Click);
             // 
-            // pnl_editor_preview
-            // 
-            this.pnl_editor_preview.AllowDrop = true;
-            this.pnl_editor_preview.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.pnl_editor_preview.BackColor = System.Drawing.SystemColors.Control;
-            this.pnl_editor_preview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pnl_editor_preview.Controls.Add(this.menuStrip1);
-            this.pnl_editor_preview.Location = new System.Drawing.Point(3, 3);
-            this.pnl_editor_preview.MinimumSize = new System.Drawing.Size(320, 240);
-            this.pnl_editor_preview.Name = "pnl_editor_preview";
-            this.pnl_editor_preview.Size = new System.Drawing.Size(653, 604);
-            this.pnl_editor_preview.TabIndex = 3;
-            this.pnl_editor_preview.SizeChanged += new System.EventHandler(this.pnl_editor_preview_SizeChanged);
-            this.pnl_editor_preview.Click += new System.EventHandler(this.pnl_editor_preview_Click);
-            this.pnl_editor_preview.DragDrop += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragDrop);
-            this.pnl_editor_preview.DragEnter += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragEnter);
-            // 
-            // menuStrip1
-            // 
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(651, 24);
-            this.menuStrip1.TabIndex = 0;
-            this.menuStrip1.Text = "menuStrip1";
-            // 
             // miniToolStrip
             // 
             this.miniToolStrip.AutoSize = false;
@@ -493,19 +467,43 @@ namespace ARdevKit
             this.panel1.AutoScrollMargin = new System.Drawing.Size(3, 3);
             this.panel1.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel1.Controls.Add(this.pnl_editor_preview);
+            this.panel1.Controls.Add(this.pnl_preview_overlay);
+            this.panel1.Controls.Add(this.html_preview);
             this.panel1.Location = new System.Drawing.Point(141, 27);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(661, 612);
             this.panel1.TabIndex = 4;
-            this.panel1.DragDrop += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragDrop);
-            this.panel1.DragEnter += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragEnter);
+            // 
+            // pnl_preview_overlay
+            // 
+            this.pnl_preview_overlay.AllowDrop = true;
+            this.pnl_preview_overlay.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnl_preview_overlay.Location = new System.Drawing.Point(0, 0);
+            this.pnl_preview_overlay.Name = "pnl_preview_overlay";
+            this.pnl_preview_overlay.Size = new System.Drawing.Size(659, 610);
+            this.pnl_preview_overlay.TabIndex = 5;
+            this.pnl_preview_overlay.Visible = false;
+            this.pnl_preview_overlay.DragDrop += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragDrop);
+            this.pnl_preview_overlay.DragEnter += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragEnter);
+            // 
+            // html_preview
+            // 
+            this.html_preview.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.html_preview.IsWebBrowserContextMenuEnabled = false;
+            this.html_preview.Location = new System.Drawing.Point(3, 3);
+            this.html_preview.MinimumSize = new System.Drawing.Size(20, 20);
+            this.html_preview.Name = "html_preview";
+            this.html_preview.Size = new System.Drawing.Size(653, 604);
+            this.html_preview.TabIndex = 4;
+            this.html_preview.WebBrowserShortcutsEnabled = false;
             // 
             // EditorWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1008, 730);
+            this.ClientSize = new System.Drawing.Size(1016, 741);
             this.Controls.Add(this.pnl_editor_status);
             this.Controls.Add(this.pnl_editor_scenes);
             this.Controls.Add(this.pnl_editor_properties);
@@ -525,8 +523,6 @@ namespace ARdevKit
             this.pnl_editor_properties.ResumeLayout(false);
             this.mst_editor_menu.ResumeLayout(false);
             this.mst_editor_menu.PerformLayout();
-            this.pnl_editor_preview.ResumeLayout(false);
-            this.pnl_editor_preview.PerformLayout();
             this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -582,10 +578,10 @@ namespace ARdevKit
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripMenuItem sendProject;
         private ToolStripMenuItem DeviceDebug;
-        private Panel pnl_editor_preview;
-        private MenuStrip menuStrip1;
         private MenuStrip miniToolStrip;
         private Panel panel1;
+        private WebBrowser html_preview;
+        private View.TransparentPanel pnl_preview_overlay;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
@@ -603,21 +599,6 @@ namespace ARdevKit
             set { propertyGrid1 = value; }
         }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// <summary>
-        /// Gets or sets the pnl editor preview.
-        /// </summary>
-        ///
-        /// <value>
-        /// The pnl editor preview.
-        /// </value>
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        public System.Windows.Forms.Panel Pnl_editor_preview
-        {
-            get { return pnl_editor_preview; }
-            set { pnl_editor_preview = value; }
-        }
 
         /**
          * <summary>    Gets or sets the pnl editor selection. </summary>
@@ -690,6 +671,19 @@ namespace ARdevKit
             get { return tsm_editor_menu_edit_delete; }
             set { tsm_editor_menu_edit_delete = value; }
         }
+
+        public ARdevKit.View.TransparentPanel Pnl_preview_overlay
+        {
+            get { return pnl_preview_overlay; }
+            set { pnl_preview_overlay = value; }
+        }
+
+        public System.Windows.Forms.WebBrowser Html_preview
+        {
+            get { return html_preview; }
+            set { html_preview = value; }
+        }
+
     }
 }
 

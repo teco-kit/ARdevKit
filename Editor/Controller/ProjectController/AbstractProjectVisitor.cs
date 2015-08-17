@@ -153,6 +153,36 @@ namespace ARdevKit.Controller.ProjectController
         public abstract void Visit(IDMarker idMarker);
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>   Visits the given <see cref="HtmlImage"/>. </summary>
+        ///
+        /// <remarks>   Imanuel, 17.01.2014. </remarks>
+        ///
+        /// <param name="HtmlImage"> The HtmlImage. </param>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        public abstract void Visit(HtmlImage htmlImage);
+        
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>   Visits the given <see cref="HtmlVideo"/>. </summary>
+        ///
+        /// <remarks>   Imanuel, 17.01.2014. </remarks>
+        ///
+        /// <param name="HtmlVideo"> The identifier Html Video. </param>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        public abstract void Visit(HtmlVideo htmlVideo);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>   Visits the given <see cref="GenericHtml"/>. </summary>
+        ///
+        /// <remarks>   Imanuel, 17.01.2014. </remarks>
+        ///
+        /// <param name="GenericHtml"> The identifier Html Video. </param>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        public abstract void Visit(GenericHtml genericHtml);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   Visits the given <see cref="Project"/>. </summary>
         ///
         /// <remarks>   Imanuel, 17.01.2014. </remarks>

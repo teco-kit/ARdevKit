@@ -38,8 +38,8 @@ namespace ARdevKit.Model.Project
         /// <summary>   Creates a new sensorCosIDstring. </summary>
         ///
         /// <remarks>   Imanuel, 17.01.2014. </remarks>
-        ///
         /// <param name="trackable">   The marker. </param>
+        ///
         ///
         /// <returns>   The new new sensorCosIDstring. </returns>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
