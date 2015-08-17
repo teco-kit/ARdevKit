@@ -1468,7 +1468,146 @@ namespace ARdevKit.Controller.ProjectController
 
         public override void Visit(HtmlVideo htmlVideo)
         {
-            throw new NotImplementedException();
+            string htmlVideoID = htmlVideo.ID = htmlVideo.ID == null ? "htmlVideo" + htmlVideoCount : htmlVideo.ID;
+            string htmlVideoPluginID = "arel.Plugin." + CultureInfo.CurrentCulture.TextInfo.ToTitleCase(htmlVideoID);
+
+            //get corresponding sceneX.js
+            SceneFile sceneFile = SceneFiles[coordinateSystemID - 1];
+
+            // arel[projectName].html
+            arelProjectFileHeadBlock.AddLine(new XMLLine(new XMLTag("script", "src=\"Assets/" + htmlVideoID + "/htmlVideo.js\"")));
+
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            // arelGlue.js
+            JavaScriptBlock loadContentBlock = new JavaScriptBlock();
+            //sceneReadyFunctionBlock.AddBlock(loadContentBlock);
+            sceneFile.SceneReadyBlock.AddBlock(loadContentBlock);
+
+            //arelGlueFile.AddBlock(new JavaScriptLine("var " + htmlVideoID));
+            sceneFile.DefineBlock.AddLine(new JavaScriptInLine(htmlVideoID + " : " + htmlVideoPluginID, true));
+
+            //loadContentBlock.AddLine(new JavaScriptLine(htmlVideoID + " = " + htmlVideoPluginID));
+
+            if (htmlVideo.Events != null)
+            {
+                JavaScriptBlock loadEventsBlock = new JavaScriptBlock("$.getScript(\"Events/" + htmlVideoID + "_Event.js\", function()", new BlockMarker("{", "})"));
+                loadContentBlock.AddBlock(loadEventsBlock);
+                loadContentBlock.AddBlock(new JavaScriptInLine(".fail(function() { console.log(\"Failed to load events\")})", false));
+                loadContentBlock.AddBlock(new JavaScriptLine(".done(function() { console.log(\"Loaded events successfully\")})"));
+            }
+
+            //loadContentBlock.AddLine(new JavaScriptLine(htmlVideoID + ".hide()"));
+
+            // onTracking
+            JavaScriptBlock htmlImageIfPatternIsFoundCreateBlock = new JavaScriptBlock("if (!this." + htmlVideoID + ".created || this." + htmlVideoID + ".forceRecalculation)", new BlockMarker("{", "}"));
+            sceneFile.CreateBlock.AddBlock(htmlImageIfPatternIsFoundCreateBlock);
+            htmlImageIfPatternIsFoundCreateBlock.AddLine(new JavaScriptLine("this." + htmlVideoID + ".create(this.id)"));
+
+            //JavaScriptBlock htmlVideoIfPatternIsFoundShowBlock = new JavaScriptBlock("if (param[0].getCoordinateSystemID() == " + htmlVideoID + ".getCoordinateSystemID())", new BlockMarker("{", "}"));
+            //ifPatternIsFoundBlock.AddBlock(htmlVideoIfPatternIsFoundShowBlock);
+            //JavaScriptBlock htmlVideoIfPatternIsFoundCreateBlock = new JavaScriptBlock("if (!" + htmlVideoID + ".created || " + htmlVideoID + ".forceRecalculation)", new BlockMarker("{", "}"));
+            //htmlVideoIfPatternIsFoundShowBlock.AddBlock(htmlVideoIfPatternIsFoundCreateBlock);
+            //htmlVideoIfPatternIsFoundCreateBlock.AddLine(new JavaScriptLine(htmlVideoID + ".create()"));
+
+            //htmlVideoIfPatternIsFoundShowBlock.AddLine(new JavaScriptLine(htmlVideoID + ".show()"));
+            //if (htmlVideo.Positioning.PositioningMode == HtmlPositioning.PositioningModes.RELATIVE)
+            //    htmlVideoIfPatternIsFoundShowBlock.AddLine(new JavaScriptLine("arel.Scene.getScreenCoordinatesFrom3DPosition(COS" + coordinateSystemID + "Anchor.getTranslation(), " + htmlVideoID + ".getCoordinateSystemID(), function(coord){move(COS" + coordinateSystemID + "Anchor, " + htmlVideoID + ", coord);})"));
+
+            //// onTracking lost
+            //ifPatternIsLostBlock.AddLine(new JavaScriptLine(htmlVideoID + ".hide()"));
+
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            // Create htmlVideo.js
+            HtmlVideoFile htmlVideoFile = new HtmlVideoFile(project.ProjectPath, htmlVideoID);
+            files.Add(htmlVideoFile);
+
+            JavaScriptBlock htmlVideoFileVariablesBlock = new JavaScriptBlock();
+
+            JavaScriptBlock htmlVideoFileDefineBlock = new JavaScriptBlock(htmlVideoPluginID + " = ", new BlockMarker("{", "};"));
+            htmlVideoFile.AddBlock(htmlVideoFileDefineBlock);
+
+            // Ready
+            htmlVideoFileDefineBlock.AddLine(new JavaScriptInLine("created : false", true));
+            //// Visibility
+            //htmlVideoFileDefineBlock.AddLine(new JavaScriptInLine("visible : false", true));
+            // ID
+            htmlVideoFileDefineBlock.AddLine(new JavaScriptInLine("id : \"" + htmlVideoID + "\"", true));
+            //// CoordinateSystemID
+            //htmlVideoFileDefineBlock.AddLine(new JavaScriptInLine("coordinateSystemID : " + coordinateSystemID, true));
+            //// Translation in this Case Ignore translations and us positioning
+            //string translationX = htmlVideo.Positioning.Left.ToString("F1", CultureInfo.InvariantCulture);
+            //string translationY = htmlVideo.Positioning.Top.ToString("F1", CultureInfo.InvariantCulture);
+            //string translationZ = htmlVideo.Translation.Z.ToString("F1", CultureInfo.InvariantCulture);
+            //htmlVideoFileDefineBlock.AddBlock(new JavaScriptInLine("translation : new arel.Vector3D(" + translationX + "," + translationY + "," + translationZ + ")", true));
+            // htmlVideo
+            htmlVideoFileDefineBlock.AddBlock(new JavaScriptInLine("element : document.createElement(\"video\")", true));
+
+            // Create
+            // element
+            JavaScriptBlock htmlVideoFileCreateBlock = new JavaScriptBlock("create : function(sceneID)", new BlockMarker("{", "},"));
+            htmlVideoFileDefineBlock.AddBlock(htmlVideoFileCreateBlock);
+            htmlVideoFileCreateBlock.AddLine(new JavaScriptLine("this.created = true"));
+            //htmlVideoFileCreateBlock.AddLine(new JavaScriptLine("this.element.setAttribute(\"id\", this.id)"));
+            //switch (htmlVideo.Positioning.PositioningMode)
+            //{
+            //    case (HtmlPositioning.PositioningModes.STATIC):
+            //        htmlVideoFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.position = \"static\""));
+            //        break;
+            //    case (HtmlPositioning.PositioningModes.ABSOLUTE):
+            //    case (HtmlPositioning.PositioningModes.RELATIVE):
+            //        htmlVideoFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.position = \"absolute\""));
+            //        break;
+            //}
+
+            // Copy video to projectPath
+            string newPath = "Assets";
+            if (htmlVideo.ResFilePath.Contains(':'))
+            {
+                ExportIsValid = Helper.Copy(htmlVideo.ResFilePath, Path.Combine(project.ProjectPath, newPath)) && ExportIsValid;
+            }
+            else if (project.OldProjectPath != null && !project.OldProjectPath.Equals(project.ProjectPath))
+            {
+                ExportIsValid = Helper.Copy(Path.Combine(project.OldProjectPath, htmlVideo.ResFilePath), Path.Combine(project.ProjectPath, newPath)) && ExportIsValid;
+            }
+            htmlVideo.ResFilePath = Path.Combine(newPath, Path.GetFileName(htmlVideo.ResFilePath));
+
+
+            //htmlVideoFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.width = \"" + htmlVideo.Width + "px\""));
+            //htmlVideoFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.height = \"" + htmlVideo.Height + "px\""));
+
+            //set ImageBackground
+            //htmlVideoFileCreateBlock.AddLine(new JavaScriptLine("this.element.src =\"" + htmlVideo.ResFilePath.Replace('\\', '/') + "\""));
+            //TODO
+
+            htmlVideoFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.position =\"absolute\""));
+            htmlVideoFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.top = \"" + htmlVideo.Positioning.Top + "px\""));
+            htmlVideoFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.left = \"" + htmlVideo.Positioning.Left + "px\""));
+            htmlVideoFileCreateBlock.AddLine(new JavaScriptLine("this.element.setAttribute(\"width\", \"" + htmlVideo.Width + "px\")"));
+            htmlVideoFileCreateBlock.AddLine(new JavaScriptLine("this.element.setAttribute(\"height\", \"" + htmlVideo.Height + "px\")"));
+            htmlVideoFileCreateBlock.AddLine(new JavaScriptLine("this.element.setAttribute(\"controls\",true)"));
+            htmlVideoFileCreateBlock.AddLine(new JavaScriptLine("this.element.innerHTML = \"<source src=\\\""+ htmlVideo.ResFilePath.Replace('\\', '/')+"\\\" type=\\\"video/mp4\\\">\""));
+            htmlVideoFileCreateBlock.AddLine(new JavaScriptLine("document.getElementById(sceneID).appendChild(this.element)"));
+
+            //// Show            
+            //JavaScriptBlock htmlVideoShowBlock = new JavaScriptBlock("show : function()", new BlockMarker("{", "},"));
+            //htmlVideoFileDefineBlock.AddBlock(htmlVideoShowBlock);
+            //htmlVideoShowBlock.AddLine(new JavaScriptLine("$('#' + this.id).show()"));
+            //htmlVideoShowBlock.AddLine(new JavaScriptLine("this.visible = true"));
+
+            //// Hide
+            //JavaScriptBlock htmlVideoHideBlock = new JavaScriptBlock("hide : function()", new BlockMarker("{", "},"));
+            //htmlVideoFileDefineBlock.AddBlock(htmlVideoHideBlock);
+            //htmlVideoHideBlock.AddLine(new JavaScriptLine("$('#' + this.id).hide()"));
+            //htmlVideoHideBlock.AddLine(new JavaScriptLine("this.visible = false"));
+
+            //// Get coordinateSystemID
+            //JavaScriptBlock htmlVideoGetCoordinateSystemIDBlock = new JavaScriptBlock("getCoordinateSystemID : function()", new BlockMarker("{", "}"));
+            //htmlVideoFileDefineBlock.AddBlock(htmlVideoGetCoordinateSystemIDBlock);
+            //htmlVideoGetCoordinateSystemIDBlock.AddLine(new JavaScriptLine("return this.coordinateSystemID"));
+
+            htmlVideoCount++;
         }
 
         public override void Visit(GenericHtml htmlGeneric)

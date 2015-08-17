@@ -161,18 +161,6 @@ Editor/bin/
 
 !bin/Debug/
 bin/Debug/*
-!bin/Debug/AForge.dll
-!bin/Debug/AForge.Video.dll
-!bin/Debug/AForge.Video.FFMPEG.dll
-!bin/Debug/avcodec-53.dll
-!bin/Debug/avformat-53.dll
-!bin/Debug/avutil-51.dll
-!bin/Debug/swresample-0.dll
-!bin/Debug/swscale-2.dll
-
-!bin/Debug/Player.exe
-!bin/Debug/DebugPlayer.exe
-!bin/Debug/ARdevKit.exe.config
 
 !bin/Debug/res/
 !bin/Debug/res/*

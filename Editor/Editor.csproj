@@ -11,6 +11,7 @@
     <AssemblyName>ARdevKit</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -23,7 +24,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -110,6 +110,7 @@
     <Compile Include="Model\Project\File\HtmlImageFile.cs" />
     <Compile Include="Model\Project\File\EventFile.cs" />
     <Compile Include="Model\Project\Event\OnTouchStartedEvent.cs" />
+    <Compile Include="Model\Project\File\HtmlVideoFile.cs" />
     <Compile Include="Model\Project\File\SceneFile.cs" />
     <Compile Include="Model\Project\GenericHtml.cs" />
     <Compile Include="Model\Project\HtmlImage.cs" />
@@ -263,6 +264,81 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ARdevKit.ico" />
+    <Content Include="Resources\additionalDLL\AForge.dll" />
+    <Content Include="Resources\additionalDLL\AForge.Video.dll" />
+    <Content Include="Resources\additionalDLL\AForge.Video.FFMPEG.dll" />
+    <Content Include="Resources\additionalDLL\HtmlAgilityPack.dll" />
+    <Content Include="Resources\additionalDLL\HtmlAgilityPack.pdb" />
+    <Content Include="Resources\additionalDLL\HtmlAgilityPack.xml" />
+    <Content Include="Resources\PlayerFiles\avcodec-53.dll" />
+    <Content Include="Resources\PlayerFiles\avcodec-54.dll" />
+    <Content Include="Resources\PlayerFiles\avdevice-53.dll" />
+    <Content Include="Resources\PlayerFiles\avfilter-2.dll" />
+    <Content Include="Resources\PlayerFiles\avformat-53.dll" />
+    <Content Include="Resources\PlayerFiles\avformat-54.dll" />
+    <Content Include="Resources\PlayerFiles\avutil-51.dll" />
+    <Content Include="Resources\PlayerFiles\avutil-52.dll" />
+    <Content Include="Resources\PlayerFiles\DebugPlayer.exe" />
+    <Content Include="Resources\PlayerFiles\icudt51.dll" />
+    <Content Include="Resources\PlayerFiles\icudt52.dll" />
+    <Content Include="Resources\PlayerFiles\icuin51.dll" />
+    <Content Include="Resources\PlayerFiles\icuin52.dll" />
+    <Content Include="Resources\PlayerFiles\icuuc51.dll" />
+    <Content Include="Resources\PlayerFiles\icuuc52.dll" />
+    <Content Include="Resources\PlayerFiles\metaioSDK.dll" />
+    <Content Include="Resources\PlayerFiles\metaioSDKD.dll" />
+    <Content Include="Resources\PlayerFiles\mfc100u.dll" />
+    <Content Include="Resources\PlayerFiles\mfc100ud.dll" />
+    <Content Include="Resources\PlayerFiles\msvcp100.dll" />
+    <Content Include="Resources\PlayerFiles\msvcp100d.dll" />
+    <Content Include="Resources\PlayerFiles\msvcr100.dll" />
+    <Content Include="Resources\PlayerFiles\msvcr100d.dll" />
+    <Content Include="Resources\PlayerFiles\platforms\qwindows.dll" />
+    <Content Include="Resources\PlayerFiles\platforms\qwindowsd.dll" />
+    <Content Include="Resources\PlayerFiles\Player.exe" />
+    <Content Include="Resources\PlayerFiles\player.pdb" />
+    <Content Include="Resources\PlayerFiles\postproc-52.dll" />
+    <Content Include="Resources\PlayerFiles\pthreadVC2.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Core.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Cored.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Gui.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Guid.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Multimedia.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Multimediad.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5MultimediaWidgets.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5MultimediaWidgetsd.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Network.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Networkd.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5OpenGL.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5OpenGLd.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Positioning.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Positioningd.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5PrintSupport.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5PrintSupportd.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Qml.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Qmld.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Quick.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Quickd.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Sensors.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Sensorsd.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Sql.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Sqld.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5WebKit.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5WebKitd.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5WebKitWidgets.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5WebKitWidgetsd.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Widgets.dll" />
+    <Content Include="Resources\PlayerFiles\Qt5Widgetsd.dll" />
+    <Content Include="Resources\PlayerFiles\quazip.dll" />
+    <Content Include="Resources\PlayerFiles\qwindows.dll" />
+    <Content Include="Resources\PlayerFiles\qwindowsd.dll" />
+    <Content Include="Resources\PlayerFiles\Shore140.dll" />
+    <Content Include="Resources\PlayerFiles\ssleay32.dll" />
+    <Content Include="Resources\PlayerFiles\swresample-0%28anderesBla%29.dll" />
+    <Content Include="Resources\PlayerFiles\swresample-0.dll" />
+    <Content Include="Resources\PlayerFiles\swscale-2%28bla%29.dll" />
+    <Content Include="Resources\PlayerFiles\swscale-2.dll" />
+    <Content Include="Resources\PlayerFiles\vcomp100.dll" />
     <None Include="Resources\htmlpreviewpage.html" />
     <None Include="Resources\HtmlImageAugmentation%28small%29.bmp" />
     <None Include="Resources\HtmlVideoAugmention%28small%29.bmp" />
@@ -779,6 +855,9 @@
     <Content Include="Resources\IDMarker\IDMarker510.jpg" />
     <Content Include="Resources\IDMarker\IDMarker511.jpg" />
     <Content Include="Resources\IDMarker\IDMarker512.jpg" />
+    <None Include="Resources\PlayerFiles\googletest.lib" />
+    <None Include="Resources\PlayerFiles\Player.exe.lib" />
+    <None Include="Resources\PlayerFiles\Player.ilk" />
     <None Include="Resources\VideoAugmention%28small%29.bmp" />
     <None Include="Resources\ImageTrackable_normal_.bmp" />
     <None Include="Resources\ImageTrackable.bmp" />
@@ -824,7 +903,13 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>XCOPY "$(ProjectDir)Resources\PlayerFiles\*.*" "$(TargetDir)" /Y
+XCOPY "$(ProjectDir)Resources\additionalDLL\*.*" "$(TargetDir)" /Y
+XCOPY "$(ProjectDir)Resources\PlayerFiles\platforms\*.*" "$(TargetDir)platforms\" /Y</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

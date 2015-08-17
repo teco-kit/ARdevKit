@@ -703,14 +703,33 @@ namespace ARdevKit.Controller.EditorController
             else if (currentElement is HtmlVideo)
             {
                 HtmlVideo video = ((HtmlVideo)currentElement);
-                HtmlElement htmlVideo = htmlPreview.Document.CreateElement("video");
-                htmlVideo.Id = video.ID;
-                htmlVideo.SetAttribute("title", "augmentation");
-                htmlVideo.Style = String.Format(@"width: {0}px; height: {1}px; z-index:{2}; margin-left: {3}px; margin-top: {4}px; position: absolute",
+                HtmlElement htmlVideoPrev = htmlPreview.Document.CreateElement("img");
+                //retrieving thumbnail for preview
+                AForge.Video.FFMPEG.VideoFileReader reader = new AForge.Video.FFMPEG.VideoFileReader();
+                reader.Open(video.ResFilePath);
+                for (int i = 0; i < reader.FrameCount / 20; i++)
+                { reader.ReadVideoFrame(); }
+                Bitmap preview = reader.ReadVideoFrame();
+                preview.Tag = video.ID;
+                Websites.previews.Add(preview);
+
+                //adding to tempFolder
+                string newPath = addToFileSystemWithoutNotification(video.ResFilePath, video);
+                if(newPath == null)
+                {
+                    MessageBox.Show("Es konnte keine Kopie der genutzten Videodatei in " + TEMP_PATH + " angelegt werden");
+                    return;
+                }
+                video.ResFilePath = newPath;
+               
+                htmlVideoPrev.Id = video.ID;
+                htmlVideoPrev.SetAttribute("title", "augmentation");
+                htmlVideoPrev.SetAttribute("src", "http://localhost:" + PREVIEW_PORT + "/" + video.ID);
+                htmlVideoPrev.Style = String.Format(@"width: {0}px; height: {1}px; z-index:{2}; margin-left: {3}px; margin-top: {4}px; position: absolute",
                 video.Width, video.Height,
                 nativeToHtmlCoordinates(vector).Z,
                 video.Positioning.Left, video.Positioning.Top);
-                Websites.addElementAt(htmlVideo, index);
+                Websites.addElementAt(htmlVideoPrev, index);
 
             }
             else if (currentElement is GenericHtml)
@@ -1020,9 +1039,9 @@ namespace ARdevKit.Controller.EditorController
                     }
                 }
                 //delete all pictures saved in memory from Websitemanager
-                if (currentElement is HtmlImage)
+                if (currentElement is HtmlImage || currentElement is HtmlVideo)
                 {
-                    Websites.previews.RemoveAll(pic => pic.Tag == ((HtmlImage)currentElement).ID);
+                    Websites.previews.RemoveAll(pic => pic.Tag == ((AbstractHtmlElement)currentElement).ID);
                 }
                 Websites.removeElementAt(findElement(currentElement), index);
 
@@ -1187,9 +1206,9 @@ namespace ARdevKit.Controller.EditorController
                     removeSource(chart.Source, chart);
                 }
             }
-            if(prev is HtmlImage)
+            if(prev is HtmlImage || prev is HtmlVideo)
             {
-                Websites.previews.RemoveAll(pic => pic.Tag == ((HtmlImage)prev).ID);
+                Websites.previews.RemoveAll(pic => pic.Tag == ((AbstractHtmlElement)prev).ID);
             }
             if(prev is Abstract2DTrackable)
             {
@@ -1850,8 +1869,8 @@ namespace ARdevKit.Controller.EditorController
             else if (prev is AbstractHtmlElement)
             {
                 Point position = htmlPreview.PointToClient(new Point((int)newV.X, (int)newV.Y));
-               ((AbstractHtmlElement)prev).Positioning.Left = (int)newV.X;
-               ((AbstractHtmlElement)prev).Positioning.Top = (int)newV.Y;
+                ((AbstractHtmlElement)prev).Positioning.Left = (int)newV.X;
+                ((AbstractHtmlElement)prev).Positioning.Top = (int)newV.Y;
 
                 Vector3D result = new Vector3D(0, 0, ((AbstractHtmlElement)prev).Translation.Z);
                 result.X = (int)(newV.X - getMainContainerSize().Width / 2 + ((AbstractHtmlElement)prev).Width / 2);
