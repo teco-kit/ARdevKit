@@ -76,27 +76,60 @@ namespace ARdevKit.Controller.EditorController
         /// </value>
         public AbstractAugmentation copy { get; set; }
 
+        /// <summary>
+        /// Hosts the HTTPServer and manages changes to the scenes/Websites
+        /// </summary>
         private WebSiteHTMLManager Websites;
 
+        /// <summary>
+        /// ContextMenu for the mainContainer
+        /// </summary>
         private ContextMenu mainContainerContextMenu;
 
+        /// <summary>
+        /// ContextMenu for the augmentations
+        /// </summary>
         private ContextMenu augmentationContextMenu;
 
+        /// <summary>
+        /// ContextMenu for the trackable
+        /// </summary>
         private ContextMenu trackableContextMenu;
 
-        private System.Windows.Forms.Timer dragTimer;
-
+        /// <summary>
+        /// indicates at which position the drag of an object has taken place
+        /// </summary>
         private Point dragStartPosition;
 
+        /// <summary>
+        /// indicates if after the documentis loaded, the ew.currentElement should be marked
+        /// </summary>
         private bool markCurrentElementInPreview;
 
+        /// <summary>
+        /// Thread for the Webserver to run in
+        /// </summary>
         private Thread webServerThread;
 
+        /// <summary>
+        /// checks if files in the temp folder got changed and triggers the according events
+        /// </summary>
         private FileSystemWatcher fileWatcher;
 
+        /// <summary>
+        /// a dictionary to look up which data belongs to which Previewable
+        /// </summary>
         private Dictionary<string, IPreviewable> fileLookup;
 
+        /// <summary>
+        /// indicates if the PreviewController is disposed and should not be used anymore
+        /// </summary>
         private bool disposed = false;
+
+        /// <summary>
+        /// indicates if the browser is available or not
+        /// </summary>
+        private ManualResetEventSlim BrowserAvailable;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
@@ -115,6 +148,9 @@ namespace ARdevKit.Controller.EditorController
             this.htmlPreview = this.ew.Html_preview;
             htmlPreview.DocumentCompleted += htmlPreview_DocumentFirstCompleted;
            
+            //so the thread can wait on the browser to load
+            htmlPreview.Navigating += manageAvailability;
+            BrowserAvailable = new ManualResetEventSlim(false);
 
             this.currentMetaCategory = new MetaCategory();
             this.index = 0;
@@ -169,9 +205,7 @@ namespace ARdevKit.Controller.EditorController
             Directory.CreateDirectory(Directory.GetCurrentDirectory() + "\\temp");
             fileWatcher = new FileSystemWatcher(Directory.GetCurrentDirectory() + "\\temp");
             fileWatcher.IncludeSubdirectories = true;
-            fileWatcher.Created += fileWatcher_Created;
             fileWatcher.Changed += fileWatcher_Changed;
-            fileWatcher.Renamed +=fileWatcher_Renamed;
             fileWatcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite;
             fileWatcher.Filter = "";
             fileWatcher.IncludeSubdirectories = true;
@@ -180,15 +214,11 @@ namespace ARdevKit.Controller.EditorController
             fileLookup = new Dictionary<string,IPreviewable>();
         }
 
-        private void fileWatcher_Created(object sender, FileSystemEventArgs e)
+        private void manageAvailability(object sender, WebBrowserNavigatingEventArgs e)
         {
-            //throw new NotImplementedException();
+            BrowserAvailable.Reset();
         }
 
-        void fileWatcher_Renamed(object sender, RenamedEventArgs e)
-        {
- 	        //throw new NotImplementedException();
-        }
 
         void fileWatcher_Changed(object sender, FileSystemEventArgs e)
         {
@@ -229,6 +259,9 @@ namespace ARdevKit.Controller.EditorController
             //htmlPreview.Document.MouseMove += dragHandler;
             htmlPreview.Document.MouseDown += handleDocumentMouseDown;
             htmlPreview.Document.MouseUp += writeBackChangesfromDOM;
+
+            //to indicate it is availible
+            BrowserAvailable.Set();
         }
 
         private void htmlPreview_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
@@ -237,10 +270,14 @@ namespace ARdevKit.Controller.EditorController
             if (!this.ew.PreviewController.Equals(this) || disposed)
                 throw new Exception("This PreviewController should not be atached to the htmlPreview!");
 
+            //because if actions are triggered after oneanother the MouseDown eventhandler wasnt called
             htmlPreview.Document.MouseDown -= handleDocumentMouseDown;
             htmlPreview.Document.MouseUp -= writeBackChangesfromDOM;
             htmlPreview.Document.MouseDown += handleDocumentMouseDown;
             htmlPreview.Document.MouseUp += writeBackChangesfromDOM;
+
+            //to indicate it is availible
+            BrowserAvailable.Set();
 
             if (markCurrentElementInPreview)
             {
@@ -629,7 +666,7 @@ namespace ARdevKit.Controller.EditorController
                 htmlChart.SetAttribute("class","augmentation");
                 htmlChart.SetAttribute("title", "augmentation");
                 htmlChart.Style = String.Format(@"width: {0}px; height: {1}px; margin-left: {2}px; margin-top: {3}px; position: absolute",
-                chart.Width, chart.Height, chart.Positioning.Top, chart.Positioning.Left);
+                chart.Width, chart.Height, chart.Positioning.Left, chart.Positioning.Top);
                 if (chart.ResFilePath != null)
                 {
                     string chartTempFolderPath = TEMP_PATH + chart.ID;
@@ -1482,21 +1519,15 @@ namespace ARdevKit.Controller.EditorController
         {
             if (prev == null)
                 throw new ArgumentException("parameter prev was null.");
-            HtmlElement element = null;          
-            if (!htmlPreview.IsBusy)
+            HtmlElement element = null;
+            BrowserAvailable.Wait();
+            if (prev is Abstract2DTrackable)
             {
-                if (prev is Abstract2DTrackable)
-                {
-                    element = htmlPreview.Document.GetElementById(((Abstract2DTrackable)prev).SensorCosID);
-                }
-                else if (prev is AbstractAugmentation)
-                {
-                    element = htmlPreview.Document.GetElementById(((AbstractAugmentation)prev).ID);
-                }
+                element = htmlPreview.Document.GetElementById(((Abstract2DTrackable)prev).SensorCosID);
             }
-            else
+            else if (prev is AbstractAugmentation)
             {
-                throw new Exception("Cannot find Element while Webbrowser is still loading.");
+                element = htmlPreview.Document.GetElementById(((AbstractAugmentation)prev).ID);
             }
             return element;
         }
@@ -2450,13 +2481,12 @@ namespace ARdevKit.Controller.EditorController
             htmlPreview.DocumentCompleted -= htmlPreview_DocumentFirstCompleted;
             htmlPreview.Document.MouseDown -= handleDocumentMouseDown;
             htmlPreview.Document.MouseUp -= writeBackChangesfromDOM;
+            htmlPreview.Navigating -= manageAvailability;
             htmlPreview = null;
             this.ew.Tsm_editor_menu_edit_paste.Click -= new System.EventHandler(this.paste_augmentation_center);
             this.ew.Tsm_editor_menu_edit_copie.Click -= new System.EventHandler(this.copy_augmentation);
             this.ew.Tsm_editor_menu_edit_delete.Click -= new System.EventHandler(this.delete_current_element);
-            fileWatcher.Created -= fileWatcher_Created;
             fileWatcher.Changed -= fileWatcher_Changed;
-            fileWatcher.Renamed -= fileWatcher_Renamed;
 
             fileWatcher.EnableRaisingEvents = false;
             fileWatcher.Dispose();
@@ -2466,6 +2496,7 @@ namespace ARdevKit.Controller.EditorController
             shutDownWebserver();
             this.ew = null;
             this.webServerThread = null;
+            BrowserAvailable.Dispose();
             this.disposed = true;
         }
     }

@@ -27,12 +27,38 @@ namespace ARdevKit.Model.Project
         }
 
         /// <summary>
+        /// Gets or sets the Position. 
+        /// </summary>
+        /// <value>
+        /// The Positioning.
+        /// </value>
+        [Browsable(false)]
+        public new HtmlPositioning Positioning
+        {
+            get { return base.Positioning; }
+            set { base.Positioning = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the Translation. 
+        /// </summary>
+        /// <value>
+        /// The Translation.
+        /// </value>
+        [Browsable(false)]
+        public new Vector3D Translation
+        {
+            get { return base.Translation; }
+            set { base.Translation = value; }
+        }
+
+        /// <summary>
         /// Gets or sets the width.
         /// </summary>
         /// <value>
         /// The width, in mm.
         /// </value>
-        [Browsable(true)]
+        [Browsable(false)]
         public new int Width
         {
             get { return base.Width; }
@@ -45,7 +71,7 @@ namespace ARdevKit.Model.Project
         /// <value>
         /// The height, in mm.
         /// </value>
-        [Browsable(true)]
+        [Browsable(false)]
         public new int Height
         {
             get { return base.Height; }
