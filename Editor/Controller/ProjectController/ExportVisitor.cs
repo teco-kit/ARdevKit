@@ -1705,6 +1705,18 @@ namespace ARdevKit.Controller.ProjectController
             //        break;
             //}
 
+            // Copy html to projectPath
+            string newPath = "Assets";
+            if (htmlGeneric.ResFilePath.Contains(':'))
+            {
+                ExportIsValid = Helper.Copy(htmlGeneric.ResFilePath, Path.Combine(project.ProjectPath, newPath)) && ExportIsValid;
+            }
+            else if (project.OldProjectPath != null && !project.OldProjectPath.Equals(project.ProjectPath))
+            {
+                ExportIsValid = Helper.Copy(Path.Combine(project.OldProjectPath, htmlGeneric.ResFilePath), Path.Combine(project.ProjectPath, newPath)) && ExportIsValid;
+            }
+            htmlGeneric.ResFilePath = Path.Combine(newPath, Path.GetFileName(htmlGeneric.ResFilePath));
+
 
             //htmlGenericFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.width = \"" + htmlGeneric.Width + "px\""));
             //htmlGenericFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.height = \"" + htmlGeneric.Height + "px\""));
@@ -1714,7 +1726,7 @@ namespace ARdevKit.Controller.ProjectController
             //TODO
 
             htmlGenericFileCreateBlock.AddLine(new JavaScriptLine("document.getElementById(sceneID).appendChild(this.element)"));
-            htmlGenericFileCreateBlock.AddLine(new JavaScriptLine("this.element.outerHTML = \"" + File.ReadAllText(htmlGeneric.ResFilePath).Replace("\"", "\\\"") + "\""));
+            htmlGenericFileCreateBlock.AddLine(new JavaScriptLine("this.element.outerHTML = \"" + File.ReadAllText(Path.Combine(project.ProjectPath, htmlGeneric.ResFilePath)).Replace("\"", "\\\"") + "\""));
             htmlGenericFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.position =\"absolute\""));
             htmlGenericFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.top = \"" + htmlGeneric.Positioning.Top + "px\""));
             htmlGenericFileCreateBlock.AddLine(new JavaScriptLine("this.element.style.left = \"" + htmlGeneric.Positioning.Left + "px\""));

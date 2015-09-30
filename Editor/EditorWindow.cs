@@ -544,16 +544,37 @@ namespace ARdevKit
                 initializeLoadedProject(SaveLoadController.loadProject(openFileDialog1.FileName));
                 this.initializeControllers();
                 this.updatePanels();
-                //previewController.Index = -1;
-                for (int i = 0; i < project.Trackables.Count; i++)
-                {
-                    previewController.reloadPreviewPanel(i);
+                int i = 0;
+                foreach (AbstractTrackable track in project.Trackables)
+                {   
+                    previewController.changeSceneTo(i++);
+                    if (track == null)
+                    {
+                        continue;
+                    }
+                    previewController.addElement(track, track.vector);
+                    foreach (AbstractAugmentation aug in track.Augmentations)
+                    {
+                        previewController.addElement(aug, aug.Translation);
+                    } 
                 }
                 updateElementSelectionPanel();
                 this.updateSceneSelectionPanel();
                 this.updateScreenSize();
                 this.checksum = project.getChecksum();
                 previewController.changeSceneTo(0);
+                //diables all trackable elements excepted the ones that was added.
+                foreach (SceneElementCategory c in ElementCategories)
+                {
+                    if (c.Name == "Trackables")
+                    {
+                        foreach (SceneElement e in c.SceneElements)
+                        {
+                            ElementSelectionController.setElementEnable(e.Prototype.GetType(), false);
+                        }
+                    }
+                }
+                ElementSelectionController.setElementEnable(currentElement.GetType(), true);
             }
             catch (System.ArgumentException a)
             {

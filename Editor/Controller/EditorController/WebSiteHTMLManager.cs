@@ -79,36 +79,6 @@ namespace ARdevKit.Controller.EditorController
             mainContainerHeigth = 0;
             chartFiles = new Dictionary<string, string>();
         }
-        /// <summary>
-        /// builds a html document or loads the existing one at the 
-        /// <para>websitePath</para> and constructs
-        /// the according htmlManager
-        /// </summary>
-        /// <param name="projectPath">The project path.</param>
-        /// <param name="port">The port.</param>
-        public WebSiteHTMLManager(string projectPath, int port) : base(port)
-        {
-            websiteTexts = new string[10];
-            for (int i = 0; i < websiteTexts.Length; ++i)
-            {
-                websiteTexts[i] = ARdevKit.Properties.Resources.HTMLPreviewPage;
-            }
-            previews = new List<System.Drawing.Bitmap>();
-            mainContainerWidth = 0;
-            mainContainerHeigth = 0;
-            chartFiles = new Dictionary<string, string>();
-            //int i = 0;
-            //while (File.Exists(projectPath + "htmlWebsites/" + i + ".html"))
-            //{
-            //    websiteTexts[i] = File.ReadAllText(projectPath);
-            //    ++i;
-            //}
-            //for (; i < websiteTexts.Length; ++i)
-            //{
-            //    websiteTexts[i] = ARdevKit.Properties.Resources.HTMLPreviewPage;
-            //}
-            //previews = new List<System.Drawing.Bitmap>();
-        }
 
         /// <summary>
         /// adds the HTMLText of the given <para>element</para> to the containment-wrapper

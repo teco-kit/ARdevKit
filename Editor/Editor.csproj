@@ -906,9 +906,9 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>XCOPY "$(ProjectDir)Resources\PlayerFiles\*.*" "$(TargetDir)" /Y
-XCOPY "$(ProjectDir)Resources\additionalDLL\*.*" "$(TargetDir)" /Y
-XCOPY "$(ProjectDir)Resources\PlayerFiles\platforms\*.*" "$(TargetDir)platforms\" /Y</PostBuildEvent>
+    <PostBuildEvent>XCOPY "$(ProjectDir)Resources\PlayerFiles\*.*" "$(TargetDir)" /Y/D
+XCOPY "$(ProjectDir)Resources\additionalDLL\*.*" "$(TargetDir)" /Y/D
+XCOPY "$(ProjectDir)Resources\PlayerFiles\platforms\*.*" "$(TargetDir)platforms\" /Y/D</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

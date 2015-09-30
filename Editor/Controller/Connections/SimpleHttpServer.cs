@@ -214,7 +214,21 @@ namespace ARdevKit.Controller.Connections
         {
             int i = 0;
             listener = new TcpListener(port);
-            listener.Start();
+            //errorhandling, e.g. if the port is already taken
+            bool startedListen = false;
+            while (!startedListen)
+            {
+                try
+                {
+                    listener.Start();
+                    startedListen = true;
+                }
+                catch (Exception e)
+                {
+                    startedListen = false;
+                    System.Windows.Forms.MessageBox.Show("Bitte beheben sie diesen Fehler: \n" + e.Message + "\n Das Programm versucht danach neu auf Port: " + port + " zu hören.");
+                }
+            }
             while (is_active)
             {
                 try

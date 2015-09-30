@@ -162,18 +162,12 @@ namespace ARdevKit.Controller.EditorController
             Directory.CreateDirectory(TEMP_PATH);
 
             //start the Websitemanager, which hosts the previewpages
-            if (string.IsNullOrEmpty(ew.project.ProjectPath))
-            {
-                this.Websites = new WebSiteHTMLManager(ew.project.ProjectPath,PREVIEW_PORT);
-            }
-            else
-            {
-                this.Websites = new WebSiteHTMLManager(PREVIEW_PORT);
-            }
+            this.Websites = new WebSiteHTMLManager(PREVIEW_PORT);
             Websites.changeMainContainerSize(EditorWindow.MINSCREENWIDHT, EditorWindow.MINSCREENHEIGHT);
             webServerThread = new Thread(new ThreadStart(Websites.listen));
             webServerThread.Name = "WebServerThread";
             webServerThread.IsBackground = true;
+
             webServerThread.Start();
 
             if (htmlPreview.Document != null)
@@ -370,6 +364,8 @@ namespace ARdevKit.Controller.EditorController
 
         private void handleDocumentMouseDown(object sender, HtmlElementEventArgs e)
         {
+            //NOT YET TESTED UNDER HEAVY DUTY/ maybe that whole threat is blocked, and even eventhandler dont respond
+            BrowserAvailable.Wait();
             HtmlElement clickedElement = htmlPreview.Document.GetElementFromPoint(e.MousePosition);
             switch (clickedElement.GetAttribute("title"))
             {
@@ -593,7 +589,7 @@ namespace ARdevKit.Controller.EditorController
 
         //adds elements to website and navigates again to new Website
         //adds the according preview to 
-        private void addElement(IPreviewable currentElement, Vector3D vector)
+        public void addElement(IPreviewable currentElement, Vector3D vector)
         {
             if (currentElement is Abstract2DTrackable)
             {
@@ -690,7 +686,12 @@ namespace ARdevKit.Controller.EditorController
                 {
                     if(chart.Source.Query!=null)
                     {
-                        
+                        HtmlElement queryScript = htmlPreview.Document.CreateElement("script");
+                        ((IHTMLScriptElement)queryScript.DomElement).type = "text/javascript";
+                        ((IHTMLScriptElement)queryScript.DomElement).text = chart.Source is FileSource
+                            ? "$.getScript(\"http://localhost:" + PREVIEW_PORT + "/query" + chart.ID + "\", function(){$(\"#" + chart.ID + "\").highcharts(init());});"
+                            : "$.getScript(\"http://localhost:" + PREVIEW_PORT + "/query" + chart.ID + "\", function(){$(\"#" + chart.ID + "\").highcharts(init());});";
+                        htmlChart.AppendChild(queryScript);
                     }
                 }
                 Websites.addElementAt(htmlChart, index);
@@ -774,9 +775,11 @@ namespace ARdevKit.Controller.EditorController
                 GenericHtml element = ((GenericHtml)currentElement);
                 if (element.ResFilePath != null)
                 {
-                    string elementText = Path.IsPathRooted(ew.project.ProjectPath) ? 
-                        File.ReadAllText(element.ResFilePath) :
-                        File.ReadAllText(ew.project.ProjectPath + element.ResFilePath);
+                    string elementText;
+                    if (Path.IsPathRooted(element.ResFilePath))
+                        elementText = File.ReadAllText(element.ResFilePath);
+                    else
+                        elementText = File.ReadAllText(Path.Combine(ew.project.ProjectPath, element.ResFilePath));
                     int bracketsCount = 0;
                     foreach (char Char in elementText.ToCharArray())
 	                {
@@ -901,7 +904,6 @@ namespace ARdevKit.Controller.EditorController
 
             if (currentElement is AbstractDynamic2DAugmentation)
             {
-
                 if (this.trackable != null && trackable.existAugmentation((AbstractAugmentation)currentElement)
                     && ((AbstractDynamic2DAugmentation)currentElement).Source == null)
                 {
@@ -957,17 +959,17 @@ namespace ARdevKit.Controller.EditorController
                         {
                             source.initElement(ew);
                             source.Augmentation = ((AbstractDynamic2DAugmentation)currentElement);
-
-                            string newQueryPath = Path.Combine(Environment.CurrentDirectory, "tmp\\" + source.Augmentation.ID);
+                            string newQueryPath = Path.Combine(TEMP_PATH + source.Augmentation.ID);
+                            fileWatcher.EnableRaisingEvents = false;
                             Helper.Copy(openFileDialog.FileName, newQueryPath, "query.js");
                             ((DbSource)source).Query = Path.Combine(newQueryPath, "query.js");
-                            
-                            Helper.Copy(Path.Combine(Environment.CurrentDirectory, "res", "templates", "chart(source).html"), newQueryPath, "chart.html");
+                            fileLookup.Add(((DbSource)source).Query, source.Augmentation);
 
                             //add references in Augmentation, Picturebox + project.sources List.
                             ((AbstractDynamic2DAugmentation)currentElement).Source = source;
 
                             this.reloadPreviewable(currentElement);
+                            fileWatcher.EnableRaisingEvents = true;
                         }
                         source.Augmentation = ((AbstractDynamic2DAugmentation)currentElement);
                     }
@@ -1240,7 +1242,12 @@ namespace ARdevKit.Controller.EditorController
                 Websites.chartFiles.Remove("options" + chart.ID);
                 if(chart.Source != null)
                 {
-                    removeSource(chart.Source, chart);
+                    AbstractSource source = chart.Source;
+                    if(source is FileSource)
+                    {
+                        Websites.chartFiles.Remove("source" + chart.ID);
+                    }
+                    Websites.chartFiles.Remove("query" + chart.ID);  
                 }
             }
             if(prev is HtmlImage || prev is HtmlVideo)
@@ -1252,7 +1259,16 @@ namespace ARdevKit.Controller.EditorController
                 Websites.previews.RemoveAll(pic => pic.Tag == ((Abstract2DTrackable)prev).SensorCosID);
             }
             Websites.removeElementAt(findElement(prev), index);
-            if (prev is Chart || prev is AbstractHtmlElement)
+            if (prev is Chart)
+            {
+                this.addElement(prev, recalculateChartVector(((Abstract2DAugmentation)prev).Translation));
+                Chart chart = (Chart)prev;
+                if (chart.Source != null)
+                {
+                    ///addSource
+                    AbstractSource source = chart.Source;
+                }
+            } else if(prev is AbstractHtmlElement)
             {
                 this.addElement(prev, recalculateChartVector(((Abstract2DAugmentation)prev).Translation));
             }
@@ -1520,7 +1536,7 @@ namespace ARdevKit.Controller.EditorController
             if (prev == null)
                 throw new ArgumentException("parameter prev was null.");
             HtmlElement element = null;
-            BrowserAvailable.Wait();
+            //BrowserAvailable.Wait();
             if (prev is Abstract2DTrackable)
             {
                 element = htmlPreview.Document.GetElementById(((Abstract2DTrackable)prev).SensorCosID);
@@ -2407,8 +2423,9 @@ namespace ARdevKit.Controller.EditorController
 
         internal void updateElement(IPreviewable previewable)
         {
-            Websites.removeElementAt(findElement(previewable), index);
-            addElement(previewable, new Vector3D(0, 0, 0));
+            HtmlElement htmlPrev = findElement(previewable);
+            Websites.removeElementAt(htmlPrev, index);
+            Websites.addElementAt(htmlPrev, index);
         }
 
         /// <summary>
