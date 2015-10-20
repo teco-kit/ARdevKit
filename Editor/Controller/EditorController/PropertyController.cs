@@ -215,6 +215,50 @@ namespace Controller.EditorController
             }
 
             // Checks if picturePath has been changed
+            if (String.Equals(e.ChangedItem.Label.ToString(), "SensorCosID", StringComparison.Ordinal))
+            {
+                if (string.Equals((string)e.ChangedItem.Value, "", StringComparison.Ordinal))
+                    ((Abstract2DTrackable)ew.CurrentElement).SensorCosID = e.OldValue.ToString();
+                else
+                {
+                    string newName = e.ChangedItem.Value.ToString().Replace(" ", "_");
+                    ((Abstract2DTrackable)ew.CurrentElement).SensorCosID = e.OldValue.ToString();
+
+                    if (ew.project.Trackables.Exists(x => ((Abstract2DTrackable)x).SensorCosID.Equals(newName)))
+                        return;
+                    ew.PreviewController.renamePreviewable(ew.CurrentElement, newName);
+                    ew.Cmb_editor_properties_objectSelection.Items.Clear();
+                    ew.Cmb_editor_properties_objectSelection.Items.Clear();
+                    ew.PreviewController.updateElementCombobox((AbstractTrackable)ew.CurrentElement);
+                    ew.Cmb_editor_properties_objectSelection.SelectedItem = ew.CurrentElement;
+                }
+                return;
+            }
+
+            if (String.Equals(e.ChangedItem.Label.ToString(), "ID", StringComparison.Ordinal))
+            {
+                if (string.Equals((string)e.ChangedItem.Value, "", StringComparison.Ordinal))
+                    ((AbstractAugmentation)ew.CurrentElement).ID = e.OldValue.ToString();
+                else
+                {
+                    string newName = e.ChangedItem.Value.ToString().Replace(" ", "_");
+                    ((AbstractAugmentation)ew.CurrentElement).ID = e.OldValue.ToString();
+
+                    foreach (AbstractTrackable track in ew.project.Trackables)
+	                {
+                        if(track.Augmentations.Exists(x => ((AbstractAugmentation)x).ID.Equals(newName)))
+                            return;
+	                }
+
+                    ew.PreviewController.renamePreviewable(ew.CurrentElement, newName);
+                    ew.Cmb_editor_properties_objectSelection.Items.Clear();
+                    ew.PreviewController.updateElementCombobox(((AbstractAugmentation)ew.CurrentElement).Trackable);
+                    ew.Cmb_editor_properties_objectSelection.SelectedItem = ew.CurrentElement;
+                }
+                return;
+            }
+
+            // Checks if picturePath has been changed
             if (String.Equals(e.ChangedItem.Label.ToString(), "PicturePath", StringComparison.Ordinal))
             {
                 if (string.Equals((string)e.ChangedItem.Value, "", StringComparison.Ordinal))
@@ -264,23 +308,87 @@ namespace Controller.EditorController
                 }
             }
 
+
             // Checks if Data has been changed (only for FileSource for now)
             if (string.Equals(e.ChangedItem.Label.ToString(), "Data", StringComparison.Ordinal))
             {
-                if (string.Equals((string)e.ChangedItem.Value, "", StringComparison.Ordinal))
+                if (ew.CurrentElement is FileSource)
                 {
-                    if (((Chart)ew.CurrentElement).Source is FileSource)
+                    if (string.Equals((string)e.ChangedItem.Value, "", StringComparison.Ordinal))
                     {
-                        ((FileSource)((Chart)ew.CurrentElement).Source).Data = e.OldValue.ToString();
-                        this.ew.PreviewController.reloadPreviewable((Chart)this.ew.CurrentElement);
-                        this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
+                        ((FileSource)ew.CurrentElement).Data = e.OldValue.ToString();
                         //this replaces TODO: check if there are unexpected changes or if its even neede
                         /* PictureBox temp = this.ew.PreviewController.findElement(this.ew.CurrentElement);
                         temp.BorderStyle = BorderStyle.Fixed3D;
                         temp.BringToFront();*/
                     }
-                    return;
+                    else
+                    {
+                        ((FileSource)ew.CurrentElement).Data = e.ChangedItem.Value.ToString();
+                        this.ew.PreviewController.reloadPreviewable(((FileSource)ew.CurrentElement).Augmentation);
+                        this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
+                    }
                 }
+                return;
+                if (((Chart)ew.CurrentElement).Source is FileSource)
+                {
+                    if (string.Equals((string)e.ChangedItem.Value, "", StringComparison.Ordinal))
+                    {
+                        ((FileSource)((Chart)ew.CurrentElement).Source).Data = e.OldValue.ToString();
+                        //this replaces TODO: check if there are unexpected changes or if its even neede
+                        /* PictureBox temp = this.ew.PreviewController.findElement(this.ew.CurrentElement);
+                        temp.BorderStyle = BorderStyle.Fixed3D;
+                        temp.BringToFront();*/
+                    } 
+                    else
+                    {
+                        ((FileSource)((Chart)ew.CurrentElement).Source).Data = e.ChangedItem.Value.ToString();
+                        this.ew.PreviewController.reloadPreviewable((Chart)this.ew.CurrentElement);
+                        this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
+                    }
+                }
+                return;
+            }
+
+            // Checks if Url has been changed (only for DbSource for now)
+            if (string.Equals(e.ChangedItem.Label.ToString(), "Url", StringComparison.Ordinal))
+            {
+                if (ew.CurrentElement is DbSource)
+                {
+                    if (string.Equals((string)e.ChangedItem.Value, "", StringComparison.Ordinal))
+                    {
+                        ((DbSource)ew.CurrentElement).Url = e.OldValue.ToString();
+                        //this replaces TODO: check if there are unexpected changes or if its even neede
+                        /* PictureBox temp = this.ew.PreviewController.findElement(this.ew.CurrentElement);
+                        temp.BorderStyle = BorderStyle.Fixed3D;
+                        temp.BringToFront();*/
+                    }
+                    else
+                    {
+                        ((DbSource)ew.CurrentElement).Url = e.ChangedItem.Value.ToString();
+                        this.ew.PreviewController.reloadPreviewable(((DbSource)ew.CurrentElement).Augmentation);
+                        this.ew.PreviewController.setCurrentElement(ew.CurrentElement);
+                    }
+                }
+                return;
+                if (((Chart)ew.CurrentElement).Source is DbSource)
+                {
+                    if (string.Equals((string)e.ChangedItem.Value, "", StringComparison.Ordinal))
+                    {
+                        ((DbSource)((Chart)ew.CurrentElement).Source).Url = e.OldValue.ToString();
+                        //this replaces TODO: check if there are unexpected changes or if its even neede
+                        /* PictureBox temp = this.ew.PreviewController.findElement(this.ew.CurrentElement);
+                        temp.BorderStyle = BorderStyle.Fixed3D;
+                        temp.BringToFront();*/
+                    }
+                    else
+                    {
+                        ((DbSource)((Chart)ew.CurrentElement).Source).Url = e.ChangedItem.Value.ToString();
+                        this.ew.PreviewController.reloadPreviewable((Chart)this.ew.CurrentElement);
+                        this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
+                    }
+                }
+                return;
             }
 
             /*=================================================================================*/

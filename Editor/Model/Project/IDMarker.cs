@@ -160,6 +160,7 @@ namespace ARdevKit.Model.Project
             if (ew.project.existTrackable(this))
             {
                 MatrixID = ew.project.nextID();
+                sensorCosID = sensorCosID.Replace("1", MatrixID.ToString());
             }
             else
             {

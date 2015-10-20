@@ -330,6 +330,21 @@ namespace ARdevKit.Controller.EditorController
                     p.outputStream.Write(chartFiles[extension.Remove(extension.IndexOf('?'))]);
                     return;
                 }
+                if(chartFiles.ContainsKey(extension))
+                {
+                    if (extension.Contains("xml"))
+                    {
+                        p.writeSuccess("text/xml");
+                        p.outputStream.Write(chartFiles[extension]);
+                        return;
+                    }
+                    if (extension.Contains("json"))
+                    {
+                        p.writeSuccess("application/json");
+                        p.outputStream.Write(chartFiles[extension]);
+                        return;
+                    }
+                }
                 //if(extension == "jquery")
                 //{
                 //    p.writeSuccess("application/javascript");

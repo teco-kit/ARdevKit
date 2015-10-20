@@ -37,7 +37,7 @@ namespace ARdevKit.Model.Project
         /// <value> The identifier. </value>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        [CategoryAttribute("General"), ReadOnly(true)]
+        [CategoryAttribute("General"), ReadOnly(false)]
         public string ID
         {
             get { return id; }

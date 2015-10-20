@@ -208,23 +208,38 @@ namespace ARdevKit.Model.Project
         }
 
         /// <summary>
-        /// Returns the next bigger Matrix ID.
+        /// Returns the next not yet taken Matrix ID.
         /// </summary>
         /// <returns></returns>
         public int nextID()
         {
-            int i = 0;
-            foreach (AbstractTrackable track in this.trackables)
-            {
-                if (track != null && track is IDMarker)
+            int id = 1;
+            bool IDFound;
+            IDFound = false;
+            for (int i = 0; i < trackables.Count; i++)
+			{
+                AbstractTrackable track = trackables[i];
+			    if (track != null && track is IDMarker)
                 {
-                    if (((IDMarker)track).MatrixID > i)
+                    if (((IDMarker)track).MatrixID == id)
                     {
-                        i = ((IDMarker)track).MatrixID;
+                        id++;
+                        i = -1;
                     }
                 }
-            }
-            return i + 1;
+			}
+            return id;
+            //foreach (AbstractTrackable track in this.trackables)
+            //{
+            //    if (track != null && track is IDMarker)
+            //    {
+            //        if (((IDMarker)track).MatrixID > i)
+            //        {
+            //            i = ((IDMarker)track).MatrixID;
+            //        }
+            //    }
+            //}
+            //return i + 1;
         }
 
         /// <summary>

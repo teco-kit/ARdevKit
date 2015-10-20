@@ -1,10 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F088123C-0E9E-452A-89E6-6BA2F21D5CAC}") = "UML", "UML\UML.modelproj", "{B659E0E2-3330-472F-A2C7-93C641C5FD18}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Editor", "Editor\Editor.csproj", "{89322CCE-624D-489E-A157-06C0DD4A3719}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EditorTest", "EditorTest\EditorTest.csproj", "{3A846B92-31B7-4602-BB8C-21FA6FC2E3FB}"
@@ -29,20 +27,6 @@ Global
 		UITest|Win32 = UITest|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B659E0E2-3330-472F-A2C7-93C641C5FD18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B659E0E2-3330-472F-A2C7-93C641C5FD18}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B659E0E2-3330-472F-A2C7-93C641C5FD18}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{B659E0E2-3330-472F-A2C7-93C641C5FD18}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{B659E0E2-3330-472F-A2C7-93C641C5FD18}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B659E0E2-3330-472F-A2C7-93C641C5FD18}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B659E0E2-3330-472F-A2C7-93C641C5FD18}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{B659E0E2-3330-472F-A2C7-93C641C5FD18}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{B659E0E2-3330-472F-A2C7-93C641C5FD18}.Release|Win32.ActiveCfg = Release|Any CPU
-		{B659E0E2-3330-472F-A2C7-93C641C5FD18}.UITest|Any CPU.ActiveCfg = Release|Any CPU
-		{B659E0E2-3330-472F-A2C7-93C641C5FD18}.UITest|Any CPU.Build.0 = Release|Any CPU
-		{B659E0E2-3330-472F-A2C7-93C641C5FD18}.UITest|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{B659E0E2-3330-472F-A2C7-93C641C5FD18}.UITest|Mixed Platforms.Build.0 = Release|Any CPU
-		{B659E0E2-3330-472F-A2C7-93C641C5FD18}.UITest|Win32.ActiveCfg = Release|Any CPU
 		{89322CCE-624D-489E-A157-06C0DD4A3719}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{89322CCE-624D-489E-A157-06C0DD4A3719}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89322CCE-624D-489E-A157-06C0DD4A3719}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

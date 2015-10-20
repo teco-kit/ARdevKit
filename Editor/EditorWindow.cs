@@ -1155,7 +1155,7 @@ namespace ARdevKit
                         {
                             a.initElement(this);
                         }
-                        this.updateSceneSelectionPanel();
+                        this.updateSceneSelectionPanel(); 
                     }
                 }
             }
