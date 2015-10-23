@@ -61,6 +61,7 @@ namespace ARdevKit.Controller.EditorController
         public int Index
         {
             get { return index; }
+            set { index = value; }
         }
         
         /// <summary>
@@ -277,7 +278,6 @@ namespace ARdevKit.Controller.EditorController
         {
             htmlPreview.DocumentCompleted -= htmlPreview_DocumentFirstCompleted;
             htmlPreview.DocumentCompleted += htmlPreview_DocumentCompleted;
-            //htmlPreview.Document.MouseMove += dragHandler;
             htmlPreview.Document.MouseDown += handleDocumentMouseDown;
             htmlPreview.Document.MouseUp += writeBackChangesfromDOM;
         }
@@ -378,19 +378,19 @@ namespace ARdevKit.Controller.EditorController
                 Chart chart = (Chart)aug;
                 if(chart.Source == null)
                 {
-                    chartContextMenu_noSource.Show(htmlPreview, e.ClientMousePosition);
+                    chartContextMenu_noSource.Show(ew.GetChildAtPoint(e.MousePosition), e.ClientMousePosition);
                 } else if(chart.Source is FileSource)
                 {
                     if(((FileSource)chart.Source).Query == null)
                     {
-                        chartContextMenu_FileSource_noQuery.Show(htmlPreview, e.ClientMousePosition);
+                        chartContextMenu_FileSource_noQuery.Show(ew.GetChildAtPoint(e.MousePosition), e.ClientMousePosition);
                     }
                     else
                     {
-                        chartContextMenu_FileSource_Query.Show(htmlPreview, e.ClientMousePosition);
+                        chartContextMenu_FileSource_Query.Show(ew.GetChildAtPoint(e.MousePosition), e.ClientMousePosition);
                     }
                 } else {
-                    chartContextMenu_DbSource.Show(htmlPreview, e.ClientMousePosition);
+                    chartContextMenu_DbSource.Show(ew.GetChildAtPoint(e.MousePosition), e.ClientMousePosition);
                 }
             }
             if(e.MouseButtonsPressed == MouseButtons.Left)
@@ -408,7 +408,7 @@ namespace ARdevKit.Controller.EditorController
                     //TODO set Screensize as editable or leave it with changes made to Screensize picking
                     if (e.MouseButtonsPressed == MouseButtons.Right)
                     {
-                        mainContainerContextMenu.Show(htmlPreview, e.MousePosition);
+                        mainContainerContextMenu.Show(ew.GetChildAtPoint(e.MousePosition), e.MousePosition);
                     }
                     break;
 
@@ -492,6 +492,21 @@ namespace ARdevKit.Controller.EditorController
         public void addPreviewAble(IPreviewable p)
         { throw new NotImplementedException(); }
 
+
+        public void createNewScenewithTrackable(AbstractTrackable track, int index)
+        {
+            this.htmlPreview.Navigate("http:localhost:" + PREVIEW_PORT + "/" + index);
+            this.index = index;
+            this.trackable = null;
+            ew.project.Trackables.Add(trackable);
+            addPreviewable(track, new Vector3D(0, 0, 0));
+            List<AbstractAugmentation> augs = new List<AbstractAugmentation>(track.Augmentations);
+            track.Augmentations.Clear();
+            foreach (AbstractAugmentation aug in augs)
+            {
+                addPreviewable(aug, aug.Translation);
+            }
+        }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
@@ -746,8 +761,7 @@ namespace ARdevKit.Controller.EditorController
                         }
                     }
                     htmlChart.AppendChild(script);
-                }   
-               
+                }
                 Websites.addElementAt(htmlChart, index);
             }
             else if (currentElement is Abstract2DAugmentation && !(currentElement is AbstractHtmlElement))
@@ -768,6 +782,7 @@ namespace ARdevKit.Controller.EditorController
             else if (currentElement is HtmlImage)
             {
                 HtmlImage image = ((HtmlImage)currentElement);
+                
                 HtmlElement htmlImage = htmlPreview.Document.CreateElement("img");
                 //adding to tempFolder
                 string newPath = addToFileSystemWithoutNotification(image.ResFilePath, image);
@@ -777,7 +792,6 @@ namespace ARdevKit.Controller.EditorController
                     return;
                 }
                 image.ResFilePath = newPath;
-
                 Bitmap preview = image.getPreview(ew.project.ProjectPath);
                 htmlImage.Id = image.ID;
                 htmlImage.SetAttribute("title", "augmentation");
@@ -1378,6 +1392,8 @@ namespace ARdevKit.Controller.EditorController
         /// <param name="prev">The previewable.</param>
         public void reloadPreviewable(IPreviewable prev)
         {
+            if (findElement(prev) == null)
+                return;
             List<string> filesToDelete = RemoveByValue<string, IPreviewable>(fileLookup, prev);
             if (prev is Chart)
             {
@@ -1388,7 +1404,7 @@ namespace ARdevKit.Controller.EditorController
                     AbstractSource source = chart.Source;
                     if (source is FileSource)
                     {
-                        Websites.chartFiles.Remove("source" + chart.ID);
+                        Websites.chartFiles.Remove("data" + chart.ID + Path.GetExtension(((FileSource)source).Data));
                     }
                     Websites.chartFiles.Remove("query" + chart.ID);
                 }
@@ -2239,7 +2255,10 @@ namespace ARdevKit.Controller.EditorController
             htmlPreview.Document.MouseMove -= dragHandler;
         }
 
-        private void reloadCurrentWebsite()
+        /// <summary>
+        /// reloads the current Website by clearing the IEs Cache
+        /// </summary>
+        public void reloadCurrentWebsite()
         {
             markCurrentElementInPreview = true;
             htmlPreview.Refresh(WebBrowserRefreshOption.Completely);
@@ -2461,7 +2480,7 @@ namespace ARdevKit.Controller.EditorController
                 TextEditorForm tef = new TextEditorForm(path);
                 if (tef.ShowDialog() == DialogResult.OK)
                 {
-                    reloadPreviewable((Chart)this.ew.CurrentElement);
+                    //reloadPreviewable((Chart)this.ew.CurrentElement);
                 }
             }
             catch (Exception exception)
@@ -2484,7 +2503,7 @@ namespace ARdevKit.Controller.EditorController
                 TextEditorForm tef = new TextEditorForm(path);
                 if (tef.ShowDialog() == DialogResult.OK)
                 {
-                    reloadPreviewable((Chart)this.ew.CurrentElement);
+                    //reloadPreviewable((Chart)this.ew.CurrentElement);
                 }
             }
             catch (Exception exception)

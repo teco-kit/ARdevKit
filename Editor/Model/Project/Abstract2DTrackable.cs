@@ -144,5 +144,40 @@ namespace ARdevKit.Model.Project
         {
             return sensorCosID;
         }
+
+        /// <summary>
+        /// secures, that the chosen id is unique in the project, under augmentations id and 2Dtrackables sensorCosId
+        /// </summary>
+        /// <param name="ew">the editorwindow</param>
+        /// <returns>if the element was initiated sucessfully</returns>
+        public override bool initElement(EditorWindow ew)
+        {
+            int count = 0;
+            bool found = true;
+            String newID = "";
+            while (found)
+            {
+                found = false;
+                newID = this.GetType().Name + ++count;
+                foreach (AbstractTrackable t in ew.project.Trackables)
+                {
+                    if (t is Abstract2DTrackable && ((Abstract2DTrackable)t).SensorCosID == newID)
+                    {
+                        found = true;
+                        break;
+                    }
+                    if (t != null)
+                    {
+                        if (t.Augmentations.Exists(a => a.ID == newID))
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            sensorCosID = newID;
+            return base.initElement(ew);
+        }
     }
 }

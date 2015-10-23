@@ -458,6 +458,9 @@ namespace ARdevKit
                     this.previewController.removePreviewable(this.previewController.trackable);
                     if (!this.project.hasTrackable())
                     {
+                        //current Element must be set null, or a marking of a new currentElement tries to find the old current Element
+                        //in the first case this is handled by the changeSceneTo method
+                        this.currentElement = null;
                         this.ElementSelectionController.setElementEnable(typeof(PictureMarker), true);
                         this.ElementSelectionController.setElementEnable(typeof(IDMarker), true);
                     }
@@ -1149,13 +1152,33 @@ namespace ARdevKit
                     }
                     if (!this.project.existTrackable(tempTrack))
                     {
-                        tempTrack.vector = new Vector3D(previewController.getMainContainerSize().Width / 2, previewController.getMainContainerSize().Height / 2, 0);
-                        this.project.Trackables.Add(tempTrack);
+                        this.previewController.createNewScenewithTrackable(tempTrack, project.Trackables.Count);
+                        //tempTrack.vector = new Vector3D(previewController.getMainContainerSize().Width / 2, previewController.getMainContainerSize().Height / 2, 0);
+                        //this.project.Trackables.Add(tempTrack);
                         foreach (AbstractAugmentation a in tempTrack.Augmentations)
                         {
                             a.initElement(this);
                         }
-                        this.updateSceneSelectionPanel(); 
+                        //this.updateSceneSelectionPanel();
+                        this.reloadSelectionPanel();
+                        this.previewController.changeSceneTo(temp - 1);
+                        this.resetButton();
+                        this.setButton(temp.ToString());
+                        //foreach (Control comp in pnl_editor_scenes.Controls)
+                        //{
+                        //    if (comp.Text == (project.Trackables.Count).ToString())
+                        //    {
+                        //        btn_editor_scene_scene_change(comp, new EventArgs());
+                        //    }
+                        //}
+                        //this.previewController.reloadCurrentWebsite();
+                        //this.html_preview.Refresh();
+                        //cant use changeScene because it wants to mark the not yet added previewable
+                        //this.html_preview.Navigate("http:localhost:" + PreviewController.PREVIEW_PORT + "/" + (project.Trackables.Count - 1));
+                        //this.previewController.Index = (project.Trackables.Count - 1);
+                        //this.previewController.trackable = null;
+                        //this.previewController.addPreviewable(tempTrack, tempTrack.vector);
+                        //this.previewController.changeSceneTo(project.Trackables.Count - 1);
                     }
                 }
             }

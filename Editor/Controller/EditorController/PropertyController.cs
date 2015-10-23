@@ -223,9 +223,16 @@ namespace Controller.EditorController
                 {
                     string newName = e.ChangedItem.Value.ToString().Replace(" ", "_");
                     ((Abstract2DTrackable)ew.CurrentElement).SensorCosID = e.OldValue.ToString();
-
-                    if (ew.project.Trackables.Exists(x => ((Abstract2DTrackable)x).SensorCosID.Equals(newName)))
-                        return;
+                    
+                    foreach (AbstractTrackable track in ew.project.Trackables)
+                    {
+                        //check if the trackable has the same id
+                        if (track != null && track is Abstract2DTrackable && ((Abstract2DTrackable)track).SensorCosID.Equals(newName))
+                            return;
+                        //check if any augmentation associated with this trackable has the same id
+                        if (track != null && track.Augmentations.Exists(x => ((AbstractAugmentation)x).ID.Equals(newName)))
+                            return;
+                    }
                     ew.PreviewController.renamePreviewable(ew.CurrentElement, newName);
                     ew.Cmb_editor_properties_objectSelection.Items.Clear();
                     ew.Cmb_editor_properties_objectSelection.Items.Clear();
@@ -246,7 +253,11 @@ namespace Controller.EditorController
 
                     foreach (AbstractTrackable track in ew.project.Trackables)
 	                {
-                        if(track.Augmentations.Exists(x => ((AbstractAugmentation)x).ID.Equals(newName)))
+                        //check if the trackable has the same id
+                        if (track != null && track is Abstract2DTrackable && ((Abstract2DTrackable)track).SensorCosID == newName)
+                            return;
+                        //check if any augmentation associated with this trackable has the same id
+                        if (track != null && track.Augmentations.Exists(x => ((AbstractAugmentation)x).ID.Equals(newName)))
                             return;
 	                }
 

@@ -106,7 +106,8 @@ namespace ARdevKit.Controller.EditorController
         {
             HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
             doc.LoadHtml(websiteTexts[index]);
-            doc.GetElementbyId(element.Id).Remove();
+            HtmlNode toBeDeleted = doc.GetElementbyId(element.Id);
+            toBeDeleted.ParentNode.RemoveChild(toBeDeleted,false);
             websiteTexts[index] = doc.DocumentNode.OuterHtml;
             //websiteTexts[index].Replace(doc.GetElementbyId(element.Id).OuterHtml,"");
         //    XmlReaderSettings settings = new XmlReaderSettings();

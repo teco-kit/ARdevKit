@@ -396,24 +396,22 @@ namespace ARdevKit.Model.Project
             while (found)
             {
                 found = false;
-                count++;
+                newID = this.GetType().Name + ++count;
+                //make first letter lowercase
+                newID = newID[0].ToString().ToLower() + newID.Substring(1);
                 foreach (AbstractTrackable t in ew.project.Trackables)
                 {
-                    newID = this.GetType().Name + count;
-                    //make first letter lowercase
-                    newID = newID[0].ToString().ToLower() + newID.Substring(1);
+                    if(t is Abstract2DTrackable && ((Abstract2DTrackable)t).SensorCosID == newID)
+                    {
+                        found = true;
+                        break;
+                    }
                     if (t != null)
                     {
-                        foreach (AbstractAugmentation a in t.Augmentations)
+                        if(t.Augmentations.Exists(a => a.ID == newID))
                         {
-                            if (this.GetType().Equals(a.GetType()))
-                            {
-                                if (a.ID == newID)
-                                {
-                                    found = true;
-                                    break;
-                                }
-                            }
+                            found = true;
+                            break;
                         }
                     }
                 }

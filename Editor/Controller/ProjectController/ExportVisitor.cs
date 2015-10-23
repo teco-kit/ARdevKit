@@ -1305,8 +1305,8 @@ namespace ARdevKit.Controller.ProjectController
             arelGlueFile.AddBlock(arelGlueMoveBlock);
             arelGlueMoveBlock.AddBlock(new JavaScriptLine("var oldLeft = object.element.style.left"));
             arelGlueMoveBlock.AddBlock(new JavaScriptLine("var oldTop = object.element.style.top"));
-            arelGlueMoveBlock.AddBlock(new JavaScriptLine("var newLeft = (coord.getX() - parseInt(object.element.style.width) / 2)/window.devicePixelRatio"));
-            arelGlueMoveBlock.AddBlock(new JavaScriptLine("var newTop = (coord.getY() - parseInt(object.element.style.height) / 2)/window.devicePixelRatio"));
+            arelGlueMoveBlock.AddBlock(new JavaScriptLine("var newLeft = (coord.getX()/window.devicePixelRatio - parseInt(object.element.style.width) / 2)"));
+            arelGlueMoveBlock.AddBlock(new JavaScriptLine("var newTop = (coord.getY()/window.devicePixelRatio - parseInt(object.element.style.height) / 2)"));
             arelGlueMoveBlock.AddBlock(new JavaScriptLine("object.element.style.left = newLeft + 'px'"));
             arelGlueMoveBlock.AddBlock(new JavaScriptLine("object.element.style.top = newTop + 'px'"));
 

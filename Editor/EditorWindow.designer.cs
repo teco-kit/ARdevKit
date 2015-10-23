@@ -599,7 +599,6 @@ namespace ARdevKit
             set { propertyGrid1 = value; }
         }
 
-
         /**
          * <summary>    Gets or sets the pnl editor selection. </summary>
          *
