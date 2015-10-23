@@ -734,23 +734,23 @@ namespace ARdevKit.Controller.ProjectController
 
             // arelGlue.js
 
-            // Set anchor
-            Bitmap bmp = new Bitmap(1, 1);
-            Graphics g = Graphics.FromImage(bmp);
-            g.Clear(Color.Transparent);
-            g.Flush();
-            string anchorPath = Path.Combine(project.ProjectPath, "Assets", "anchor.png");
-            if (!File.Exists(anchorPath))
-                bmp.Save(anchorPath, System.Drawing.Imaging.ImageFormat.Png);
+            //// Set anchor
+            //Bitmap bmp = new Bitmap(1, 1);
+            //Graphics g = Graphics.FromImage(bmp);
+            //g.Clear(Color.Transparent);
+            //g.Flush();
+            //string anchorPath = Path.Combine(project.ProjectPath, "Assets", "anchor.png");
+            //if (!File.Exists(anchorPath))
+            //    bmp.Save(anchorPath, System.Drawing.Imaging.ImageFormat.Png);
 
-            // Add global variable for the anchor
-            arelGlueFile.AddBlock(new JavaScriptLine("var COS" + coordinateSystemID + "Anchor"));
+            //// Add global variable for the anchor
+            //arelGlueFile.AddBlock(new JavaScriptLine("var COS" + coordinateSystemID + "Anchor"));
 
-            // Add the anchor to the scene
-            sceneReadyFunctionBlock.AddLine(new JavaScriptLine("COS" + coordinateSystemID + "Anchor = arel.Object.Model3D.createFromImage(\"COS" + coordinateSystemID + "Anchor" + "\",\"Assets/anchor.png" + "\")"));
-            sceneReadyFunctionBlock.AddLine(new JavaScriptLine("COS" + coordinateSystemID + "Anchor.setVisibility(false)"));
-            sceneReadyFunctionBlock.AddLine(new JavaScriptLine("COS" + coordinateSystemID + "Anchor.setCoordinateSystemID(" + coordinateSystemID + ")"));
-            sceneReadyFunctionBlock.AddLine(new JavaScriptLine("arel.Scene.addObject(COS" + coordinateSystemID + "Anchor)"));
+            //// Add the anchor to the scene
+            //sceneReadyFunctionBlock.AddLine(new JavaScriptLine("COS" + coordinateSystemID + "Anchor = arel.Object.Model3D.createFromImage(\"COS" + coordinateSystemID + "Anchor" + "\",\"Assets/anchor.png" + "\")"));
+            //sceneReadyFunctionBlock.AddLine(new JavaScriptLine("COS" + coordinateSystemID + "Anchor.setVisibility(false)"));
+            //sceneReadyFunctionBlock.AddLine(new JavaScriptLine("COS" + coordinateSystemID + "Anchor.setCoordinateSystemID(" + coordinateSystemID + ")"));
+            //sceneReadyFunctionBlock.AddLine(new JavaScriptLine("arel.Scene.addObject(COS" + coordinateSystemID + "Anchor)"));
 
             // Create scene.js
             createSceneFileToCurrentCoordSysID();
@@ -877,23 +877,23 @@ namespace ARdevKit.Controller.ProjectController
 
             // arelGlue.js
 
-            // Set anchor
-            Bitmap bmp = new Bitmap(1, 1);
-            Graphics g = Graphics.FromImage(bmp);
-            g.Clear(Color.Transparent);
-            g.Flush();
-            string anchorPath = Path.Combine(project.ProjectPath, "Assets", "anchor.png");
-            if (!File.Exists(anchorPath))
-                bmp.Save(anchorPath, System.Drawing.Imaging.ImageFormat.Png);
+            //// Set anchor
+            //Bitmap bmp = new Bitmap(1, 1);
+            //Graphics g = Graphics.FromImage(bmp);
+            //g.Clear(Color.Transparent);
+            //g.Flush();
+            //string anchorPath = Path.Combine(project.ProjectPath, "Assets", "anchor.png");
+            //if (!File.Exists(anchorPath))
+            //    bmp.Save(anchorPath, System.Drawing.Imaging.ImageFormat.Png);
 
-            // Add global variable for the anchor
-            arelGlueFile.AddBlock(new JavaScriptLine("var COS" + coordinateSystemID + "Anchor"));
+            //// Add global variable for the anchor
+            //arelGlueFile.AddBlock(new JavaScriptLine("var COS" + coordinateSystemID + "Anchor"));
 
-            // Add the anchor to the scene
-            sceneReadyFunctionBlock.AddLine(new JavaScriptLine("COS" + coordinateSystemID + "Anchor = arel.Object.Model3D.createFromImage(\"COS" + coordinateSystemID + "Anchor" + "\",\"Assets/anchor.png" + "\")"));
-            sceneReadyFunctionBlock.AddLine(new JavaScriptLine("COS" + coordinateSystemID + "Anchor.setVisibility(false)"));
-            sceneReadyFunctionBlock.AddLine(new JavaScriptLine("COS" + coordinateSystemID + "Anchor.setCoordinateSystemID(" + coordinateSystemID + ")"));
-            sceneReadyFunctionBlock.AddLine(new JavaScriptLine("arel.Scene.addObject(COS" + coordinateSystemID + "Anchor)"));
+            //// Add the anchor to the scene
+            //sceneReadyFunctionBlock.AddLine(new JavaScriptLine("COS" + coordinateSystemID + "Anchor = arel.Object.Model3D.createFromImage(\"COS" + coordinateSystemID + "Anchor" + "\",\"Assets/anchor.png" + "\")"));
+            //sceneReadyFunctionBlock.AddLine(new JavaScriptLine("COS" + coordinateSystemID + "Anchor.setVisibility(false)"));
+            //sceneReadyFunctionBlock.AddLine(new JavaScriptLine("COS" + coordinateSystemID + "Anchor.setCoordinateSystemID(" + coordinateSystemID + ")"));
+            //sceneReadyFunctionBlock.AddLine(new JavaScriptLine("arel.Scene.addObject(COS" + coordinateSystemID + "Anchor)"));
 
             // Create scene.js
             createSceneFileToCurrentCoordSysID();
@@ -1025,25 +1025,25 @@ namespace ARdevKit.Controller.ProjectController
 
             // arelGlue.js
 
-            // Set anchor
-            Bitmap bmp = new Bitmap(1, 1);
-            Graphics g = Graphics.FromImage(bmp);
-            g.Clear(Color.Transparent);
-            g.Flush();
-            string anchorPath = Path.Combine(project.ProjectPath, "Assets", "anchor.png");
-            if (!File.Exists(anchorPath))
-                bmp.Save(anchorPath, System.Drawing.Imaging.ImageFormat.Png);
+            //// Set anchor
+            //Bitmap bmp = new Bitmap(1, 1);
+            //Graphics g = Graphics.FromImage(bmp);
+            //g.Clear(Color.Transparent);
+            //g.Flush();
+            //string anchorPath = Path.Combine(project.ProjectPath, "Assets", "anchor.png");
+            //if (!File.Exists(anchorPath))
+            //    bmp.Save(anchorPath, System.Drawing.Imaging.ImageFormat.Png);
 
-            // Add global variable for the anchor
-            arelGlueFile.AddBlock(new JavaScriptLine("var COS" + coordinateSystemID + "Anchor"));
+            //// Add global variable for the anchor
+            //arelGlueFile.AddBlock(new JavaScriptLine("var COS" + coordinateSystemID + "Anchor"));
 
-            // Add the anchor to the scene
-            sceneReadyFunctionBlock.AddLine(new JavaScriptLine("COS" + coordinateSystemID + "Anchor = arel.Object.Model3D.createFromImage(\"COS" + coordinateSystemID + "Anchor" + "\",\"Assets/anchor.png" + "\")"));
-            sceneReadyFunctionBlock.AddLine(new JavaScriptLine("COS" + coordinateSystemID + "Anchor.setVisibility(false)"));
-            sceneReadyFunctionBlock.AddLine(new JavaScriptLine("COS" + coordinateSystemID + "Anchor.setCoordinateSystemID(" + coordinateSystemID + ")"));
-            sceneReadyFunctionBlock.AddLine(new JavaScriptLine("arel.Scene.addObject(COS" + coordinateSystemID + "Anchor)"));
+            //// Add the anchor to the scene
+            //sceneReadyFunctionBlock.AddLine(new JavaScriptLine("COS" + coordinateSystemID + "Anchor = arel.Object.Model3D.createFromImage(\"COS" + coordinateSystemID + "Anchor" + "\",\"Assets/anchor.png" + "\")"));
+            //sceneReadyFunctionBlock.AddLine(new JavaScriptLine("COS" + coordinateSystemID + "Anchor.setVisibility(false)"));
+            //sceneReadyFunctionBlock.AddLine(new JavaScriptLine("COS" + coordinateSystemID + "Anchor.setCoordinateSystemID(" + coordinateSystemID + ")"));
+            //sceneReadyFunctionBlock.AddLine(new JavaScriptLine("arel.Scene.addObject(COS" + coordinateSystemID + "Anchor)"));
 
-            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
             // Create scene.js
             createSceneFileToCurrentCoordSysID();
@@ -1146,7 +1146,8 @@ namespace ARdevKit.Controller.ProjectController
             sceneIfPatternIsFoundShowBlock.AddLine(new JavaScriptLine(sceneID + ".show()"));
 
             //moving is handled by the scene
-            sceneIfPatternIsFoundShowBlock.AddLine(new JavaScriptLine("arel.Scene.getScreenCoordinatesFrom3DPosition(COS" + coordinateSystemID + "Anchor.getTranslation(), " + sceneID + ".getCoordinateSystemID(), function(coord){move(COS" + coordinateSystemID + "Anchor, " + sceneID + ", coord);})"));
+            sceneIfPatternIsFoundShowBlock.AddLine(new JavaScriptLine("arel.Scene.getViewportCoordinatesFrom3DPosition(new arel.Vector3D(0,0,0), " + sceneID + ".getCoordinateSystemID(), function(coord){move(" + sceneID + ", coord);})"));
+            //getScreenCoordinatesFrom3DPosition(COS" + coordinateSystemID + "Anchor.getTranslation(), " + sceneID + ".getCoordinateSystemID(), function(coord){move(COS" + coordinateSystemID + "Anchor, " + sceneID + ", coord);})"));
 
             // onTracking lost
             ifPatternIsLostBlock.AddLine(new JavaScriptLine(sceneID + ".hide()"));
@@ -1258,7 +1259,7 @@ namespace ARdevKit.Controller.ProjectController
             // Trackingdata
             string trackingdataExtension = "channel=\"0\" poiprefix=\"extpoi-124906-\" url=\"Assets/" + trackingDataFileName + "\" /";
             resultsBlock.AddLine(new XMLLine(new NonTerminatingXMLTag("trackingdata", trackingdataExtension)));
-            resultsBlock.AddLine(new XMLLine(new XMLTag("apilevel"), "7"));
+            resultsBlock.AddLine(new XMLLine(new XMLTag("apilevel"), "18"));
             resultsBlock.AddLine(new XMLLine(new XMLTag("arel"), Path.GetFileName(arelProjectFile.FilePath)));
 
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1301,7 +1302,7 @@ namespace ARdevKit.Controller.ProjectController
             ifPatternIsLostBlock.AddLine(new JavaScriptLine("console.log(\"Tracking lost\")"));
 
             // Move
-            JavaScriptBlock arelGlueMoveBlock = new JavaScriptBlock("function move(anchor, object, coord)", new BlockMarker("{", "};"));
+            JavaScriptBlock arelGlueMoveBlock = new JavaScriptBlock("function move(object, coord)", new BlockMarker("{", "};"));
             arelGlueFile.AddBlock(arelGlueMoveBlock);
             arelGlueMoveBlock.AddBlock(new JavaScriptLine("var oldLeft = object.element.style.left"));
             arelGlueMoveBlock.AddBlock(new JavaScriptLine("var oldTop = object.element.style.top"));
@@ -1317,7 +1318,8 @@ namespace ARdevKit.Controller.ProjectController
             JavaScriptBlock arelGlueMoveTimeoutBlock = new JavaScriptBlock("if (object.visible)", new BlockMarker("{", "}"));
             arelGlueMoveBlock.AddBlock(arelGlueMoveTimeoutBlock);
 
-            arelGlueMoveTimeoutBlock.AddLine(new JavaScriptLine("setTimeout(function() { arel.Scene.getScreenCoordinatesFrom3DPosition(anchor.getTranslation(), object.getCoordinateSystemID(), function(coord){move(anchor, object, coord);}); }, 100)"));
+            arelGlueMoveTimeoutBlock.AddLine(new JavaScriptLine("setTimeout(function() { arel.Scene.getViewportCoordinatesFrom3DPosition(new arel.Vector3D(0,0,0), object.getCoordinateSystemID(), function(coord){move(object, coord);}); }, 100)"));
+            //arelGlueMoveTimeoutBlock.AddLine(new JavaScriptLine("setTimeout(function() { arel.Scene.getScreenCoordinatesFrom3DPosition(anchor.getTranslation(), object.getCoordinateSystemID(), function(coord){move(anchor, object, coord);}); }, 100)"));
         }
 
         public override void Visit(HtmlImage htmlImage)
