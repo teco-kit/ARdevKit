@@ -211,31 +211,24 @@ namespace ARdevKit
         {
             InitializeComponent();
             //initializes additional controls
-            //mask = new MaskedTextBox("9000(Breite)px; 9000(Höhe)px");
-            //toolStripWrapper = new ToolStripControlHost(mask);
-            //if(toolStripWrapper.CanSelect)
-            //toolStripWrapper.Select();
+            mask = new MaskedTextBox("9000(Breite)px; 9000(Höhe)px");
+            toolStripWrapper = new ToolStripControlHost(mask);
+            if (toolStripWrapper.CanSelect)
+                toolStripWrapper.Select();
+            mask.MaskInputRejected += screenSizeInputRejected;
+            mask.KeyDown += mask_KeyDown;
+            screenSizeInputToolTip = new ToolTip();
+            benutzdefiniertToolStripMenuItem.DropDownItems.Add(toolStripWrapper);
+            benutzdefiniertToolStripMenuItem.Click += screenSizeChooseToolStripMenuItem_Click;
 
-            //mask.ValidatingType = typeof(ScreenSize);
-            //mask.TypeValidationCompleted += mask_TypeValidationCompleted;
-            //mask.MaskInputRejected += screenSizeInputRejected;
-            //mask.KeyDown += mask_KeyDown;  
-            //screenSizeInputToolTip = new ToolTip();
-            //tsm_editor_menu_edit_changeScreenSize.DropDownItems.Add(toolStripWrapper);
             createNewProject("");
-        }
-
-        void mask_TypeValidationCompleted(object sender, TypeValidationEventArgs e)
-        {
-            System.Windows.Forms.MessageBox.Show("IT worked");
         }
 
         void mask_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
-                ScreenSize newSize = (ScreenSize)mask.ValidateText();
-                PreviewController.setMainContainerSize(newSize);
+                benutzdefiniertToolStripMenuItem.PerformClick();
             }
             screenSizeInputToolTip.Hide(mask);
         }
@@ -528,6 +521,7 @@ namespace ARdevKit
             this.initializeEmptyProject(name);
             this.initializeControllers();
             this.updatePanels();
+            this.updateScreenSize();
             this.checksum = project.getChecksum();
         }
 
@@ -1006,8 +1000,28 @@ namespace ARdevKit
             {
                 this.project.Screensize.Height = MINSCREENHEIGHT;
             }
-                this.previewController.setMainContainerSize(project.Screensize);
-                //this.previewController.rescalePreviewPanel();
+            string screenSizeText = this.project.Screensize.Width + "x" + this.project.Screensize.Height;
+            foreach (ToolStripItem item in tsm_editor_menu_edit_changeScreenSize.DropDownItems)
+            {
+                if (item.Text != "Benutzerdefiniert")
+                {
+                    foreach (ToolStripItem subItem in ((ToolStripMenuItem)item).DropDownItems)
+                    {
+                        if (subItem.Text == screenSizeText)
+                        {
+                            subItem.PerformClick();
+                            return;
+                        }
+                    }
+                }
+                else
+                {
+                    ((ToolStripMenuItem)item).DropDownItems[0].Text = project.Screensize.Width + "(Breite)px; " 
+                        + project.Screensize.Height+ "(Höhe)px";
+                    item.PerformClick();
+                }       
+            }
+            //this.previewController.setMainContainerSize(project.Screensize);
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1537,28 +1551,56 @@ namespace ARdevKit
             // if the user chooses a special resolution
             if (toolStripSender.Text.Equals("Benutzerdefiniert"))
             {
-                            
+                string[] chosenVariables = toolStripSender.DropDownItems[0].Text.Split(';');
+                chosenVariables[0] = chosenVariables[0].Replace("(Breite)px", "").Replace(" ","");
+                chosenVariables[1] = chosenVariables[1].Replace("(Höhe)px", "").Replace(" ","");
+                if (chosenVariables[0] == "" || chosenVariables[1] == "")
+                {
+                    screenSizeInputToolTip.ToolTipTitle = "keine Eingabe";
+                    screenSizeInputToolTip.Show("Bitte geben Sie in diese Maske ihre gewünschte Breite und Höhe in Pixeln ein.", mask, 0, -20, 5000);
+                    return;
+                }
+                uint[] parsedKoordinates = { uint.Parse(chosenVariables[0]), uint.Parse(chosenVariables[1]) };
+                if (parsedKoordinates[0] < MINSCREENWIDHT)
+                {
+                    screenSizeInputToolTip.ToolTipTitle = "Breite zu klein";
+                    screenSizeInputToolTip.Show("Bitte geben Sie eine Breite größer gleich "+ MINSCREENWIDHT+ " an.", mask, 0, -20, 5000);
+                    return;
+                }
+                else if (parsedKoordinates[1] < MINSCREENHEIGHT)
+                {
+                    screenSizeInputToolTip.ToolTipTitle = "Höhe zu klein";
+                    screenSizeInputToolTip.Show("Bitte geben Sie eine Höhe größer gleich " + MINSCREENHEIGHT + " an.", mask, 0, -20, 5000);
+                    return;
+                }
+                ScreenSize newScreenSize = new ScreenSize(parsedKoordinates[0], parsedKoordinates[1]);
+                this.previewController.setMainContainerSize(newScreenSize);
+                this.project.Screensize = newScreenSize;
             }
             // if the user chooses predefined resolution
             else
             {
-                foreach (ToolStripMenuItem item in ((ToolStripMenuItem)toolStripSender.OwnerItem).DropDownItems)
+                ((ToolStripMenuItem)toolStripSender.DropDownItems[0]).Checked = true;
+                string[] chosenVariables = toolStripSender.DropDownItems[0].Text.Split('x');
+                ScreenSize newScreenSize = new ScreenSize(uint.Parse(chosenVariables[0]), uint.Parse(chosenVariables[1]));
+                this.previewController.setMainContainerSize(newScreenSize);
+                this.project.Screensize = newScreenSize;
+            }      
+
+            //handle the checking of the currently chosen ScreenSize
+            foreach (ToolStripMenuItem item in ((ToolStripMenuItem)toolStripSender.OwnerItem).DropDownItems)
+            {
+                if (item.Checked)
                 {
-                    if (item.Checked)
-                    {
+                    if(item.Text != "Benutzerdefiniert")
                         foreach (ToolStripMenuItem specific_item in item.DropDownItems)
                         {
                             specific_item.Checked = false;
                         }
-                        item.Checked = false;
-                    }
+                    item.Checked = false;
                 }
-                ((ToolStripMenuItem)toolStripSender.DropDownItems[0]).Checked = true;
-                toolStripSender.Checked = true;
-                ScreenSize newScreenSize = new ScreenSize();
-                string[] chosenVariables = toolStripSender.DropDownItems[0].Text.Split('x');
-                this.previewController.setMainContainerSize(new ScreenSize(uint.Parse(chosenVariables[0]), uint.Parse(chosenVariables[1])));
-            }      
+            }
+            toolStripSender.Checked = true;
         }
 
         private void portraitOrLandscapeChooseToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1577,10 +1619,10 @@ namespace ARdevKit
             }
             ((ToolStripMenuItem)toolStripSender.OwnerItem).Checked = true;
             toolStripSender.Checked = true;
-            ScreenSize newScreenSize = new ScreenSize();
             string[] chosenVariables = toolStripSender.Text.Split('x');
-            this.previewController.setMainContainerSize(new ScreenSize(uint.Parse(chosenVariables[0]), uint.Parse(chosenVariables[1])));
-
+            ScreenSize newScreenSize = new ScreenSize(uint.Parse(chosenVariables[0]), uint.Parse(chosenVariables[1]));
+            this.previewController.setMainContainerSize(newScreenSize);
+            this.project.Screensize = newScreenSize; 
         }
     }
 }

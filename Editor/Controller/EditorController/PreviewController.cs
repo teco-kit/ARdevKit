@@ -2035,10 +2035,10 @@ namespace ARdevKit.Controller.EditorController
                 if (trackable != null)
                 {
                     HtmlElement trackElement = findElement(trackable);
-                    Websites.changePositionOf(trackElement, i, 
-                        (height / 2 - trackElement.OffsetRectangle.Height / 2).ToString() + "px", 
+                    if (trackElement != null)
+                        Websites.changePositionOf(trackElement, i,
+                        (height / 2 - trackElement.OffsetRectangle.Height / 2).ToString() + "px",
                         (width / 2 - trackElement.OffsetRectangle.Width / 2).ToString() + "px");
-                    trackable.vector = new Vector3D(width / 2, height / 2, 0);
                     //foreach (AbstractAugmentation aug in trackable.Augmentations)
                     //{
                     //    if (aug is Chart)
@@ -2578,10 +2578,11 @@ namespace ARdevKit.Controller.EditorController
        
         public ScreenSize getMainContainerSize()
         {
-            ScreenSize result = new ScreenSize();
-            result.Height = Convert.ToUInt32(htmlPreview.Document.GetElementById("containment-wrapper").ClientRectangle.Height);
-            result.Width = Convert.ToUInt32(htmlPreview.Document.GetElementById("containment-wrapper").ClientRectangle.Width);
-            return result;
+            return this.ew.project.Screensize;
+            //ScreenSize result = new ScreenSize();
+            //result.Height = Convert.ToUInt32(htmlPreview.Document.GetElementById("containment-wrapper").ClientRectangle.Height);
+            //result.Width = Convert.ToUInt32(htmlPreview.Document.GetElementById("containment-wrapper").ClientRectangle.Width);
+            //return result;
         }
 
         public void setMainContainerSize(ScreenSize size)
