@@ -135,6 +135,7 @@ namespace ARdevKit.Properties {
         ///&lt;html lang=&quot;en&quot;&gt;
         ///&lt;head&gt;
         ///    &lt;meta charset=&quot;utf-8&quot;&gt;
+        ///    &lt;meta http-equiv=&quot;cache-control&quot; content=&quot;no-cache&quot;&gt;
         ///    &lt;title&gt;HTMLPreviewPage&lt;/title&gt;
         ///    &lt;script src=&quot;http://code.jquery.com/jquery-1.11.2.min.js&quot;&gt;&lt;/script&gt;
         ///    &lt;script src=&quot;http://code.highcharts.com/highcharts.js&quot;&gt;&lt;/script&gt;
@@ -144,10 +145,7 @@ namespace ARdevKit.Properties {
         ///            top: 50%;
         ///            position: absolute;
         ///            border: 2px solid #4cff00;
-        ///            background-color: white
-        ///        }
-        ///
-        ///        #containment-wrapper &gt; [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
+        ///            background [Rest der Zeichenfolge wurde abgeschnitten]&quot;; ähnelt.
         /// </summary>
         internal static string HTMLPreviewPage {
             get {
@@ -5351,6 +5349,26 @@ namespace ARdevKit.Properties {
         internal static System.Drawing.Bitmap PictureMarker_small_ {
             get {
                 object obj = ResourceManager.GetObject("PictureMarker_small_", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap rect3344 {
+            get {
+                object obj = ResourceManager.GetObject("rect3344", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Ressource vom Typ System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap rect3345 {
+            get {
+                object obj = ResourceManager.GetObject("rect3345", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

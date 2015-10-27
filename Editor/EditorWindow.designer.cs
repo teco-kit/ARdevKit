@@ -61,6 +61,27 @@ namespace ARdevKit
             this.tsm_editor_menu_edit_copie = new System.Windows.Forms.ToolStripMenuItem();
             this.tsm_editor_menu_edit_paste = new System.Windows.Forms.ToolStripMenuItem();
             this.tsm_editor_menu_edit_delete = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsm_editor_menu_edit_changeScreenSize = new System.Windows.Forms.ToolStripMenuItem();
+            this.standardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.x240ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.x320ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.iPhone5ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.x640ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.x1136ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.iPhone6ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.x750ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.x1334ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.nexus4ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.x768ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.x1280ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.nexus5ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.x1080ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.x1920ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.lGG3G4ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.x1440ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.x2560ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.benutzdefiniertToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsm_editor_menu_test = new System.Windows.Forms.ToolStripMenuItem();
             this.tsm_editor_menu_test_startImage = new System.Windows.Forms.ToolStripMenuItem();
             this.tsm_editor_menu_test_startVideo = new System.Windows.Forms.ToolStripMenuItem();
@@ -341,7 +362,9 @@ namespace ARdevKit
             this.tsm_editor_menu_edit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsm_editor_menu_edit_copie,
             this.tsm_editor_menu_edit_paste,
-            this.tsm_editor_menu_edit_delete});
+            this.tsm_editor_menu_edit_delete,
+            this.toolStripSeparator1,
+            this.tsm_editor_menu_edit_changeScreenSize});
             this.tsm_editor_menu_edit.Name = "tsm_editor_menu_edit";
             this.tsm_editor_menu_edit.Size = new System.Drawing.Size(75, 20);
             this.tsm_editor_menu_edit.Text = "Bearbeiten";
@@ -352,7 +375,7 @@ namespace ARdevKit
             this.tsm_editor_menu_edit_copie.Name = "tsm_editor_menu_edit_copie";
             this.tsm_editor_menu_edit_copie.ShortcutKeyDisplayString = "STRG+C";
             this.tsm_editor_menu_edit_copie.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.tsm_editor_menu_edit_copie.Size = new System.Drawing.Size(181, 22);
+            this.tsm_editor_menu_edit_copie.Size = new System.Drawing.Size(186, 22);
             this.tsm_editor_menu_edit_copie.Text = "Kopieren";
             // 
             // tsm_editor_menu_edit_paste
@@ -361,7 +384,7 @@ namespace ARdevKit
             this.tsm_editor_menu_edit_paste.Name = "tsm_editor_menu_edit_paste";
             this.tsm_editor_menu_edit_paste.ShortcutKeyDisplayString = "STRG+V";
             this.tsm_editor_menu_edit_paste.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
-            this.tsm_editor_menu_edit_paste.Size = new System.Drawing.Size(181, 22);
+            this.tsm_editor_menu_edit_paste.Size = new System.Drawing.Size(186, 22);
             this.tsm_editor_menu_edit_paste.Text = "Einfügen";
             // 
             // tsm_editor_menu_edit_delete
@@ -370,8 +393,194 @@ namespace ARdevKit
             this.tsm_editor_menu_edit_delete.Name = "tsm_editor_menu_edit_delete";
             this.tsm_editor_menu_edit_delete.ShortcutKeyDisplayString = "STRG+DEL";
             this.tsm_editor_menu_edit_delete.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Delete)));
-            this.tsm_editor_menu_edit_delete.Size = new System.Drawing.Size(181, 22);
+            this.tsm_editor_menu_edit_delete.Size = new System.Drawing.Size(186, 22);
             this.tsm_editor_menu_edit_delete.Text = "Löschen";
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(183, 6);
+            // 
+            // tsm_editor_menu_edit_changeScreenSize
+            // 
+            this.tsm_editor_menu_edit_changeScreenSize.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.standardToolStripMenuItem,
+            this.iPhone5ToolStripMenuItem,
+            this.iPhone6ToolStripMenuItem,
+            this.nexus4ToolStripMenuItem,
+            this.nexus5ToolStripMenuItem,
+            this.lGG3G4ToolStripMenuItem,
+            this.benutzdefiniertToolStripMenuItem});
+            this.tsm_editor_menu_edit_changeScreenSize.Name = "tsm_editor_menu_edit_changeScreenSize";
+            this.tsm_editor_menu_edit_changeScreenSize.Size = new System.Drawing.Size(186, 22);
+            this.tsm_editor_menu_edit_changeScreenSize.Text = "Zielauflösung ändern";
+            // 
+            // standardToolStripMenuItem
+            // 
+            this.standardToolStripMenuItem.Checked = true;
+            this.standardToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.standardToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.x240ToolStripMenuItem,
+            this.x320ToolStripMenuItem});
+            this.standardToolStripMenuItem.Name = "standardToolStripMenuItem";
+            this.standardToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+            this.standardToolStripMenuItem.Text = "Standard";
+            this.standardToolStripMenuItem.Click += new System.EventHandler(this.screenSizeChooseToolStripMenuItem_Click);
+            // 
+            // x240ToolStripMenuItem
+            // 
+            this.x240ToolStripMenuItem.Checked = true;
+            this.x240ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.x240ToolStripMenuItem.Image = global::ARdevKit.Properties.Resources.rect3344;
+            this.x240ToolStripMenuItem.Name = "x240ToolStripMenuItem";
+            this.x240ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.x240ToolStripMenuItem.Text = "320x240";
+            this.x240ToolStripMenuItem.Click += new System.EventHandler(this.portraitOrLandscapeChooseToolStripMenuItem_Click);
+            // 
+            // x320ToolStripMenuItem
+            // 
+            this.x320ToolStripMenuItem.Image = global::ARdevKit.Properties.Resources.rect3345;
+            this.x320ToolStripMenuItem.Name = "x320ToolStripMenuItem";
+            this.x320ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.x320ToolStripMenuItem.Text = "240x320";
+            this.x320ToolStripMenuItem.Click += new System.EventHandler(this.portraitOrLandscapeChooseToolStripMenuItem_Click);
+            // 
+            // iPhone5ToolStripMenuItem
+            // 
+            this.iPhone5ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.x640ToolStripMenuItem,
+            this.x1136ToolStripMenuItem});
+            this.iPhone5ToolStripMenuItem.Name = "iPhone5ToolStripMenuItem";
+            this.iPhone5ToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+            this.iPhone5ToolStripMenuItem.Text = "iPhone 5";
+            this.iPhone5ToolStripMenuItem.Click += new System.EventHandler(this.screenSizeChooseToolStripMenuItem_Click);
+            // 
+            // x640ToolStripMenuItem
+            // 
+            this.x640ToolStripMenuItem.Image = global::ARdevKit.Properties.Resources.rect3344;
+            this.x640ToolStripMenuItem.Name = "x640ToolStripMenuItem";
+            this.x640ToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
+            this.x640ToolStripMenuItem.Text = "1136x640";
+            this.x640ToolStripMenuItem.Click += new System.EventHandler(this.portraitOrLandscapeChooseToolStripMenuItem_Click);
+            // 
+            // x1136ToolStripMenuItem
+            // 
+            this.x1136ToolStripMenuItem.Image = global::ARdevKit.Properties.Resources.rect3345;
+            this.x1136ToolStripMenuItem.Name = "x1136ToolStripMenuItem";
+            this.x1136ToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
+            this.x1136ToolStripMenuItem.Text = "640x1136";
+            this.x1136ToolStripMenuItem.Click += new System.EventHandler(this.portraitOrLandscapeChooseToolStripMenuItem_Click);
+            // 
+            // iPhone6ToolStripMenuItem
+            // 
+            this.iPhone6ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.x750ToolStripMenuItem,
+            this.x1334ToolStripMenuItem});
+            this.iPhone6ToolStripMenuItem.Name = "iPhone6ToolStripMenuItem";
+            this.iPhone6ToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+            this.iPhone6ToolStripMenuItem.Text = "iPhone 6";
+            this.iPhone6ToolStripMenuItem.Click += new System.EventHandler(this.screenSizeChooseToolStripMenuItem_Click);
+            // 
+            // x750ToolStripMenuItem
+            // 
+            this.x750ToolStripMenuItem.Image = global::ARdevKit.Properties.Resources.rect3344;
+            this.x750ToolStripMenuItem.Name = "x750ToolStripMenuItem";
+            this.x750ToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
+            this.x750ToolStripMenuItem.Text = "1334x750";
+            this.x750ToolStripMenuItem.Click += new System.EventHandler(this.portraitOrLandscapeChooseToolStripMenuItem_Click);
+            // 
+            // x1334ToolStripMenuItem
+            // 
+            this.x1334ToolStripMenuItem.Image = global::ARdevKit.Properties.Resources.rect3345;
+            this.x1334ToolStripMenuItem.Name = "x1334ToolStripMenuItem";
+            this.x1334ToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
+            this.x1334ToolStripMenuItem.Text = "750x1334";
+            this.x1334ToolStripMenuItem.Click += new System.EventHandler(this.portraitOrLandscapeChooseToolStripMenuItem_Click);
+            // 
+            // nexus4ToolStripMenuItem
+            // 
+            this.nexus4ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.x768ToolStripMenuItem,
+            this.x1280ToolStripMenuItem});
+            this.nexus4ToolStripMenuItem.Name = "nexus4ToolStripMenuItem";
+            this.nexus4ToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+            this.nexus4ToolStripMenuItem.Text = "Nexus4";
+            this.nexus4ToolStripMenuItem.Click += new System.EventHandler(this.screenSizeChooseToolStripMenuItem_Click);
+            // 
+            // x768ToolStripMenuItem
+            // 
+            this.x768ToolStripMenuItem.Image = global::ARdevKit.Properties.Resources.rect3344;
+            this.x768ToolStripMenuItem.Name = "x768ToolStripMenuItem";
+            this.x768ToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
+            this.x768ToolStripMenuItem.Text = "1280x768";
+            this.x768ToolStripMenuItem.Click += new System.EventHandler(this.portraitOrLandscapeChooseToolStripMenuItem_Click);
+            // 
+            // x1280ToolStripMenuItem
+            // 
+            this.x1280ToolStripMenuItem.Image = global::ARdevKit.Properties.Resources.rect3345;
+            this.x1280ToolStripMenuItem.Name = "x1280ToolStripMenuItem";
+            this.x1280ToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
+            this.x1280ToolStripMenuItem.Text = "768x1280";
+            this.x1280ToolStripMenuItem.Click += new System.EventHandler(this.portraitOrLandscapeChooseToolStripMenuItem_Click);
+            // 
+            // nexus5ToolStripMenuItem
+            // 
+            this.nexus5ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.x1080ToolStripMenuItem,
+            this.x1920ToolStripMenuItem});
+            this.nexus5ToolStripMenuItem.Name = "nexus5ToolStripMenuItem";
+            this.nexus5ToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+            this.nexus5ToolStripMenuItem.Text = "FullHD(S4,S5,N5)";
+            this.nexus5ToolStripMenuItem.Click += new System.EventHandler(this.screenSizeChooseToolStripMenuItem_Click);
+            // 
+            // x1080ToolStripMenuItem
+            // 
+            this.x1080ToolStripMenuItem.Image = global::ARdevKit.Properties.Resources.rect3344;
+            this.x1080ToolStripMenuItem.Name = "x1080ToolStripMenuItem";
+            this.x1080ToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.x1080ToolStripMenuItem.Text = "1920x1080";
+            this.x1080ToolStripMenuItem.Click += new System.EventHandler(this.portraitOrLandscapeChooseToolStripMenuItem_Click);
+            // 
+            // x1920ToolStripMenuItem
+            // 
+            this.x1920ToolStripMenuItem.Image = global::ARdevKit.Properties.Resources.rect3345;
+            this.x1920ToolStripMenuItem.Name = "x1920ToolStripMenuItem";
+            this.x1920ToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.x1920ToolStripMenuItem.Text = "1080x1920";
+            this.x1920ToolStripMenuItem.Click += new System.EventHandler(this.portraitOrLandscapeChooseToolStripMenuItem_Click);
+            // 
+            // lGG3G4ToolStripMenuItem
+            // 
+            this.lGG3G4ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.x1440ToolStripMenuItem,
+            this.x2560ToolStripMenuItem});
+            this.lGG3G4ToolStripMenuItem.Name = "lGG3G4ToolStripMenuItem";
+            this.lGG3G4ToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+            this.lGG3G4ToolStripMenuItem.Text = "LG G3/G4";
+            this.lGG3G4ToolStripMenuItem.Click += new System.EventHandler(this.screenSizeChooseToolStripMenuItem_Click);
+            // 
+            // x1440ToolStripMenuItem
+            // 
+            this.x1440ToolStripMenuItem.Image = global::ARdevKit.Properties.Resources.rect3344;
+            this.x1440ToolStripMenuItem.Name = "x1440ToolStripMenuItem";
+            this.x1440ToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.x1440ToolStripMenuItem.Text = "2560x1440";
+            this.x1440ToolStripMenuItem.Click += new System.EventHandler(this.portraitOrLandscapeChooseToolStripMenuItem_Click);
+            // 
+            // x2560ToolStripMenuItem
+            // 
+            this.x2560ToolStripMenuItem.Image = global::ARdevKit.Properties.Resources.rect3345;
+            this.x2560ToolStripMenuItem.Name = "x2560ToolStripMenuItem";
+            this.x2560ToolStripMenuItem.Size = new System.Drawing.Size(127, 22);
+            this.x2560ToolStripMenuItem.Text = "1440x2560";
+            this.x2560ToolStripMenuItem.Click += new System.EventHandler(this.portraitOrLandscapeChooseToolStripMenuItem_Click);
+            // 
+            // benutzdefiniertToolStripMenuItem
+            // 
+            this.benutzdefiniertToolStripMenuItem.Name = "benutzdefiniertToolStripMenuItem";
+            this.benutzdefiniertToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
+            this.benutzdefiniertToolStripMenuItem.Text = "Benutzerdefiniert";
+            this.benutzdefiniertToolStripMenuItem.Click += new System.EventHandler(this.screenSizeChooseToolStripMenuItem_Click);
             // 
             // tsm_editor_menu_test
             // 
@@ -582,6 +791,32 @@ namespace ARdevKit
         private Panel panel1;
         private WebBrowser html_preview;
         private View.TransparentPanel pnl_preview_overlay;
+        private ToolStripMenuItem tsm_editor_menu_edit_changeScreenSize;
+        private ToolStripSeparator toolStripSeparator1;
+
+        //for device ScreenSize manipulation
+        private ToolStripControlHost toolStripWrapper;
+        private ToolTip screenSizeInputToolTip;
+        private MaskedTextBox mask;
+        private ToolStripMenuItem nexus4ToolStripMenuItem;
+        private ToolStripMenuItem x768ToolStripMenuItem;
+        private ToolStripMenuItem x1280ToolStripMenuItem;
+        private ToolStripMenuItem nexus5ToolStripMenuItem;
+        private ToolStripMenuItem x1080ToolStripMenuItem;
+        private ToolStripMenuItem x1920ToolStripMenuItem;
+        private ToolStripMenuItem iPhone6ToolStripMenuItem;
+        private ToolStripMenuItem x750ToolStripMenuItem;
+        private ToolStripMenuItem x1334ToolStripMenuItem;
+        private ToolStripMenuItem iPhone5ToolStripMenuItem;
+        private ToolStripMenuItem x640ToolStripMenuItem;
+        private ToolStripMenuItem x1136ToolStripMenuItem;
+        private ToolStripMenuItem lGG3G4ToolStripMenuItem;
+        private ToolStripMenuItem x1440ToolStripMenuItem;
+        private ToolStripMenuItem x2560ToolStripMenuItem;
+        private ToolStripMenuItem standardToolStripMenuItem;
+        private ToolStripMenuItem x240ToolStripMenuItem;
+        private ToolStripMenuItem x320ToolStripMenuItem;
+        private ToolStripMenuItem benutzdefiniertToolStripMenuItem;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>

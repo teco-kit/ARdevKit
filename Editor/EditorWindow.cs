@@ -210,7 +210,53 @@ namespace ARdevKit
         public EditorWindow()
         {
             InitializeComponent();
+            //initializes additional controls
+            //mask = new MaskedTextBox("9000(Breite)px; 9000(Höhe)px");
+            //toolStripWrapper = new ToolStripControlHost(mask);
+            //if(toolStripWrapper.CanSelect)
+            //toolStripWrapper.Select();
+
+            //mask.ValidatingType = typeof(ScreenSize);
+            //mask.TypeValidationCompleted += mask_TypeValidationCompleted;
+            //mask.MaskInputRejected += screenSizeInputRejected;
+            //mask.KeyDown += mask_KeyDown;  
+            //screenSizeInputToolTip = new ToolTip();
+            //tsm_editor_menu_edit_changeScreenSize.DropDownItems.Add(toolStripWrapper);
             createNewProject("");
+        }
+
+        void mask_TypeValidationCompleted(object sender, TypeValidationEventArgs e)
+        {
+            System.Windows.Forms.MessageBox.Show("IT worked");
+        }
+
+        void mask_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                ScreenSize newSize = (ScreenSize)mask.ValidateText();
+                PreviewController.setMainContainerSize(newSize);
+            }
+            screenSizeInputToolTip.Hide(mask);
+        }
+
+        private void screenSizeInputRejected(object sender, MaskInputRejectedEventArgs e)
+        {
+            if (mask.MaskFull)
+            {
+                screenSizeInputToolTip.ToolTipTitle = "Input Rejected - Too Much Data";
+                screenSizeInputToolTip.Show("You cannot enter any more data into the date field. Delete some characters in order to insert more data.", mask, 0, -20, 5000);
+            }
+            else if (e.Position == mask.Mask.Length)
+            {
+                screenSizeInputToolTip.ToolTipTitle = "Input Rejected - End of Field";
+                screenSizeInputToolTip.Show("You cannot add extra characters to the end of this date field.", mask, 0, -20, 5000);
+            }
+            else
+            {
+                screenSizeInputToolTip.ToolTipTitle = "Input Rejected";
+                screenSizeInputToolTip.Show("You can only add numeric characters (0-9) into this date field.", mask, 0, -20, 5000);
+            }
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1483,6 +1529,58 @@ namespace ARdevKit
         internal void enableDragnNDropOverlay()
         {
             this.pnl_preview_overlay.Visible = true;
+        }
+
+        private void screenSizeChooseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem toolStripSender = (ToolStripMenuItem)sender;
+            // if the user chooses a special resolution
+            if (toolStripSender.Text.Equals("Benutzerdefiniert"))
+            {
+                            
+            }
+            // if the user chooses predefined resolution
+            else
+            {
+                foreach (ToolStripMenuItem item in ((ToolStripMenuItem)toolStripSender.OwnerItem).DropDownItems)
+                {
+                    if (item.Checked)
+                    {
+                        foreach (ToolStripMenuItem specific_item in item.DropDownItems)
+                        {
+                            specific_item.Checked = false;
+                        }
+                        item.Checked = false;
+                    }
+                }
+                ((ToolStripMenuItem)toolStripSender.DropDownItems[0]).Checked = true;
+                toolStripSender.Checked = true;
+                ScreenSize newScreenSize = new ScreenSize();
+                string[] chosenVariables = toolStripSender.DropDownItems[0].Text.Split('x');
+                this.previewController.setMainContainerSize(new ScreenSize(uint.Parse(chosenVariables[0]), uint.Parse(chosenVariables[1])));
+            }      
+        }
+
+        private void portraitOrLandscapeChooseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem toolStripSender = (ToolStripMenuItem)sender;
+            foreach (ToolStripMenuItem item in ((ToolStripMenuItem)((ToolStripMenuItem)toolStripSender.OwnerItem).OwnerItem).DropDownItems)
+            {
+                if (item.Checked)
+                {
+                    foreach (ToolStripMenuItem specific_item in item.DropDownItems)
+                    {
+                        specific_item.Checked = false;
+                    }
+                    item.Checked = false;
+                }
+            }
+            ((ToolStripMenuItem)toolStripSender.OwnerItem).Checked = true;
+            toolStripSender.Checked = true;
+            ScreenSize newScreenSize = new ScreenSize();
+            string[] chosenVariables = toolStripSender.Text.Split('x');
+            this.previewController.setMainContainerSize(new ScreenSize(uint.Parse(chosenVariables[0]), uint.Parse(chosenVariables[1])));
+
         }
     }
 }

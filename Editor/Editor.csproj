@@ -220,6 +220,9 @@
       <DependentUpon>Slider.cs</DependentUpon>
     </Compile>
     <Compile Include="View\SliderEditor.cs" />
+    <Compile Include="View\ToolStripCustomScreenSize.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="View\TransparentPanel.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -270,6 +273,8 @@
     <Content Include="Resources\additionalDLL\HtmlAgilityPack.dll" />
     <Content Include="Resources\additionalDLL\HtmlAgilityPack.pdb" />
     <Content Include="Resources\additionalDLL\HtmlAgilityPack.xml" />
+    <None Include="Resources\rect3345.png" />
+    <None Include="Resources\rect3344.png" />
     <Content Include="Resources\PlayerFiles\avcodec-53.dll" />
     <Content Include="Resources\PlayerFiles\avcodec-54.dll" />
     <Content Include="Resources\PlayerFiles\avdevice-53.dll" />

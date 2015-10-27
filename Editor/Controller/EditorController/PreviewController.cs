@@ -2023,30 +2023,32 @@ namespace ARdevKit.Controller.EditorController
         /// <summary>
         /// Rescales the preview panel if the size was changed.
         /// </summary>
-
-        public void rescalePreviewPanel()
+        
+        public void rescalePreviewPanel(uint width, uint height)
         {
-            int width = (int)this.getMainContainerSize().Width;
-            int height = (int)this.getMainContainerSize().Height;
+            //int width = (int)this.getMainContainerSize().Width;
+            //int height = (int)this.getMainContainerSize().Height;
 
-            foreach (AbstractTrackable trackable in this.ew.project.Trackables)
-            {
+            for (int i = 0; i < this.ew.project.Trackables.Count; i++)
+			{
+                AbstractTrackable trackable = this.ew.project.Trackables[i];
                 if (trackable != null)
                 {
+                    HtmlElement trackElement = findElement(trackable);
+                    Websites.changePositionOf(trackElement, i, 
+                        (height / 2 - trackElement.OffsetRectangle.Height / 2).ToString() + "px", 
+                        (width / 2 - trackElement.OffsetRectangle.Width / 2).ToString() + "px");
                     trackable.vector = new Vector3D(width / 2, height / 2, 0);
-                    foreach (AbstractAugmentation aug in trackable.Augmentations)
-                    {
-                        if (aug is Chart)
-                        {
-                            ((Chart)aug).Positioning.Left = (int)((aug.Translation.X + getMainContainerSize().Width / 2));
-                            ((Chart)aug).Positioning.Top = (int)((aug.Translation.Y + getMainContainerSize().Height / 2));
-                        }
-                    }
+                    //foreach (AbstractAugmentation aug in trackable.Augmentations)
+                    //{
+                    //    if (aug is Chart)
+                    //    {
+                    //        ((Chart)aug).Positioning.Left = (int)((aug.Translation.X + getMainContainerSize().Width / 2));
+                    //        ((Chart)aug).Positioning.Top = (int)((aug.Translation.Y + getMainContainerSize().Height / 2));
+                    //    }
+                    //}
                 }
-            }
-            int i = this.index;
-            this.index = -1;
-            this.reloadPreviewPanel(i);
+			}
         }
 
         /// <summary>
@@ -2585,6 +2587,8 @@ namespace ARdevKit.Controller.EditorController
         public void setMainContainerSize(ScreenSize size)
         {
             Websites.changeMainContainerSize(size.Width, size.Height);
+            rescalePreviewPanel(size.Width, size.Height);
+            reloadCurrentWebsite();
         }
 
         internal void updateElement(IPreviewable previewable)
