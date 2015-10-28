@@ -400,6 +400,8 @@ namespace ARdevKit
             //if (this.project.Trackables.Count > 1)
             //{
                 this.previewController.changeSceneTo(temp - 1);
+                this.PropertyGrid1.SelectedObject = project.Trackables[temp - 1];
+                this.currentElement = project.Trackables[temp - 1];
                 //this.previewController.reloadPreviewPanel(temp - 1);
                 //this.PropertyGrid1.SelectedObject = null;
                 //this.currentElement = null;
@@ -522,6 +524,7 @@ namespace ARdevKit
             this.initializeControllers();
             this.updatePanels();
             this.updateScreenSize();
+            previewController.changeSceneTo(0);
             this.checksum = project.getChecksum();
         }
 
@@ -1610,10 +1613,11 @@ namespace ARdevKit
             {
                 if (item.Checked)
                 {
-                    foreach (ToolStripMenuItem specific_item in item.DropDownItems)
-                    {
-                        specific_item.Checked = false;
-                    }
+                    if (item.Text != "Benutzerdefiniert")
+                        foreach (ToolStripMenuItem specific_item in item.DropDownItems)
+                        {
+                            specific_item.Checked = false;
+                        }                    
                     item.Checked = false;
                 }
             }

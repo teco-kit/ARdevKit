@@ -1812,6 +1812,7 @@ namespace ARdevKit.Controller.EditorController
                     //}
                     if (this.ew.CurrentElement != null)
                     {
+                        this.ew.Tsm_editor_menu_edit_copie.Enabled = this.ew.CurrentElement is AbstractAugmentation;
                         this.ew.Tsm_editor_menu_edit_delete.Enabled = true;
                     }
                 }
@@ -1821,6 +1822,7 @@ namespace ARdevKit.Controller.EditorController
             {
                 ew.CurrentElement = null;
                 this.ew.Tsm_editor_menu_edit_delete.Enabled = false;
+                this.ew.Tsm_editor_menu_edit_copie.Enabled = false;
             }
         }
         /// <summary>
@@ -2612,7 +2614,12 @@ namespace ARdevKit.Controller.EditorController
             updateElementCombobox(trackable);
             //in order to prevent setCurrentElement from trying to delete the mark on the 
             ew.CurrentElement = null;
-            ew.Cmb_editor_properties_objectSelection.SelectedItem = trackable;       
+            //compare the index before and after the change of the selected item, if the only element is null then there is no change in index and 
+            //setCurrentElement must be triggered here, because the selectedIndex EventListener is not triggered, which would normally trigger setCurrentElement
+            int index_pre = ew.Cmb_editor_properties_objectSelection.SelectedIndex;
+            ew.Cmb_editor_properties_objectSelection.SelectedItem = trackable;
+            if (index_pre == ew.Cmb_editor_properties_objectSelection.SelectedIndex)
+                setCurrentElement(trackable);
         }
         /// <summary>
         /// iterates upwords through html stucture and sums up the offsets
