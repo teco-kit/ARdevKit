@@ -766,20 +766,6 @@ namespace ARdevKit
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>
-        ///     This functions Updates the scene PreviewPanel. Alle elements will be removed and
-        ///     all current elements will add again to the panel.
-        /// </summary>
-        ///
-        /// <remarks>   Lizzard, 1/16/2014. </remarks>
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        public void updatePreviewPanel()
-        {
-            this.previewController.updatePreviewPanel();
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// <summary>
         ///     This functions Updates the scene SceneSelectionPanel. Alle elements will be removed and
         ///     all current elements will add again to the panel.
         /// </summary>
@@ -985,7 +971,7 @@ namespace ARdevKit
         private void updatePanels()
         {
             this.updateElementSelectionPanel();
-            this.updatePreviewPanel();
+            this.previewController.cleanCurrentPageAndAddCurrentTrackable();
             this.updateSceneSelectionPanel();
         }
 
@@ -1334,7 +1320,7 @@ namespace ARdevKit
         {
             if (!ProjectChanged())
             {
-                previewController.shutDownWebserver();
+                previewController.Dispose();
                 return;
             }
 
@@ -1362,20 +1348,7 @@ namespace ARdevKit
                 return;
             }
             DialogResult result = DialogResult.Retry;
-            while (Directory.Exists("tmp") && result == System.Windows.Forms.DialogResult.Retry)
-            {
-                try
-                {
-                    Directory.Delete("tmp", true);
-                } catch (IOException ioe)
-                {
-                   result = MessageBox.Show("Could not delete tmp folder.\n" + ioe.Message, "Error!", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
-                } catch (UnauthorizedAccessException uae)
-                {
-                    MessageBox.Show("Could not delete tmp folder.\n" + uae.Message, "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            previewController.shutDownWebserver();
+            previewController.Dispose();
         }
 
         /// <summary>

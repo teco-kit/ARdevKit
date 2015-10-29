@@ -94,8 +94,8 @@ namespace ARdevKit
             this.tsm_editor_menu_help_info = new System.Windows.Forms.ToolStripMenuItem();
             this.miniToolStrip = new System.Windows.Forms.MenuStrip();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.html_preview = new System.Windows.Forms.WebBrowser();
             this.pnl_preview_overlay = new ARdevKit.View.TransparentPanel();
+            this.html_preview = new System.Windows.Forms.WebBrowser();
             this.pnl_editor_selection.SuspendLayout();
             this.pnl_editor_status.SuspendLayout();
             this.pnl_editor_scenes.SuspendLayout();
@@ -433,7 +433,7 @@ namespace ARdevKit
             this.x240ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.x240ToolStripMenuItem.Image = global::ARdevKit.Properties.Resources.rect3344;
             this.x240ToolStripMenuItem.Name = "x240ToolStripMenuItem";
-            this.x240ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.x240ToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
             this.x240ToolStripMenuItem.Text = "320x240";
             this.x240ToolStripMenuItem.Click += new System.EventHandler(this.portraitOrLandscapeChooseToolStripMenuItem_Click);
             // 
@@ -441,7 +441,7 @@ namespace ARdevKit
             // 
             this.x320ToolStripMenuItem.Image = global::ARdevKit.Properties.Resources.rect3345;
             this.x320ToolStripMenuItem.Name = "x320ToolStripMenuItem";
-            this.x320ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.x320ToolStripMenuItem.Size = new System.Drawing.Size(115, 22);
             this.x320ToolStripMenuItem.Text = "240x320";
             this.x320ToolStripMenuItem.Click += new System.EventHandler(this.portraitOrLandscapeChooseToolStripMenuItem_Click);
             // 
@@ -460,7 +460,7 @@ namespace ARdevKit
             this.x640ToolStripMenuItem.Image = global::ARdevKit.Properties.Resources.rect3344;
             this.x640ToolStripMenuItem.Name = "x640ToolStripMenuItem";
             this.x640ToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
-            this.x640ToolStripMenuItem.Text = "1136x640";
+            this.x640ToolStripMenuItem.Text = "568x320";
             this.x640ToolStripMenuItem.Click += new System.EventHandler(this.portraitOrLandscapeChooseToolStripMenuItem_Click);
             // 
             // x1136ToolStripMenuItem
@@ -683,6 +683,18 @@ namespace ARdevKit
             this.panel1.Size = new System.Drawing.Size(661, 612);
             this.panel1.TabIndex = 4;
             // 
+            // pnl_preview_overlay
+            // 
+            this.pnl_preview_overlay.AllowDrop = true;
+            this.pnl_preview_overlay.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnl_preview_overlay.Location = new System.Drawing.Point(0, 0);
+            this.pnl_preview_overlay.Name = "pnl_preview_overlay";
+            this.pnl_preview_overlay.Size = new System.Drawing.Size(659, 610);
+            this.pnl_preview_overlay.TabIndex = 5;
+            this.pnl_preview_overlay.Visible = false;
+            this.pnl_preview_overlay.DragDrop += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragDrop);
+            this.pnl_preview_overlay.DragEnter += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragEnter);
+            // 
             // html_preview
             // 
             this.html_preview.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -695,18 +707,6 @@ namespace ARdevKit
             this.html_preview.Size = new System.Drawing.Size(653, 604);
             this.html_preview.TabIndex = 4;
             this.html_preview.WebBrowserShortcutsEnabled = false;
-            // 
-            // pnl_preview_overlay
-            // 
-            this.pnl_preview_overlay.AllowDrop = true;
-            this.pnl_preview_overlay.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnl_preview_overlay.Location = new System.Drawing.Point(0, 0);
-            this.pnl_preview_overlay.Name = "pnl_preview_overlay";
-            this.pnl_preview_overlay.Size = new System.Drawing.Size(659, 610);
-            this.pnl_preview_overlay.TabIndex = 5;
-            this.pnl_preview_overlay.Visible = false;
-            this.pnl_preview_overlay.DragDrop += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragDrop);
-            this.pnl_preview_overlay.DragEnter += new System.Windows.Forms.DragEventHandler(this.pnl_editor_preview_DragEnter);
             // 
             // EditorWindow
             // 
@@ -918,6 +918,10 @@ namespace ARdevKit
             set { html_preview = value; }
         }
 
+        public System.Windows.Forms.Panel BackgroundPanel
+        {
+            get { return panel1; }
+        }
     }
 }
 

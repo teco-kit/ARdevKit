@@ -63,7 +63,13 @@ namespace ARdevKit.Controller.EditorController
             get { return index; }
             set { index = value; }
         }
-        
+
+        /// <summary>
+        /// a HashSet of IPreviewables, which associated files were changed and are reloaded, when the 
+        /// Document containing them was completed loading
+        /// </summary>
+        private HashSet<IPreviewable>[] needToBeUpdated;
+
         /// <summary>
         /// The scale of the previewPanel. we need this to scale the distance and the size of the elements.
         /// </summary>
@@ -148,19 +154,22 @@ namespace ARdevKit.Controller.EditorController
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="ew">EditorWindow Instanz.</param>
+        /// <param name="ew">
+        /// EditorWindow which holds a Html_preview WebBrowserControl and 3 ToolStripMenuItems
+        /// </param>
         /// <exception cref="System.ArgumentException">parameter ew was null.</exception>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-
         public PreviewController(EditorWindow ew)
         {
             if (ew == null)
                 throw new ArgumentException("parameter ew was null.");
 
+            //get the WebBrowser which is ebbeded in the EditorWindow
             this.ew = ew;
             this.htmlPreview = this.ew.Html_preview;
             htmlPreview.DocumentCompleted += htmlPreview_DocumentFirstCompleted;
 
+            //start with the first scene and no 
             this.currentMetaCategory = new MetaCategory();
             this.index = 0;
             this.trackable = null;
@@ -178,7 +187,7 @@ namespace ARdevKit.Controller.EditorController
             webServerThread.IsBackground = true;
 
             webServerThread.Start();
-
+            //navigate to the first site
             if (htmlPreview.Document != null)
                 reloadCurrentWebsite();
             this.htmlPreview.Navigate("http://localhost:" + PREVIEW_PORT + "/" + index);
@@ -223,6 +232,7 @@ namespace ARdevKit.Controller.EditorController
             trackableContextMenu.MenuItems.Add("löschen", delete_current_element);
             trackableContextMenu.MenuItems[0].Enabled = true;
 
+            //add Eventhandlers to the dropdownmenu in the editorwindow to copy, paste and delete the currentElement
             this.ew.Tsm_editor_menu_edit_paste.Click += new System.EventHandler(this.paste_augmentation_center);
             this.ew.Tsm_editor_menu_edit_copie.Click += new System.EventHandler(this.copy_augmentation);
             this.ew.Tsm_editor_menu_edit_delete.Click += new System.EventHandler(this.delete_current_element);
@@ -240,9 +250,21 @@ namespace ARdevKit.Controller.EditorController
             fileWatcher.SynchronizingObject = ew.Html_preview;
             fileWatcher.EnableRaisingEvents = true;
             fileLookup = new Dictionary<string,IPreviewable>();
+            needToBeUpdated = new HashSet<IPreviewable>[10];
+            for (int i = 0; i < needToBeUpdated.Length; i++)
+            {
+                needToBeUpdated[i] = new HashSet<IPreviewable>();               
+            }
         }
 
-        void fileWatcher_Changed(object sender, FileSystemEventArgs e)
+        /// <summary>
+        /// this Listener is triggered when the filWatcher recognizes changes.
+        /// most important is the part to the changed file, which is looked up in the fileLookup
+        /// and all associated Previewables are reloaded
+        /// </summary>
+        /// <param name="sender">the fileWatcher which detects a change</param>
+        /// <param name="e">the Event describing the changes</param>
+        private void fileWatcher_Changed(object sender, FileSystemEventArgs e)
         {
             if(fileLookup.ContainsKey(e.FullPath))
             {
@@ -255,8 +277,10 @@ namespace ARdevKit.Controller.EditorController
                     }
                     else
                     {
-                        MessageBox.Show("Es wurden Änderungen an einer Augmentation in einer anderen Szene vorgenommen,"
-                        + "diese Änderungen werden erst angezeigt, wenn sie wieder Änderungen vornehmen, wenn die zu verändernde Szene die aktuell angezeigte ist.");
+                        int i = ew.project.Trackables.FindIndex(track => track.Augmentations.Contains((AbstractAugmentation)changedPrev));
+                        if(needToBeUpdated[i].Add(changedPrev))
+                            MessageBox.Show("Es wurden Änderungen an einer Augmentation in einer anderen Szene vorgenommen,"
+                                + "diese Änderungen werden erst angezeigt, wenn sie wieder Änderungen vornehmen, wenn die zu verändernde Szene die aktuell angezeigte ist.");
                     }
                    
                 } else if(changedPrev is AbstractTrackable)
@@ -267,13 +291,21 @@ namespace ARdevKit.Controller.EditorController
                     }
                     else
                     {
-                        MessageBox.Show("Es wurden Änderungen an einem Trackable in einer anderen Szene vorgenommen,"
-                        + "diese Änderungen werden erst angezeigt, wenn sie wieder Änderungen vornehmen, wenn die zu verändernde Szene die aktuell angezeigte ist.");
+                        int i = ew.project.Trackables.FindIndex(track => track.Equals(changedPrev));
+                        if (needToBeUpdated[i].Add(changedPrev))
+                            MessageBox.Show("Es wurden Änderungen an einem Trackable in einer anderen Szene vorgenommen,"
+                                + "diese Änderungen werden erst angezeigt, wenn sie wieder Änderungen vornehmen, wenn die zu verändernde Szene die aktuell angezeigte ist.");
                     }
                 }                
             }
         }
 
+        /// <summary>
+        /// EventListener that is triggered only for the first time a Document is sucessfully loaded by the Webbrowser.
+        /// It attaches the Listener that regularly reacts to the DocumentedCompletedEvent, and the MouseEventHandler for the MouseDown/Up Events
+        /// </summary>
+        /// <param name="sender">The WebBrowser which finished loading the Document</param>
+        /// <param name="e">the WebBrowserDocumentCompletedEventArgs</param>
         private void htmlPreview_DocumentFirstCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             htmlPreview.DocumentCompleted -= htmlPreview_DocumentFirstCompleted;
@@ -282,6 +314,11 @@ namespace ARdevKit.Controller.EditorController
             htmlPreview.Document.MouseUp += writeBackChangesfromDOM;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void htmlPreview_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             //to determine of this previewController should be currently used
@@ -311,6 +348,15 @@ namespace ARdevKit.Controller.EditorController
                     selectedElement.style.zIndex = "10";
                 }
             }
+
+            //reload every Previewable that were changed, when the current index scene was not viewed
+            //and are now updated
+            foreach (IPreviewable item in needToBeUpdated[index])
+            {
+                reloadPreviewable(item);
+            }
+            needToBeUpdated[index].Clear();
+
             //attach Eventhandlers to all charts attached to the current trackable directly
             if(trackable != null)
             foreach (Chart chart in trackable.Augmentations.FindAll(x => x is Chart))
@@ -322,28 +368,11 @@ namespace ARdevKit.Controller.EditorController
                 htmlChart.MouseMove += chartMouseMove;
             }
         }
-
-        private void elem_KeyDown(object sender, HtmlElementEventArgs e)
-        {
-            IHTMLElement draggedDomElement = (IHTMLElement)((HtmlElement)sender).DomElement;
-            
-            string oldMarginLeft = draggedDomElement.style.marginLeft;
-            string oldMarginTop = draggedDomElement.style.marginTop;
-            if (oldMarginLeft == null)
-                oldMarginLeft = "0px";
-            if (oldMarginTop == null)
-                oldMarginTop = "0px";
-            Debug.Print(String.Format("MousePosX = {0}; StartPositionX = {1}; currentMarginLeft = {2}\n", e.MousePosition.X, dragStartPosition.X, oldMarginLeft));
-            Debug.Print(String.Format("MousePosY = {0}; StartPositionY = {1}; currentMarginTop = {2}\n", e.MousePosition.Y, dragStartPosition.Y, oldMarginTop));
-            int newMarginLeft = Int16.Parse((oldMarginLeft).Replace("px", "")) + 10;
-            int newMarginTop = Int16.Parse((oldMarginTop).Replace("px", "")) + 20;
-            //if (newMarginLeft >= 0 && newMarginLeft + draggedElement.ClientRectangle.Width < getMainContainerSize().Width)
-            draggedDomElement.style.marginLeft = newMarginLeft + "px";
-
-            //if (newMarginTop >= 0 && newMarginTop + draggedElement.ClientRectangle.Height < getMainContainerSize().Height)
-            draggedDomElement.style.marginTop = newMarginTop + "px";
-        }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void chartMouseMove(object sender, HtmlElementEventArgs e)
         {
             HtmlElement draggedElement = (HtmlElement)sender;
@@ -369,6 +398,11 @@ namespace ARdevKit.Controller.EditorController
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void chartMouseDown(object sender, HtmlElementEventArgs e)
         {
             AbstractAugmentation aug = trackable.Augmentations.Find(augmentation => { return augmentation.ID == ((HtmlElement)sender).Id; });
@@ -378,19 +412,19 @@ namespace ARdevKit.Controller.EditorController
                 Chart chart = (Chart)aug;
                 if(chart.Source == null)
                 {
-                    chartContextMenu_noSource.Show(ew.GetChildAtPoint(e.MousePosition), e.ClientMousePosition);
+                    chartContextMenu_noSource.Show(ew.BackgroundPanel, e.ClientMousePosition);
                 } else if(chart.Source is FileSource)
                 {
                     if(((FileSource)chart.Source).Query == null)
                     {
-                        chartContextMenu_FileSource_noQuery.Show(ew.GetChildAtPoint(e.MousePosition), e.ClientMousePosition);
+                        chartContextMenu_FileSource_noQuery.Show(ew.BackgroundPanel, e.ClientMousePosition);
                     }
                     else
                     {
-                        chartContextMenu_FileSource_Query.Show(ew.GetChildAtPoint(e.MousePosition), e.ClientMousePosition);
+                        chartContextMenu_FileSource_Query.Show(ew.BackgroundPanel, e.ClientMousePosition);
                     }
                 } else {
-                    chartContextMenu_DbSource.Show(ew.GetChildAtPoint(e.MousePosition), e.ClientMousePosition);
+                    chartContextMenu_DbSource.Show(ew.BackgroundPanel, e.ClientMousePosition);
                 }
             }
             if(e.MouseButtonsPressed == MouseButtons.Left)
@@ -399,6 +433,11 @@ namespace ARdevKit.Controller.EditorController
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void handleDocumentMouseDown(object sender, HtmlElementEventArgs e)
         {
             HtmlElement clickedElement = htmlPreview.Document.GetElementFromPoint(e.MousePosition);
@@ -408,7 +447,7 @@ namespace ARdevKit.Controller.EditorController
                     //TODO set Screensize as editable or leave it with changes made to Screensize picking
                     if (e.MouseButtonsPressed == MouseButtons.Right)
                     {
-                        mainContainerContextMenu.Show(ew.GetChildAtPoint(e.MousePosition), e.MousePosition);
+                        mainContainerContextMenu.Show(ew.BackgroundPanel, e.MousePosition);
                     }
                     break;
 
@@ -418,7 +457,7 @@ namespace ARdevKit.Controller.EditorController
                     //setCurrentElement(trackable);
                     if (e.MouseButtonsPressed == MouseButtons.Right)
                     {
-                        trackableContextMenu.Show(ew.GetChildAtPoint(e.MousePosition), e.MousePosition);
+                        trackableContextMenu.Show(ew.BackgroundPanel, e.MousePosition);
                     }
                     if (e.MouseButtonsPressed == MouseButtons.Left)
                     {
@@ -440,7 +479,7 @@ namespace ARdevKit.Controller.EditorController
                             } 
                             else 
                             {
-                                augmentationContextMenu.Show(ew.GetChildAtPoint(e.MousePosition), e.MousePosition);
+                                augmentationContextMenu.Show(ew.BackgroundPanel, e.MousePosition);
                             }
                         }
                     }
@@ -456,6 +495,11 @@ namespace ARdevKit.Controller.EditorController
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dragHandler(object sender, HtmlElementEventArgs e)
         {
             HtmlElement draggedElement = htmlPreview.Document.GetElementFromPoint(e.MousePosition);
@@ -476,23 +520,11 @@ namespace ARdevKit.Controller.EditorController
             }       
         }
 
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// <summary>   (This method is obsolete) adds a preview able. </summary>
-        ///
-        /// <exception cref="NotImplementedException"> Thrown when the requested operation is
-        /// unimplemented. </exception>
-        ///
-        /// <param name="p">    The Panel to process. </param>
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        [Obsolete("addPreviewable(IPreviewable p) : eache IPreviewable needs a Vector where the new"
-                    + "Previewable should sit in the panel you should use addPreviewable(IPreviewable"
-                    + "currentElement, Vector3d v) for Augmentations & Trackables", true)]
-        public void addPreviewAble(IPreviewable p)
-        { throw new NotImplementedException(); }
-
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="track"></param>
+        /// <param name="index"></param>
         public void createNewScenewithTrackable(AbstractTrackable track, int index)
         {
             this.htmlPreview.Navigate("http:localhost:" + PREVIEW_PORT + "/" + index);
@@ -591,6 +623,12 @@ namespace ARdevKit.Controller.EditorController
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="originalPath"></param>
+        /// <param name="element"></param>
+        /// <returns></returns>
         private string addToFileSystemWithoutNotification(string originalPath, IPreviewable element)
         {
             if (!Path.IsPathRooted(originalPath))
@@ -626,8 +664,13 @@ namespace ARdevKit.Controller.EditorController
             }
         }
 
-        //adds elements to website and navigates again to new Website
-        //adds the according preview to 
+
+        /// <summary>
+        ///     adds elements to website and navigates again to new Website
+        ///     adds the according preview to 
+        /// </summary>
+        /// <param name="currentElement"></param>
+        /// <param name="vector"></param>
         public void addElement(IPreviewable currentElement, Vector3D vector)
         {
             if (currentElement is Abstract2DTrackable)
@@ -688,7 +731,7 @@ namespace ARdevKit.Controller.EditorController
                 htmlTrackable.SetAttribute("src", "http://localhost:" + PREVIEW_PORT + "/" + trackable.SensorCosID);
                 htmlTrackable.Style = String.Format(@"width: {0}px; height: {1}px; z-index:{2}; margin-left: {3}px; margin-top: {4}px; position: absolute",
                 width, height,
-                nativeToHtmlCoordinates(vector).Z,
+                vector.Z,
                 nativeToHtmlCoordinates(vector).X - width / 2, nativeToHtmlCoordinates(vector).Y - height / 2);
                 Websites.addElementAt(htmlTrackable, index);
                 this.trackable = trackable;
@@ -801,7 +844,7 @@ namespace ARdevKit.Controller.EditorController
                 htmlImage.SetAttribute("src", "http://localhost:" + PREVIEW_PORT + "/" + image.ID);
                 htmlImage.Style = String.Format(@"width: {0}px; height: {1}px; z-index:{2}; margin-left: {3}px; margin-top: {4}px; position: absolute",
                 image.Width, image.Height,
-                nativeToHtmlCoordinates(vector).Z,
+                vector.Z,
                 image.Positioning.Left , image.Positioning.Top);
                 Websites.addElementAt(htmlImage, index);
                 Websites.previews.Add(preview);                
@@ -833,7 +876,7 @@ namespace ARdevKit.Controller.EditorController
                 htmlVideoPrev.SetAttribute("src", "http://localhost:" + PREVIEW_PORT + "/" + video.ID);
                 htmlVideoPrev.Style = String.Format(@"width: {0}px; height: {1}px; z-index:{2}; margin-left: {3}px; margin-top: {4}px; position: absolute",
                 video.Width, video.Height,
-                nativeToHtmlCoordinates(vector).Z,
+                vector.Z,
                 video.Positioning.Left, video.Positioning.Top);
                 Websites.addElementAt(htmlVideoPrev, index);
 
@@ -904,6 +947,12 @@ namespace ARdevKit.Controller.EditorController
             reloadCurrentWebsite();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="element"></param>
+        /// <param name="newId"></param>
+        /// <returns></returns>
         private bool changeAugIDFromTo(AbstractAugmentation element, string newId)
         {
             foreach (AbstractTrackable t in ew.project.Trackables)
@@ -925,6 +974,13 @@ namespace ARdevKit.Controller.EditorController
             return true;
         }
 
+        /// <summary>
+        /// Converts a native metaio Vector3D to a HTMLVector.
+        /// This is necessary for all non HTMLElements, like AbstractTrackables and Not HTMLAugmentations
+        /// in order to use them in the HTMLPreview.
+        /// </summary>
+        /// <param name="native">the native metaio Vector3D, in a cetric coordinatesystem</param>
+        /// <returns>a HtmlVector, which X, and Y Values describe the top and left coordinates of HTMLPositioning</returns>
         private Vector3D nativeToHtmlCoordinates(Vector3D native)
         {
             if (native == null)
@@ -935,19 +991,6 @@ namespace ARdevKit.Controller.EditorController
             ScreenSize currentSize = getMainContainerSize();
             result.X = (int)((native.X + currentSize.Width / 2));
             result.Y = (int)((currentSize.Height / 2 + native.Y));
-            return result;
-        }
-
-        private Vector3D htmlToNativeCoordinates(Vector3D html)
-        {
-            if (html == null)
-            {
-                throw new ArgumentNullException();
-            }
-            Vector3D result = new Vector3D(0, 0, html.Z);
-            ScreenSize currentSize = getMainContainerSize();
-            result.X = (int)((html.X - currentSize.Width / 2));
-            result.Y = (int)((currentSize.Height / 2 - html.Y));
             return result;
         }
 
@@ -1096,7 +1139,7 @@ namespace ARdevKit.Controller.EditorController
         }
 
         /// <summary>
-        /// Removes the Previewable and the Objekt, what is linked to the Previewable.  
+        /// Removes the Previewable and the object, what is linked to the Previewable.  
         /// </summary>
         /// <param name="currentElement">The current element.</param>
         public void removePreviewable(IPreviewable currentElement)
@@ -1114,6 +1157,22 @@ namespace ARdevKit.Controller.EditorController
                 }
                 foreach(AbstractAugmentation aug in trackable.Augmentations)
                 {
+                    //release all Chart JS and JSON Files from Websitemanager
+                    if (aug is Chart)
+                    {
+                        Chart chart = (Chart)aug;
+                        Websites.chartFiles.Remove("options" + chart.ID);
+                        if (chart.Source != null)
+                        {
+                            removeSource(chart.Source, chart);
+                        }
+                    }
+                    //delete all pictures saved in memory from Websitemanager
+                    if (aug is HtmlImage || aug is HtmlVideo)
+                    {
+                        Websites.previews.RemoveAll(pic => pic.Tag == ((AbstractHtmlElement)aug).ID);
+                    }
+                    //delete all Files associated with the deleted HtmlAugmentations
                     FilesToDelete = RemoveByValue<string, IPreviewable>(fileLookup, aug);
                     foreach (string filepath in FilesToDelete)
                     {
@@ -1168,6 +1227,11 @@ namespace ARdevKit.Controller.EditorController
                 reloadCurrentWebsite();
                 this.ew.project.RemoveAugmentation((AbstractAugmentation)currentElement);
             }
+            else if (currentElement is AbstractSource && trackable != null)
+            {
+                AbstractSource source = (AbstractSource)currentElement;
+                removeSource(source, source.Augmentation);
+            }
             updateElementCombobox(trackable);
             if(ew.CurrentElement == currentElement)
             {
@@ -1175,11 +1239,11 @@ namespace ARdevKit.Controller.EditorController
                 ew.PropertyGrid1.SelectedObject = trackable;
                 ew.Cmb_editor_properties_objectSelection.SelectedItem = trackable;
             }
-            this.ew.Tsm_editor_menu_edit_delete.Enabled = false;
         }
 
         /// <summary>
         /// Removes all Elements from the PreviewPanel and clears all references and delete the trackable from the list.
+        /// Then it reloads the CurrentWebsite and updates the combobox
         /// </summary>
         public void deleteCurrentScene()
         {
@@ -1191,94 +1255,26 @@ namespace ARdevKit.Controller.EditorController
 
 
         /// <summary>
-        /// updates the preview panel.
+        /// Sets current Page, chosen by index to the standard HTMLPreviewPage.
+        /// Adds the current trackable to the Trackables of the project.
         /// </summary>
-        public void updatePreviewPanel()
+        public void cleanCurrentPageAndAddCurrentTrackable()
         {
             Websites.resetPage(index);
             this.ew.project.Trackables.Add(trackable);
             updateElementCombobox(trackable);
         }
 
-        /// <summary>
-        /// load the project with the identical index to the previewPanel 
-        /// (the index is the index of the trackable list in project)
-        /// </summary>
-        /// <param name="index">The index.</param>
-        public void reloadPreviewPanel(int index)
-        {
-            //if it's a scene which exists reload scene
-            if (index < this.ew.project.Trackables.Count)
-            {
-                changeSceneTo(index);
-                removePreviewable(trackable);
-                //makes differences between the kind of trackables
-                if (trackable != null)
-                {
-                    this.addAllToPanel(this.ew.project.Trackables[index]);
-                }
-                if (this.trackable != null && trackable is IDMarker)
-                {
-                    this.ew.ElementSelectionController.setElementEnable(typeof(PictureMarker), false);
-                    this.ew.ElementSelectionController.setElementEnable(typeof(ImageTrackable), false);
-                }
-                else if (this.trackable != null && trackable is PictureMarker)
-                {
-                    this.ew.ElementSelectionController.setElementEnable(typeof(IDMarker), false);
-                    this.ew.ElementSelectionController.setElementEnable(typeof(ImageTrackable), false);
-                }
-                else if (this.trackable != null && this.trackable is ImageTrackable)
-                {
-                    this.ew.ElementSelectionController.setElementEnable(typeof(IDMarker), false);
-                    this.ew.ElementSelectionController.setElementEnable(typeof(PictureMarker), false);
-                }
-            }
-            //if the scene is empty create a new empty scene
-            else if (index >= this.ew.project.Trackables.Count)
-            {
-                this.index = index;
-                this.trackable = null;
-                this.Websites.resetPage(index);
-                this.ew.project.Trackables.Add(trackable);
-            }
-            //set currentElement, copyButton, deleteButton & property grid to null
-            this.ew.CurrentElement = null;
-            this.ew.Tsm_editor_menu_edit_delete.Enabled = false;
-            this.ew.Tsm_editor_menu_edit_copie.Enabled = false;
-            ew.Cmb_editor_properties_objectSelection.Items.Clear();
-            updateElementCombobox(trackable);
-        }
-
 
         /// <summary>
-        /// Add all existent Objects of the trackable in the Panel, this funktion is exists for change the trackable.
+        /// A static method which takes a Generic Dictionary and searches it for all Keys associated with the TValue.
+        /// Then it deletes all the found Pairs from the Dictionary and return a List of the found Keys
         /// </summary>
-        /// <param name="trackable">The trackable.</param>
-        private void addAllToPanel(AbstractTrackable trackable)
-        {
-            if (trackable.Augmentations.Count > 0)
-            {
-                foreach (AbstractAugmentation aug in trackable.Augmentations)
-                {
-                    this.scale = 100 / (double)((Abstract2DTrackable)this.trackable).Size / 1.6;
-                    if (aug is Chart)
-                    {
-                        this.addElement(aug, this.recalculateChartVector(aug.Translation));
-                    }
-                    else
-                    {
-                        this.addElement(aug, this.recalculateVector(aug.Translation));
-                    }
-
-                    if (typeof(AbstractDynamic2DAugmentation).IsAssignableFrom(aug.GetType()) && ((AbstractDynamic2DAugmentation)aug).Source != null)
-                    {
-                        this.setSourcePreview(aug);
-                    }
-                }
-            }
-            this.addElement(trackable, trackable.vector);
-        }
-
+        /// <typeparam name="TKey">A generic Type used as a Key in the dicitonary</typeparam>
+        /// <typeparam name="TValue">A generic Type used as a Value in the dicitonary</typeparam>
+        /// <param name="dictionary">A Dictionary which maps TKey to TValue</param>
+        /// <param name="someValue">The TValue which should be found and every pair which includes it should be deleted from dictionary</param>
+        /// <returns></returns>
         private static List<TKey> RemoveByValue<TKey, TValue>(Dictionary<TKey, TValue> dictionary, TValue someValue)
         {
             List<TKey> itemsToRemove = new List<TKey>();
@@ -1304,6 +1300,7 @@ namespace ARdevKit.Controller.EditorController
         /// <param name="prev">The Previewable</param>
         public void renamePreviewable(IPreviewable prev, string ID)
         {
+            //TODO check if Sources can be renamed too, and handle those cases
             //remove the HtmlElement from the Webpage and delete linked files in the filecache of the webserver
             List<string> filesToDelete = RemoveByValue<string, IPreviewable>(fileLookup, prev);
             if (prev is Chart)
@@ -1347,7 +1344,7 @@ namespace ARdevKit.Controller.EditorController
                 Chart chart = (Chart)prev;
                 if (chart.Source != null)
                 {
-                    ///addSource
+                    //addSource
                     AbstractSource source = chart.Source;
                 }
             }
@@ -1366,7 +1363,7 @@ namespace ARdevKit.Controller.EditorController
 
             if (typeof(AbstractDynamic2DAugmentation).IsAssignableFrom(prev.GetType()) && ((AbstractDynamic2DAugmentation)prev).Source != null)
             {
-                this.setSourcePreview(prev);
+                reloadCurrentWebsite();
             }
             //if the same Files are referenced by the new elements they must not be deleted, thats why is is tested here
             fileWatcher.EnableRaisingEvents = false;
@@ -1385,6 +1382,8 @@ namespace ARdevKit.Controller.EditorController
             fileWatcher.EnableRaisingEvents = true;
         }
 
+
+
         /// <summary>
         /// Reloads a single previewable. deletes all not needed files associated with it 
         /// call this method if something changed, that need associated files to be renewed
@@ -1394,6 +1393,7 @@ namespace ARdevKit.Controller.EditorController
         {
             if (findElement(prev) == null)
                 return;
+            //make a List of all the associated Files which must be deleted if the previewable is altered
             List<string> filesToDelete = RemoveByValue<string, IPreviewable>(fileLookup, prev);
             if (prev is Chart)
             {
@@ -1442,7 +1442,7 @@ namespace ARdevKit.Controller.EditorController
 
             if (typeof(AbstractDynamic2DAugmentation).IsAssignableFrom(prev.GetType()) && ((AbstractDynamic2DAugmentation)prev).Source != null)
             {
-                this.setSourcePreview(prev);
+                reloadCurrentWebsite();
             }
             //if the same Files are referenced by the new elements they must not be deleted, thats why is is tested here
             fileWatcher.EnableRaisingEvents = false;
@@ -1462,238 +1462,18 @@ namespace ARdevKit.Controller.EditorController
         }
 
 
-        ///// <summary>
-        ///// Adds a PictureBox with for the currentElement to the aktuell Scene.
-        ///// </summary>
-        ///// <param name="prev">The previous.</param>
-        ///// <param name="vector">The vector.</param>
-        ///// <exception cref="System.ArgumentNullException">
-        ///// parameter prev was null
-        ///// or
-        ///// parameter vector was null
-        ///// </exception>
-        //public void addPictureBox(IPreviewable prev, Vector3D vector)
-        //{
-        //    if (prev == null)
-        //        throw new ArgumentException("parameter prev was null");
-
-        //    if (vector == null)
-        //        throw new ArgumentException("parameter vector was null");
-
-        //    //creates the temporateBox with all variables, which'll be add than to the panel.
-        //    PictureBox tempBox;
-        //    tempBox = new PictureBox();
-        //    tempBox.Image = this.scaleIPreviewable(prev);
-        //    tempBox.SizeMode = PictureBoxSizeMode.AutoSize;
-
-        //    tempBox.Location = new Point((int)(vector.X - tempBox.Size.Width / 2), (int)(vector.Y - tempBox.Size.Height / 2));
-
-        //    tempBox.Tag = prev;
-        //    ContextMenu cm = new ContextMenu();
-
-        //    //adds drag&drop events for augmentations so that sources can be droped on them
-        //    if (prev is AbstractAugmentation)
-        //    {
-        //        ((Control)tempBox).AllowDrop = true;
-        //        DragEventHandler enterHandler = new DragEventHandler(onAugmentationEnter);
-        //        DragEventHandler dropHandler = new DragEventHandler(onAugmentationDrop);
-        //        tempBox.DragEnter += enterHandler;
-        //        tempBox.DragDrop += dropHandler;
-        //        //adds menuItems for the contextmenue
-        //        cm.MenuItems.Add("kopieren", new EventHandler(this.copy_augmentation));
-                
-        //        //great extra work for Charts
-        //        if (prev is Chart)
-        //        {
-        //            cm.MenuItems.Add("Öffne Optionen", new EventHandler(this.openOptionsFile));
-        //            //declare local variables used to initialize the ChartPreview
-        //            string newPath = Path.Combine(Environment.CurrentDirectory, "tmp", ((Chart)prev).ID);
-                    
-        //            initializeChartPreviewAt((Chart)prev, newPath);
-        //            WebBrowser wb = new WebBrowser();
-
-        //            //modify wb and navigate to desired HTML
-        //            wb.ScrollBarsEnabled = false;
-        //            wb.Navigate(new Uri(Path.Combine(newPath, "chart.html")));
-        //            //add it to pictureBox
-        //            tempBox.Controls.Add(wb);
-        //            wb.Location = new System.Drawing.Point(0, 0);
-        //            wb.Size = wb.Parent.Size;
-        //            wb.DocumentCompleted += deactivateWebView;
-        //        }
-        //    }
-        //    tempBox.MouseClick += new MouseEventHandler(selectElement);
-        //    cm.MenuItems.Add("löschen", new EventHandler(this.remove_by_click));
-        //    cm.Tag = prev;
-        //    cm.Popup += new EventHandler(this.popupContextMenu);
-        //    tempBox.ContextMenu = cm;
-
-
-        //    if (tempBox.Tag is AbstractAugmentation)
-        //        tempBox.MouseMove += new MouseEventHandler(controlMouseMove);
-
-        //    //TODO
-        //    //this.panel.Controls.Add(tempBox);
-
-        //    if (prev is ImageAugmentation || prev is VideoAugmentation)
-        //    {
-        //        if (((AbstractAugmentation)prev).Rotation.Z != 0)
-        //        {
-        //            this.rotateAugmentation(prev);
-        //        }
-        //    }
-        //}
-
-        private void initializeChartPreviewAt(Chart chart, string newPath)
-        {
-            string res = Path.Combine(Environment.CurrentDirectory, "res");
-            
-            if(!Directory.Exists(newPath))
-            {
-                Directory.CreateDirectory(newPath);
-            }
-
-            string optionsPath;
-            if(ew.project.ProjectPath != null)
-            {
-                optionsPath = Path.Combine(ew.project.ProjectPath, chart.ResFilePath);
-            }
-            else
-            {
-                optionsPath = chart.ResFilePath;
-            }
-            
-            
-            if ((chart.ResFilePath !=null && chart.ResFilePath != "") 
-                && !File.Exists(Path.Combine(newPath, "options.js")))
-            {
-                if(Helper.Copy(optionsPath, newPath, "options.js"))
-                {
-                    chart.ResFilePath = Path.Combine(newPath, "options.js");
-                }
-            }
-            if(chart.Source != null && chart.Source.Query != null
-                && chart.Source.Query != "")
-            {
-                //set queryPath
-                string queryPath;
-                if (ew.project.ProjectPath != null)
-                {
-                    queryPath = Path.Combine(ew.project.ProjectPath, chart.Source.Query);
-                }
-                else
-                {
-                    queryPath = chart.Source.Query;
-                }
-
-                if (!File.Exists(Path.Combine(newPath, "chart.html")))
-                {
-                    Helper.Copy(Path.Combine(res,"templates", "chart(source).html"), newPath, "chart.html");
-                }
-                if(!File.Exists(Path.Combine(newPath, "query.js")))
-                {
-                    if (Helper.Copy(queryPath, newPath, "query.js"))
-                    {
-                        chart.Source.Query = Path.Combine(newPath, "query.js");
-                    }
-                }
-                if(chart.Source is FileSource 
-                    && ((FileSource)chart.Source).Data != null
-                    && ((FileSource)chart.Source).Data != ""
-                    && !File.Exists(Path.Combine(newPath, "data" 
-                    + Path.GetExtension(((FileSource)chart.Source).Data))))
-                {
-                    //set dataPath
-                    string dataPath;
-                    if (ew.project.ProjectPath != null)
-                    {
-                        dataPath = Path.Combine(ew.project.ProjectPath, ((FileSource)chart.Source).Data);
-                    }
-                    else
-                    {
-                        dataPath = chart.Source.Query;
-                    }
-
-                    if (Helper.Copy(dataPath, newPath, "data" 
-                        + Path.GetExtension(((FileSource)chart.Source).Data)))
-                    {
-                        ((FileSource)chart.Source).Data = Path.Combine(newPath,"data" 
-                        + Path.GetExtension(((FileSource)chart.Source).Data));
-                    }
-                }
-            }
-            if (!File.Exists(Path.Combine(newPath, "chart.html")))
-            {
-                Helper.Copy(Path.Combine(res, "templates", "chart.html"), newPath);
-            }
-            if (!File.Exists(Path.Combine(newPath, "jquery-1.11.1.js")))
-            {
-                Helper.Copy(Path.Combine(res, "jquery", "jquery-1.11.1.js"), newPath);
-            }
-            if (!File.Exists(Path.Combine(newPath, "highcharts.js")))
-            {
-                Helper.Copy(Path.Combine(res, "highcharts", "highcharts.js"), newPath);
-            }
-        }
-
-        private void deactivateWebView(object sender, WebBrowserDocumentCompletedEventArgs e)
-        {
-            WebBrowser wb = (WebBrowser)sender;
-            if (wb.Parent.Tag is Chart)
-            {
-                Chart chart = (Chart)wb.Parent.Tag;
-                string style = string.Format("height:{0}px; width:{1}px; positioning:{2}",
-                    chart.Height, chart.Width, chart.Positioning.PositioningMode.ToString());
-                wb.Document.All["chart"].Style = style;
-                if(chart.Source != null)
-                {
-                    if(chart.Source is FileSource)
-                    {
-                        FileSource fs = (FileSource)chart.Source;
-                        if (fs.Query != null || fs.Query != "")
-                        {
-                            if (fs.Data != null)
-                            {
-                                string data = "data" + Path.GetExtension(fs.Data);
-                                Object[] path = new Object[1];
-                                path[0] = (object)data;
-                                wb.Document.InvokeScript("startChart", path);
-                            }
-                        }
-                    }
-                    if(chart.Source is DbSource)
-                    {
-                        DbSource ds = (DbSource)chart.Source;
-                        if (ds.Query != null || ds.Query != "")
-                        {
-                            if (ds.Url != null)
-                            {
-                                Object[] path = new Object[1];
-                                path[0] = (object)ds.Url;
-                                wb.Document.InvokeScript("startChart", path);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    wb.Document.InvokeScript("startChart");
-                }
-            }
-            ((Control)sender).Enabled = false;
-        }
-
         /// <summary>
-        /// Searchs in the Panel for the important PictureBox and gives this box back.
+        /// Searchs in the HtmlPreview for the HtmlElement associated with the given IPreviewable.
         /// </summary>
-        /// <param name="prev">The previous.</param>
-        /// <returns></returns>
+        /// <param name="prev">The given IPreviewable, must not be null</param>
+        /// <returns>the HtmlElement associated with prev, or null if it is not in the DOM or the DOM cant be evaluated</returns>
         /// <exception cref="System.ArgumentException">parameter prev was null.</exception>
         public HtmlElement findElement(IPreviewable prev)
         {
             if (prev == null)
                 throw new ArgumentException("parameter prev was null.");
             HtmlElement element = null;
+            //get the prevs unique identifier which differs with type, and searches for an HtmlElement with this ID
             if (prev is Abstract2DTrackable)
             {
                 element = htmlPreview.Document.GetElementById(((Abstract2DTrackable)prev).SensorCosID);
@@ -1710,9 +1490,9 @@ namespace ARdevKit.Controller.EditorController
         }
 
         /// <summary>
-        /// sets the currentElement in EditorWindow an marks the PictureBox in the PreviewPanel.
+        /// Sets the currentElement in EditorWindow and marks the HtmlElement in the PreviewPanel by adding a border to it.
         /// </summary>
-        /// <param name="currentElement">The current element.</param>
+        /// <param name="currentElement">The current element, which should be marked and described by the PropertyPanel</param>
         public void setCurrentElement(IPreviewable currentElement)
         {
             //if there is a currentElement we musst set the box of the actual currentElement to normal
@@ -1825,41 +1605,7 @@ namespace ARdevKit.Controller.EditorController
                 this.ew.Tsm_editor_menu_edit_copie.Enabled = false;
             }
         }
-        /// <summary>
-        /// set the PictureBox of the Augmentation to a augmentationPreview with source icon
-        /// this is only able when the Augmentation is a Chart (all other Augmentations accepts no Source)
-        /// </summary>
-        /// <param name="currentElement">The current element.</param>
-        private void setSourcePreview(IPreviewable currentElement)
-        {
-            HtmlElement temp = this.findElement(currentElement);
-            //Image image1 = this.getSizedBitmap(currentElement);
-            //Image image2 = new Bitmap(ARdevKit.Properties.Resources.db_small);
-            //Image newPic = new Bitmap(image1.Width, image1.Height);
 
-            //Graphics graphic = Graphics.FromImage(newPic);
-            //graphic.DrawImage(image1, new Rectangle(0, 0, image1.Width, image1.Height));
-            //graphic.DrawImage(image2, new Rectangle(0, 0, image1.Width / 4, image1.Height / 4));
-            //temp.Image = newPic;
-            //adds the new ContextMenuItems for Source
-
-            //attaches eventhandlers each time when the site is loaded, which does htmlPreview.Refresh
-            /*temp.ContextMenu.MenuItems.Add("Source anzeigen", new EventHandler(this.show_source_by_click));
-            temp.ContextMenu.MenuItems.Add("Source löschen", new EventHandler(this.remove_source_by_click));
-            temp.ContextMenu.MenuItems.Add("QueryFile öffnen", new EventHandler(this.openQueryFile));
-            if (((AbstractDynamic2DAugmentation)currentElement).Source is FileSource)
-            {
-                temp.ContextMenu.MenuItems.Add("SourceFile öffnen", new EventHandler(this.openSourceFile));
-                //if there is no Query added the QueryButton'll be disabled.
-                if (((AbstractDynamic2DAugmentation)currentElement).Source.Query == null)
-                {
-                    temp.ContextMenu.MenuItems[5].Enabled = false;
-                }
-            }
-            temp.Refresh();*/
-
-            reloadCurrentWebsite();
-        }
         /// <summary>
         /// Recalculates the vector in dependency to panel.
         /// </summary>
@@ -2099,24 +1845,6 @@ namespace ARdevKit.Controller.EditorController
                 ((AbstractAugmentation)prev).Translation = result;
             }
         }
-
-        ///// <summary>
-        ///// This updates the position of the currentElement-Picturebox.
-        ///// </summary>
-        //public void updateTranslation()
-        //{
-        //    AbstractAugmentation current;
-
-        //    if (ew.CurrentElement is AbstractAugmentation)
-        //        current = (AbstractAugmentation)ew.CurrentElement;
-        //    else
-        //        return;
-
-        //    Vector3D tmp = recalculateVector(current.Translation);
-
-        //    PictureBox box = findElement(current);
-        //    box.Location = new Point((int)tmp.X - (box.Size.Width / 2), (int)tmp.Y - (box.Size.Height / 2));
-        //}
 
         /// <summary>
         /// Updates the element combobox.
@@ -2379,7 +2107,7 @@ namespace ARdevKit.Controller.EditorController
                     
                     if (element is AbstractDynamic2DAugmentation && ((AbstractDynamic2DAugmentation)element).Source != null)
                     {
-                        this.setSourcePreview(element);
+                        reloadCurrentWebsite();
                     }
                 }
             }
@@ -2401,7 +2129,7 @@ namespace ARdevKit.Controller.EditorController
 
                     if (element is AbstractDynamic2DAugmentation && ((AbstractDynamic2DAugmentation)element).Source != null)
                     {
-                        this.setSourcePreview(element);
+                        reloadCurrentWebsite();
                         ((AbstractDynamic2DAugmentation)element).Source = (AbstractSource)((AbstractDynamic2DAugmentation)copy).Source.Clone();
                     }
                 }
@@ -2670,7 +2398,6 @@ namespace ARdevKit.Controller.EditorController
 
         public void Dispose()
         {
-
             //this listener keeps calling disposed Previewcontroller, so it must be released
             htmlPreview.DocumentCompleted -= htmlPreview_DocumentCompleted;
             htmlPreview.DocumentCompleted -= htmlPreview_DocumentFirstCompleted;
@@ -2685,6 +2412,9 @@ namespace ARdevKit.Controller.EditorController
             fileWatcher.EnableRaisingEvents = false;
             fileWatcher.Dispose();
             fileWatcher = null;
+
+            if (Directory.Exists(TEMP_PATH))
+                Directory.Delete(TEMP_PATH, true);
 
             if(Websites != null)
             shutDownWebserver();
