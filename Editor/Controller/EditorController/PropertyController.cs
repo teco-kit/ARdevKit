@@ -443,24 +443,15 @@ namespace Controller.EditorController
             // Checks if X/Y position has been changed
             if ((String.Equals(e.ChangedItem.Label.ToString(), "X", StringComparison.Ordinal)
                 || String.Equals(e.ChangedItem.Label.ToString(), "Y", StringComparison.Ordinal))
-                && !(String.Equals(e.ChangedItem.Parent.Label.ToString(), "Rotating", StringComparison.Ordinal)))
+                && !(String.Equals(e.ChangedItem.Parent.Label.ToString(), "Translation", StringComparison.Ordinal)))
             {
-                this.ew.PreviewController.reloadPreviewable((AbstractAugmentation)this.ew.CurrentElement);
-                this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
-                //this replaces TODO: check if there are unexpected changes or if its even neede
-                /* PictureBox temp = this.ew.PreviewController.findElement(this.ew.CurrentElement);
-                temp.BorderStyle = BorderStyle.Fixed3D;
-                temp.BringToFront();*/
-
-                return;
-            }
-
-            // Checks if Z has been changed
-            if (String.Equals(e.ChangedItem.Label.ToString(), "Z", StringComparison.Ordinal)
-                && String.Equals(e.ChangedItem.Parent.Label.ToString(), "Rotation", StringComparison.Ordinal))
-            {
-                ew.PreviewController.rotateAugmentation(this.ew.CurrentElement);
-
+                if (this.ew.CurrentElement is AbstractAugmentation)
+                {
+                    AbstractAugmentation aug = (AbstractAugmentation)this.ew.CurrentElement;
+                    this.ew.PreviewController.setAugOnNativeVector(aug, aug.Translation);
+                    this.ew.PreviewController.reloadPreviewable((AbstractAugmentation)this.ew.CurrentElement);
+                    this.ew.PreviewController.setCurrentElement(this.ew.CurrentElement);
+                }
                 return;
             }
 

@@ -71,7 +71,7 @@ namespace ARdevKit
         /// The minscreenwidht
         /// </summary>
         /// <remarks>geht 28.01.2014 15:12</remarks>
-        public const uint MINSCREENWIDHT = 320;
+        public const uint MINSCREENWIDTH = 320;
 
         /// <summary>
         /// The minscreenheight
@@ -212,9 +212,8 @@ namespace ARdevKit
             InitializeComponent();
             //initializes additional controls
             mask = new MaskedTextBox("9000(Breite)px; 9000(Höhe)px");
-            toolStripWrapper = new ToolStripControlHost(mask);
-            if (toolStripWrapper.CanSelect)
-                toolStripWrapper.Select();
+            mask.Size = new System.Drawing.Size(163, 23);
+            toolStripWrapper = new ToolStripControlHost(mask);            
             mask.MaskInputRejected += screenSizeInputRejected;
             mask.KeyDown += mask_KeyDown;
             screenSizeInputToolTip = new ToolTip();
@@ -901,10 +900,10 @@ namespace ARdevKit
                 if (((ElementIcon)e.Data.GetData(typeof(ElementIcon)) != null))
                 {
                     ElementIcon icon = (ElementIcon)e.Data.GetData(typeof(ElementIcon));
-                    Point p = html_preview.PointToClient(Cursor.Position);
-
+                    //Point p = html_preview.PointToClient(Cursor.Position);
                     IPreviewable element = (IPreviewable)icon.Element.Prototype.Clone();
-                    icon.EditorWindow.PreviewController.addPreviewable(element, new Vector3D(p.X, p.Y, 0));
+                    Point htmlCoord = previewController.getHtmlCoordinatesFromScreenPoint(new Point(e.X, e.Y));
+                    icon.EditorWindow.PreviewController.addPreviewable(element, new Vector3D(htmlCoord.X, htmlCoord.Y, 0));
                 }
             }
             else
@@ -947,7 +946,7 @@ namespace ARdevKit
             this.elementCategories = new List<SceneElementCategory>();
             this.exportVisitor = new ExportVisitor();
             this.currentElement = null;
-            this.project.Screensize = new ScreenSize(MINSCREENWIDHT, MINSCREENHEIGHT);
+            this.project.Screensize = new ScreenSize(MINSCREENWIDTH, MINSCREENHEIGHT);
             this.project.Screensize.SizeChanged += new System.EventHandler(this.pnl_editor_preview_SizeChanged);
             registerElements();
         }
@@ -981,9 +980,9 @@ namespace ARdevKit
         /// <remarks>geht 26.01.2014 20:20</remarks>
         private void updateScreenSize()
         {
-            if (project.Screensize.Width < MINSCREENWIDHT)
+            if (project.Screensize.Width < MINSCREENWIDTH)
             {
-                this.project.Screensize.Width = MINSCREENWIDHT;
+                this.project.Screensize.Width = MINSCREENWIDTH;
             }
             if (project.Screensize.Height < MINSCREENHEIGHT)
             {
@@ -1537,10 +1536,10 @@ namespace ARdevKit
                     return;
                 }
                 uint[] parsedKoordinates = { uint.Parse(chosenVariables[0]), uint.Parse(chosenVariables[1]) };
-                if (parsedKoordinates[0] < MINSCREENWIDHT)
+                if (parsedKoordinates[0] < MINSCREENWIDTH)
                 {
                     screenSizeInputToolTip.ToolTipTitle = "Breite zu klein";
-                    screenSizeInputToolTip.Show("Bitte geben Sie eine Breite größer gleich "+ MINSCREENWIDHT+ " an.", mask, 0, -20, 5000);
+                    screenSizeInputToolTip.Show("Bitte geben Sie eine Breite größer gleich "+ MINSCREENWIDTH+ " an.", mask, 0, -20, 5000);
                     return;
                 }
                 else if (parsedKoordinates[1] < MINSCREENHEIGHT)

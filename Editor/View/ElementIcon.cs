@@ -125,15 +125,12 @@ namespace ARdevKit.View
          * <param name="sender">    Source of the event. </param>
          * <param name="e">         Event information to send to registered event handlers. </param>
          */
-
         public void onClick(object sender, EventArgs e)
         {
             if (editorWindow.PreviewController.currentMetaCategory != MetaCategory.Source)
             {
-                int y = (int)editorWindow.PreviewController.getMainContainerSize().Height / 2;
-                int x = (int)editorWindow.PreviewController.getMainContainerSize().Width / 2;
                 IPreviewable element = (IPreviewable)this.element.Prototype.Clone();
-                editorWindow.PreviewController.addPreviewable(element, new ARdevKit.Model.Project.Vector3D(x, y, 1));
+                editorWindow.PreviewController.addPreviewable(element, new Vector3D(0,0,0));
             }
         }
 

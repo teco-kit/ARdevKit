@@ -181,7 +181,7 @@ namespace ARdevKit.Controller.EditorController
 
             //start the Websitemanager, which hosts the previewpages
             this.Websites = new WebSiteHTMLManager(PREVIEW_PORT);
-            Websites.changeMainContainerSize(EditorWindow.MINSCREENWIDHT, EditorWindow.MINSCREENHEIGHT);
+            Websites.changeMainContainerSize(EditorWindow.MINSCREENWIDTH, EditorWindow.MINSCREENHEIGHT);
             webServerThread = new Thread(new ThreadStart(Websites.listen));
             webServerThread.Name = "WebServerThread";
             webServerThread.IsBackground = true;
@@ -194,7 +194,7 @@ namespace ARdevKit.Controller.EditorController
 
             //initialize mainContainerContextMenu
             mainContainerContextMenu = new ContextMenu();
-            mainContainerContextMenu.MenuItems.Add("einfügen", paste_augmentation_center);
+            mainContainerContextMenu.MenuItems.Add("einfügen", paste_augmentation);
             mainContainerContextMenu.MenuItems[0].Enabled = false;
 
             //initialize augmentationContextMenu
@@ -315,22 +315,26 @@ namespace ARdevKit.Controller.EditorController
         }
 
         /// <summary>
-        /// 
+        /// Is triggered every time the current Document has been fully loaded. It reattaches the Listener of to the DocuemntMouseDownEvents. It marks the
+        /// ew.CurrentElement with a border, if it should still be marked. It attaches MouseHandler to the charts, which cannot be handled with the MouseHandler for the whole Document.
+        /// It reloads the Previewables which are on the List of still to be updated.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender">The Webbrowser which finished loading the Document</param>
+        /// <param name="e">a WebBrowserDocumentCompletedEventArgs</param>
         private void htmlPreview_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             //to determine of this previewController should be currently used
             if (!this.ew.PreviewController.Equals(this) || disposed)
                 throw new Exception("This PreviewController should not be atached to the htmlPreview!");
 
-            //because if actions are triggered after oneanother the MouseDown eventhandler wasnt called
+            //during fast reloading of the page the mouseEventhandler was not attached to the new Document so it is now
             htmlPreview.Document.MouseDown -= handleDocumentMouseDown;
             htmlPreview.Document.MouseUp -= writeBackChangesfromDOM;
             htmlPreview.Document.MouseDown += handleDocumentMouseDown;
             htmlPreview.Document.MouseUp += writeBackChangesfromDOM;
 
+            //if the element was not added to the scene yet, or was not availible when it should have been selected,
+            //markCurrentElementInPreview is set true, so when the new Document finishes, the right Element gets a border
             if (markCurrentElementInPreview)
             {
                 if (ew.CurrentElement != null)
@@ -348,9 +352,8 @@ namespace ARdevKit.Controller.EditorController
                     selectedElement.style.zIndex = "10";
                 }
             }
-
-            //reload every Previewable that were changed, when the current index scene was not viewed
-            //and are now updated
+            
+            //reload every Previewable that was changed, when the current index scene was not viewed and therefore added to needToBeUpdated
             foreach (IPreviewable item in needToBeUpdated[index])
             {
                 reloadPreviewable(item);
@@ -368,32 +371,34 @@ namespace ARdevKit.Controller.EditorController
                 htmlChart.MouseMove += chartMouseMove;
             }
         }
+        
         /// <summary>
-        /// 
+        /// The senders DomElement(a IHTMLElement) is repositioned by adding the delta of the mouse positions during the whole
+        /// dragging process to te current position.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender">a HtmlElement, which is currently added to a Document and has therefore a DomElement</param>
+        /// <param name="e">HtmlElementEventArgs, mainly used for the OffsetMousePosition</param>
         private void chartMouseMove(object sender, HtmlElementEventArgs e)
         {
+            //the sender must be a HtmlElement
             HtmlElement draggedElement = (HtmlElement)sender;
+          
+            //drag the draggedElement only if, the left MouseButton is clicked while moving
             if (e.MouseButtonsPressed == MouseButtons.Left)
             {
                 IHTMLElement draggedDomElement = (IHTMLElement)draggedElement.DomElement;
-
+                //get the left and top position, default values are 0px
                 string oldMarginLeft = draggedDomElement.style.marginLeft;
                 string oldMarginTop = draggedDomElement.style.marginTop;
                 if (oldMarginLeft == null)
                     oldMarginLeft = "0px";
                 if (oldMarginTop == null)
                     oldMarginTop = "0px";
-                Debug.Print(String.Format("MousePosX = {0}; StartPositionX = {1}; currentMarginLeft = {2}\n", e.MousePosition.X, dragStartPosition.X, oldMarginLeft));
-                Debug.Print(String.Format("MousePosY = {0}; StartPositionY = {1}; currentMarginTop = {2}\n", e.MousePosition.Y, dragStartPosition.Y, oldMarginTop));
-                int newMarginLeft = e.OffsetMousePosition.X + Int16.Parse((oldMarginLeft).Replace("px", "")) - dragStartPosition.X;
-                int newMarginTop = e.OffsetMousePosition.Y + Int16.Parse((oldMarginTop).Replace("px", "")) - dragStartPosition.Y;
-                //if (newMarginLeft >= 0 && newMarginLeft + draggedElement.ClientRectangle.Width < getMainContainerSize().Width)
+                //calculate the new position by incrementing the current position by the difference between the current and the starting mouse position.
+                //the starting position should be set in the MouseDown Event
+                int newMarginLeft = Int16.Parse((oldMarginLeft).Replace("px", "")) + e.OffsetMousePosition.X - dragStartPosition.X;
+                int newMarginTop = Int16.Parse((oldMarginTop).Replace("px", "")) + e.OffsetMousePosition.Y - dragStartPosition.Y;
                 draggedDomElement.style.marginLeft = newMarginLeft + "px";
-
-                //if (newMarginTop >= 0 && newMarginTop + draggedElement.ClientRectangle.Height < getMainContainerSize().Height)
                 draggedDomElement.style.marginTop = newMarginTop + "px";
             }
         }
@@ -405,7 +410,9 @@ namespace ARdevKit.Controller.EditorController
         /// <param name="e"></param>
         private void chartMouseDown(object sender, HtmlElementEventArgs e)
         {
+            //the augmentation in the current Scene which shares the same ID with the sender is selected
             AbstractAugmentation aug = trackable.Augmentations.Find(augmentation => { return augmentation.ID == ((HtmlElement)sender).Id; });
+            //the augmentation can be clicked on, which means 
             ew.Cmb_editor_properties_objectSelection.SelectedItem = aug;
             if(e.MouseButtonsPressed == MouseButtons.Right)
             {
@@ -444,7 +451,6 @@ namespace ARdevKit.Controller.EditorController
             switch (clickedElement.GetAttribute("title"))
             {
                 case "containment-wrapper":
-                    //TODO set Screensize as editable or leave it with changes made to Screensize picking
                     if (e.MouseButtonsPressed == MouseButtons.Right)
                     {
                         mainContainerContextMenu.Show(ew.BackgroundPanel, e.MousePosition);
@@ -565,8 +571,6 @@ namespace ARdevKit.Controller.EditorController
             {
                 this.ew.Tsm_editor_menu_edit_delete.Enabled = true;
                 Vector3D center = new Vector3D(0, 0, 0);
-                center.Y = 0;
-                center.X = 0;
                 while (true)
                 {
                     //ask the user for the picture (if the trackable is a picturemarker)
@@ -582,6 +586,8 @@ namespace ARdevKit.Controller.EditorController
 
                         if (!this.ew.project.existTrackable(currentElement))
                         {
+                            if (!this.addElement(currentElement, center))
+                                return;
                             //diables all trackable elements excepted the on that was added.
                             foreach (SceneElementCategory c in this.ew.ElementCategories)
                             {
@@ -598,24 +604,23 @@ namespace ARdevKit.Controller.EditorController
                             this.trackable = (AbstractTrackable)currentElement;
                             this.ew.project.Trackables[index] = (AbstractTrackable)currentElement;
                             updateElementCombobox(trackable);
-                            this.addElement(currentElement, center);
+                           
                             ew.Cmb_editor_properties_objectSelection.SelectedItem = currentElement;                           
                             break;
                         }
                     }
                 }
             }
-            else if (currentElement is AbstractAugmentation && trackable != null && this.ew.project.Trackables[index].Augmentations.Count < 3)
+            else if (currentElement is AbstractAugmentation && trackable != null && trackable.Augmentations.Count < 3)
             {
                 bool isInitOk = currentElement.initElement(ew);
                 if (isInitOk)
                 {
+                    //check if the currentElement can be added to the scene
+                    if (!this.addElement(currentElement, v))
+                        return;
                     //set references 
                     trackable.Augmentations.Add((AbstractAugmentation)currentElement);
-                    this.setCoordinates(currentElement, new Vector3D(0, 0, 0));
-                    this.addElement(currentElement, new Vector3D(0, 0, 0));
-                    //this.setCoordinates(currentElement, v);
-                    //this.addElement(currentElement, v);
                     ((AbstractAugmentation)currentElement).Trackable = this.trackable;
                     updateElementCombobox(trackable);
                     ew.Cmb_editor_properties_objectSelection.SelectedItem = currentElement;
@@ -670,8 +675,10 @@ namespace ARdevKit.Controller.EditorController
         ///     adds the according preview to 
         /// </summary>
         /// <param name="currentElement"></param>
-        /// <param name="vector"></param>
-        public void addElement(IPreviewable currentElement, Vector3D vector)
+        /// <param name="vector"> a <see cref="Vector3D">Vector</see>, if the given <see cref="IPreviewable"/>Previewable</see> is
+        /// a trackable, the vector contains Metaio Coordinates, because it is a native metaio Element.
+        /// For the Html Augmentations it contains HTMLCoordinates</param>
+        public bool addElement(IPreviewable currentElement, Vector3D vector)    
         {
             if (currentElement is Abstract2DTrackable)
             {
@@ -695,7 +702,7 @@ namespace ARdevKit.Controller.EditorController
                         if(newPath == null)
                         {
                             MessageBox.Show("Es konnte keine Kopie der genutzten Bilddatei in " + TEMP_PATH + " angelegt werden");
-                            return;
+                            return false;
                         }
                         ((PictureMarker)currentElement).PicturePath = newPath;
                     }
@@ -706,7 +713,7 @@ namespace ARdevKit.Controller.EditorController
                         if (newPath == null)
                         {
                             MessageBox.Show("Es konnte keine Kopie der genutzten Bilddatei in "+TEMP_PATH+" angelegt werden");
-                            return;
+                            return false;
                         }
                         ((ImageTrackable)currentElement).ImagePath = newPath;
                     }
@@ -723,8 +730,7 @@ namespace ARdevKit.Controller.EditorController
                 {
                     MessageBox.Show(e.Message + " Versuchen Sie den Fehler zu beheben. Mit dem Drücken von ok, wird ein neuer Versuch gestartet.", "Fehler");
                     RemoveByValue<string, IPreviewable>(fileLookup, currentElement);
-                    addElement(currentElement, vector);
-                    return;
+                    return addElement(currentElement, vector);
                 }
                 preview.Tag = trackable.SensorCosID;
                 Websites.previews.Add(preview);
@@ -732,13 +738,14 @@ namespace ARdevKit.Controller.EditorController
                 htmlTrackable.Style = String.Format(@"width: {0}px; height: {1}px; z-index:{2}; margin-left: {3}px; margin-top: {4}px; position: absolute",
                 width, height,
                 vector.Z,
-                nativeToHtmlCoordinates(vector).X - width / 2, nativeToHtmlCoordinates(vector).Y - height / 2);
+                vector.X + (ew.project.Screensize.Width - width)/2, vector.Y + (ew.project.Screensize.Height - height)/2);
                 Websites.addElementAt(htmlTrackable, index);
                 this.trackable = trackable;
             }
             else if (currentElement is Chart)
             {
                 Chart chart = ((Chart)currentElement);
+                this.setAugOnHtmlVector(chart, vector);
                 HtmlElement htmlChart = htmlPreview.Document.CreateElement("div");
                 htmlChart.SetAttribute("id", chart.ID);
                 htmlChart.SetAttribute("class","augmentation");
@@ -807,21 +814,6 @@ namespace ARdevKit.Controller.EditorController
                 }
                 Websites.addElementAt(htmlChart, index);
             }
-            else if (currentElement is Abstract2DAugmentation && !(currentElement is AbstractHtmlElement))
-            {
-                Abstract2DAugmentation augmentation = ((Abstract2DAugmentation)currentElement);
-                HtmlElement htmlAugmentation = htmlPreview.Document.CreateElement("div");
-                Vector3D htmlCoordinate = nativeToHtmlCoordinates(augmentation.Translation);
-                Helper.Copy(((Abstract2DAugmentation)currentElement).ResFilePath, TEMP_PATH);
-                ((Abstract2DAugmentation)currentElement).ResFilePath = TEMP_PATH + Path.GetFileName(((Abstract2DAugmentation)currentElement).ResFilePath);
-                htmlAugmentation.Id = augmentation.ID;
-                htmlAugmentation.SetAttribute("class", "augmentation");
-                htmlAugmentation.Style = String.Format("background-size: 100% 100%; width: {0}; height: {1}; margin-left: {2}; margin-top: {3}; background-image:url(\"temp/{4}\"); z-index: {5}",
-                    augmentation.Width, augmentation.Height,
-                    htmlCoordinate.X, htmlCoordinate.Y,
-                    Path.GetFileName(((Abstract2DAugmentation)currentElement).ResFilePath) , htmlCoordinate.Y);
-                Websites.addElementAt(htmlAugmentation, index);
-            }
             else if (currentElement is HtmlImage)
             {
                 HtmlImage image = ((HtmlImage)currentElement);
@@ -832,7 +824,7 @@ namespace ARdevKit.Controller.EditorController
                 if(newPath == null)
                 {
                     MessageBox.Show("Es konnte keine Kopie der genutzten Bilddatei in " + TEMP_PATH + " angelegt werden");
-                    return;
+                    return false;
                 }
                 image.ResFilePath = newPath;
                 Bitmap preview = image.getPreview(ew.project.ProjectPath);
@@ -841,6 +833,7 @@ namespace ARdevKit.Controller.EditorController
                 preview.Tag = image.ID;
                 image.Width = preview.Width;
                 image.Height = preview.Height;
+                this.setAugOnHtmlVector(image, vector);
                 htmlImage.SetAttribute("src", "http://localhost:" + PREVIEW_PORT + "/" + image.ID);
                 htmlImage.Style = String.Format(@"width: {0}px; height: {1}px; z-index:{2}; margin-left: {3}px; margin-top: {4}px; position: absolute",
                 image.Width, image.Height,
@@ -852,6 +845,7 @@ namespace ARdevKit.Controller.EditorController
             else if (currentElement is HtmlVideo)
             {
                 HtmlVideo video = ((HtmlVideo)currentElement);
+                this.setAugOnHtmlVector(video, vector);
                 HtmlElement htmlVideoPrev = htmlPreview.Document.CreateElement("img");
                 //retrieving thumbnail for preview
                 AForge.Video.FFMPEG.VideoFileReader reader = new AForge.Video.FFMPEG.VideoFileReader();
@@ -867,7 +861,7 @@ namespace ARdevKit.Controller.EditorController
                 if(newPath == null)
                 {
                     MessageBox.Show("Es konnte keine Kopie der genutzten Videodatei in " + TEMP_PATH + " angelegt werden");
-                    return;
+                    return false;
                 }
                 video.ResFilePath = newPath;
                
@@ -882,7 +876,7 @@ namespace ARdevKit.Controller.EditorController
 
             }
             else if (currentElement is GenericHtml)
-            {
+            { 
                 GenericHtml element = ((GenericHtml)currentElement);
                 if (element.ResFilePath != null)
                 {
@@ -899,6 +893,7 @@ namespace ARdevKit.Controller.EditorController
 	                }
                     if(bracketsCount == 0)
                     {
+                        this.setAugOnHtmlVector(element, vector);
                         //get the ID and set as active element
                         System.Text.RegularExpressions.Regex idRex = new System.Text.RegularExpressions.Regex(@"\s*<\s*(?<tag>\S+)\s[^>]*id\s*=\s*""?(?<id>[^""\s]+)(""|\s)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
                         string elementId = idRex.Match(elementText).Groups["id"].Value;
@@ -919,7 +914,7 @@ namespace ARdevKit.Controller.EditorController
                             if (newPath == null)
                             {
                                 MessageBox.Show("Es konnte keine Kopie der genutzten HTMLDatei in " + TEMP_PATH + " angelegt werden");
-                                return;
+                                return false;
                             }
                             element.ResFilePath = newPath;
                             element.Tag = idRex.Match(elementText).Groups["tag"].Value;
@@ -928,6 +923,7 @@ namespace ARdevKit.Controller.EditorController
                         else
                         {
                             MessageBox.Show("Es gibt die von ihnen vergebene id bereits");
+                            return false;
                         }
                     }
                     else
@@ -945,6 +941,7 @@ namespace ARdevKit.Controller.EditorController
                 throw new NotSupportedException("Other then Abstract2DAugmentation/Abstract2DTrackable not yet supported");
             }
             reloadCurrentWebsite();
+            return true;
         }
 
         /// <summary>
@@ -972,26 +969,6 @@ namespace ARdevKit.Controller.EditorController
             //}
             element.ID = newId;
             return true;
-        }
-
-        /// <summary>
-        /// Converts a native metaio Vector3D to a HTMLVector.
-        /// This is necessary for all non HTMLElements, like AbstractTrackables and Not HTMLAugmentations
-        /// in order to use them in the HTMLPreview.
-        /// </summary>
-        /// <param name="native">the native metaio Vector3D, in a cetric coordinatesystem</param>
-        /// <returns>a HtmlVector, which X, and Y Values describe the top and left coordinates of HTMLPositioning</returns>
-        private Vector3D nativeToHtmlCoordinates(Vector3D native)
-        {
-            if (native == null)
-            {
-                throw new ArgumentNullException();
-            }
-            Vector3D result = new Vector3D(0, 0, native.Z);
-            ScreenSize currentSize = getMainContainerSize();
-            result.X = (int)((native.X + currentSize.Width / 2));
-            result.Y = (int)((currentSize.Height / 2 + native.Y));
-            return result;
         }
 
         /// <summary>
@@ -1312,7 +1289,7 @@ namespace ARdevKit.Controller.EditorController
                     AbstractSource source = chart.Source;
                     if (source is FileSource)
                     {
-                        Websites.chartFiles.Remove("source" + chart.ID);
+                        Websites.chartFiles.Remove("data" + chart.ID + Path.GetExtension(((FileSource)source).Data));
                     }
                     Websites.chartFiles.Remove("query" + chart.ID);
                 }
@@ -1340,8 +1317,8 @@ namespace ARdevKit.Controller.EditorController
             //add the Elements again to the Webpage, along with their corresponding files
             if (prev is Chart)
             {
-                this.addElement(prev, recalculateChartVector(((Abstract2DAugmentation)prev).Translation));
                 Chart chart = (Chart)prev;
+                this.addElement(chart, new Vector3D(chart.Positioning.Left, chart.Positioning.Top, chart.Translation.Z));
                 if (chart.Source != null)
                 {
                     //addSource
@@ -1350,15 +1327,12 @@ namespace ARdevKit.Controller.EditorController
             }
             else if (prev is AbstractHtmlElement)
             {
-                this.addElement(prev, recalculateChartVector(((Abstract2DAugmentation)prev).Translation));
+                AbstractHtmlElement elem = (AbstractHtmlElement)prev;
+                this.addElement(prev, new Vector3D(elem.Positioning.Left, elem.Positioning.Top, elem.Translation.Z));
             }
             else if (prev is AbstractTrackable)
             {
                 this.addElement(prev, new Vector3D(0, 0, 0));
-            }
-            else
-            {
-                this.addElement(prev, recalculateVector(((Abstract2DAugmentation)prev).Translation));
             }
 
             if (typeof(AbstractDynamic2DAugmentation).IsAssignableFrom(prev.GetType()) && ((AbstractDynamic2DAugmentation)prev).Source != null)
@@ -1420,8 +1394,8 @@ namespace ARdevKit.Controller.EditorController
             Websites.removeElementAt(findElement(prev), index);
             if (prev is Chart)
             {
-                this.addElement(prev, recalculateChartVector(((Abstract2DAugmentation)prev).Translation));
                 Chart chart = (Chart)prev;
+                this.addElement(chart, new Vector3D(chart.Positioning.Left, chart.Positioning.Top, chart.Translation.Z));
                 if (chart.Source != null)
                 {
                     ///addSource
@@ -1429,15 +1403,12 @@ namespace ARdevKit.Controller.EditorController
                 }
             } else if(prev is AbstractHtmlElement)
             {
-                this.addElement(prev, recalculateChartVector(((Abstract2DAugmentation)prev).Translation));
+                AbstractHtmlElement elem = (AbstractHtmlElement)prev;
+                this.addElement(prev, new Vector3D(elem.Positioning.Left, elem.Positioning.Top, elem.Translation.Z));
             }
             else if (prev is AbstractTrackable)
             {
                 this.addElement(prev, new Vector3D(0, 0, 0));
-            }
-            else
-            {
-                this.addElement(prev, recalculateVector(((Abstract2DAugmentation)prev).Translation));
             }
 
             if (typeof(AbstractDynamic2DAugmentation).IsAssignableFrom(prev.GetType()) && ((AbstractDynamic2DAugmentation)prev).Source != null)
@@ -1800,49 +1771,86 @@ namespace ARdevKit.Controller.EditorController
         }
 
         /// <summary>
-        /// Set all needed Coordinates for the augmentation.
+        /// Takes a Vector with HtmlCoordinates and changes the Translation Vector of the augmentation acordingly.
         /// </summary>
-        /// <param name="prev">The previous.</param>
-        /// <param name="newV">The new v.</param>
+        /// <param name="aug">The <see cref="AbstractAugmentation">augmentation</see> which Coordinates should be altered according to newV.</param>
+        /// <param name="newV">The new <see cref="Vector3D">vector</see> which contains HtmlCoordinates on which the aug shall be.</param>
         /// <exception cref="System.ArgumentException">
-        /// parameter prev was null.
+        /// parameter aug was null.
         /// or
         /// parameter newV was null.
         /// </exception>
-        public void setCoordinates(IPreviewable prev, Vector3D newV)
+        public void setAugOnHtmlVector(AbstractAugmentation aug, Vector3D newV)
         {
-            if (prev == null)
-                throw new ArgumentException("parameter prev was null.");
+            if (aug == null)
+                throw new ArgumentException("parameter aug was null.");
             if (newV == null)
                 throw new ArgumentException("parameter newV was null.");
 
-            if (prev is Chart)
-            {
-                ((Chart)prev).Positioning.Left = (int)newV.X;
-                ((Chart)prev).Positioning.Top = (int)newV.Y;
 
-                Vector3D result = new Vector3D(0, 0, ((Chart)prev).Translation.Z);
-                result.X = (int)(newV.X - getMainContainerSize().Width / 2 + ((Chart)prev).Width / 2);
-                result.Y = (int)(getMainContainerSize().Height / 2 - newV.Y - ((Chart)prev).Height / 2);
-                ((Chart)prev).Translation = result;
-            }
-            else if (prev is AbstractHtmlElement)
+            if (aug is Chart)
             {
-                Point position = htmlPreview.PointToClient(new Point((int)newV.X, (int)newV.Y));
-                ((AbstractHtmlElement)prev).Positioning.Left = (int)newV.X;
-                ((AbstractHtmlElement)prev).Positioning.Top = (int)newV.Y;
+                Chart chart = (Chart)aug;
+                chart.Positioning.Left = (int)newV.X;
+                chart.Positioning.Top = (int)newV.Y;
 
-                Vector3D result = new Vector3D(0, 0, ((AbstractHtmlElement)prev).Translation.Z);
-                result.X = (int)(newV.X - getMainContainerSize().Width / 2 + ((AbstractHtmlElement)prev).Width / 2);
-                result.Y = (int)(getMainContainerSize().Height / 2 - newV.Y - ((AbstractHtmlElement)prev).Height / 2);
-                ((AbstractHtmlElement)prev).Translation = result;
+                Vector3D result = new Vector3D(0, 0, chart.Translation.Z);
+                result.X = (int)(newV.X - getMainContainerSize().Width / 2 + chart.Width / 2);
+                result.Y = (int)(newV.Y - getMainContainerSize().Height / 2 + chart.Height / 2);
+                chart.Translation = result;
             }
-            else
+            else if (aug is AbstractHtmlElement)
             {
-                Vector3D result = new Vector3D(0, 0, 0);
-                result.X = (int)((newV.X - getMainContainerSize().Width / 2) / scale / 1.6);
-                result.Y = (int)((getMainContainerSize().Height / 2 - newV.Y) / scale / 1.6);
-                ((AbstractAugmentation)prev).Translation = result;
+
+                AbstractHtmlElement elem = (AbstractHtmlElement)aug;
+                elem.Positioning.Left = (int)newV.X;
+                elem.Positioning.Top = (int)newV.Y;
+
+                Vector3D result = new Vector3D(0, 0, elem.Translation.Z);
+                result.X = (int)(newV.X - getMainContainerSize().Width / 2 + elem.Width / 2);
+                result.Y = (int)(newV.Y - getMainContainerSize().Height / 2 + elem.Height / 2);
+                elem.Translation = result;
+            }
+        }
+
+        /// <summary>
+        /// Takes a Vector with MetaioCoordinates and changes the HtmlPositioning of the augmentation acordingly.
+        /// </summary>
+        /// <param name="aug">The <see cref="AbstractAugmentation">augmentation</see> which Coordinates should be altered according to newV.</param>
+        /// <param name="newV">The new <see cref="Vector3D">vector</see> which contains MetaioCoordinates on which the aug shall be.</param>
+        /// <exception cref="System.ArgumentException">
+        /// parameter aug was null.
+        /// or
+        /// parameter newV was null.
+        /// </exception>
+        public void setAugOnNativeVector(AbstractAugmentation aug, Vector3D newV)
+        {
+            if (aug == null)
+                throw new ArgumentException("parameter aug was null.");
+            if (newV == null)
+                throw new ArgumentException("parameter newV was null.");
+
+            if (aug is Chart)
+            {
+                Chart chart = (Chart)aug;
+                chart.Translation.X = newV.X;
+                chart.Translation.Y = newV.Y;
+
+                HtmlPositioning result = new HtmlPositioning(chart.Positioning.PositioningMode);
+                result.Left = (int)(newV.X + getMainContainerSize().Width / 2 - chart.Width / 2);
+                result.Top = (int)(newV.Y + getMainContainerSize().Height / 2 - chart.Height / 2);
+                chart.Positioning = result;
+            }
+            else if (aug is AbstractHtmlElement)
+            {
+                AbstractHtmlElement elem = (AbstractHtmlElement)aug;
+                elem.Translation.X = newV.X;
+                elem.Translation.Y = newV.Y;
+
+                HtmlPositioning result = new HtmlPositioning(elem.Positioning.PositioningMode);
+                result.Left = (int)(newV.X + getMainContainerSize().Width / 2 - elem.Width / 2);
+                result.Top = (int)(newV.Y + getMainContainerSize().Height / 2 - elem.Height / 2);
+                elem.Positioning = result;
             }
         }
 
@@ -1980,7 +1988,8 @@ namespace ARdevKit.Controller.EditorController
                     float newTop = ((IHTMLElement)changedElement.DomElement).offsetTop;
                     Websites.changePositionOf(changedElement, index, newMarginTop ,newMarginLeft);
                     reloadCurrentWebsite();
-                    setCoordinates(ew.CurrentElement, new Vector3D(newLeft, newTop, ((AbstractAugmentation)ew.CurrentElement).Translation.Z));
+                    setAugOnHtmlVector((AbstractAugmentation)ew.CurrentElement, 
+                        new Vector3D(newLeft, newTop, ((AbstractAugmentation)ew.CurrentElement).Translation.Z));
                     ew.PropertyGrid1.SelectedObject = ew.CurrentElement;
                 }
             }
@@ -1996,49 +2005,6 @@ namespace ARdevKit.Controller.EditorController
             htmlPreview.Refresh(WebBrowserRefreshOption.Completely);
             WebBrowserHelper.ClearCache();
             htmlPreview.Navigate(htmlPreview.Url);
-        }
-
-        //TODO
-        ///// <summary>
-        ///// Event to move a object of type Control.
-        ///// Also updates x/y coord in the Tag of the control.
-        ///// </summary>
-        ///// <param name="sender">Source of the event.</param>
-        ///// <param name="e">Mouse event information.</param>
-        //private void controlMouseMove(object sender, MouseEventArgs e)
-        //{
-        //    if (e.Button == System.Windows.Forms.MouseButtons.Left)
-        //    {
-        //        IPreviewable prev = (IPreviewable)((Control)sender).Tag;
-        //        PictureBox box = 
-        //            this.findElement(prev);
-        //        this.setCurrentElement(prev);
-        //        Control controlToMove = (Control)sender;
-        //        controlToMove.BringToFront();
-
-        //        if (((Control)sender).Tag is AbstractAugmentation)
-        //        {
-
-        //            AbstractAugmentation aa;
-        //            aa = (AbstractAugmentation)((Control)sender).Tag;
-        //            this.setCoordinates(this.ew.CurrentElement, new Vector3D((int)((controlToMove.Location.X + e.Location.X)),
-        //                (int)((controlToMove.Location.Y + e.Location.Y)), 0));
-        //        }
-        //        controlToMove.Location = new Point(controlToMove.Location.X + e.Location.X - (box.Width / 2),
-        //               controlToMove.Location.Y + e.Location.Y - (box.Height / 2));
-        //    }
-        //}
-
-        /// <summary>
-        /// Event handler. removes the current object.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        private void remove_by_click(object sender, EventArgs e)
-        {
-            IPreviewable temp = (IPreviewable)((ContextMenu)((MenuItem)sender).Parent).Tag;
-            this.removePreviewable((IPreviewable)((ContextMenu)((MenuItem)sender).Parent).Tag);
-            ew.PropertyGrid1.SelectedObject = null;
         }
 
 
@@ -2100,17 +2066,25 @@ namespace ARdevKit.Controller.EditorController
             {
                 if (this.trackable.Augmentations.Count < 3)
                 {
-                    //TODO
-                    //Point p = this.panel.PointToClient(Cursor.Position);
                     IPreviewable element = (IPreviewable)this.copy.Clone();
-                    //this.addPreviewable(element, new Vector3D(p.X, p.Y, 0));
+                    Point htmlPos = getHtmlCoordinatesFromScreenPoint(Cursor.Position);
+                    this.addPreviewable(element, new Vector3D(htmlPos.X, htmlPos.Y,((AbstractAugmentation)element).Translation.Z));
                     
                     if (element is AbstractDynamic2DAugmentation && ((AbstractDynamic2DAugmentation)element).Source != null)
                     {
-                        reloadCurrentWebsite();
+                        //TODO add Source to copied chart
                     }
                 }
             }
+        }
+
+        public Point getHtmlCoordinatesFromScreenPoint(Point point)
+        {
+            HtmlElement container = htmlPreview.Document.GetElementById("containment-wrapper");
+            Rectangle offset = container.OffsetRectangle;
+            point.X -= (htmlPreview.Document.Window.Position.X + offset.X);
+            point.Y -= (htmlPreview.Document.Window.Position.Y + offset.Y);
+            return point;
         }
 
         /// <summary>
@@ -2129,41 +2103,21 @@ namespace ARdevKit.Controller.EditorController
 
                     if (element is AbstractDynamic2DAugmentation && ((AbstractDynamic2DAugmentation)element).Source != null)
                     {
-                        reloadCurrentWebsite();
+                        //TODO add Source to copied Element
                         ((AbstractDynamic2DAugmentation)element).Source = (AbstractSource)((AbstractDynamic2DAugmentation)copy).Source.Clone();
                     }
                 }
             }
         }
 
-
-
         /**
-         * <summary>    Raises the drag event when a source enters a augmentation. </summary>
+         * <summary>    Raises the drag event when a source is dropped on an augmentation. </summary>
          *
          * <remarks>    Robin, 19.01.2014. </remarks>
          *
          * <param name="sender">    Source of the event. </param>
          * <param name="e">         Event information to send to registered event handlers. </param>
          */
-
-        public void onAugmentationEnter(object sender, DragEventArgs e)
-        {
-            if (currentMetaCategory == MetaCategory.Source)
-            {
-                e.Effect = DragDropEffects.Move;
-            }
-        }
-
-        /**
-         * <summary>    Raises the drag event when a source is droped on an augmentation. </summary>
-         *
-         * <remarks>    Robin, 19.01.2014. </remarks>
-         *
-         * <param name="sender">    Source of the event. </param>
-         * <param name="e">         Event information to send to registered event handlers. </param>
-         */
-
         public void onAugmentationDrop(object sender, DragEventArgs e)
         {
             if (currentMetaCategory == MetaCategory.Source)
@@ -2185,17 +2139,6 @@ namespace ARdevKit.Controller.EditorController
                 AbstractSource source = (AbstractSource)icon.Element.Prototype.Clone();
                 addSource(source, augmentation);
             }
-        }
-
-        /// <summary>
-        /// EventHandler for Action before the ContextMenu is open.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        private void popupContextMenu(object sender, EventArgs e)
-        {
-            this.setCurrentElement((IPreviewable)((ContextMenu)sender).Tag);
-            ew.PropertyGrid1.SelectedObject = (IPreviewable)((ContextMenu)sender).Tag;
         }
 
         /// <summary>
@@ -2315,18 +2258,15 @@ namespace ARdevKit.Controller.EditorController
             //return result;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="size"></param>
         public void setMainContainerSize(ScreenSize size)
         {
             Websites.changeMainContainerSize(size.Width, size.Height);
             rescalePreviewPanel(size.Width, size.Height);
             reloadCurrentWebsite();
-        }
-
-        internal void updateElement(IPreviewable previewable)
-        {
-            HtmlElement htmlPrev = findElement(previewable);
-            Websites.removeElementAt(htmlPrev, index);
-            Websites.addElementAt(htmlPrev, index);
         }
 
         /// <summary>
@@ -2349,46 +2289,8 @@ namespace ARdevKit.Controller.EditorController
             if (index_pre == ew.Cmb_editor_properties_objectSelection.SelectedIndex)
                 setCurrentElement(trackable);
         }
-        /// <summary>
-        /// iterates upwords through html stucture and sums up the offsets
-        /// </summary>
-        /// <param name="el">the HtmlElement from which the offset to the WebbrowserCOntrol is calculated</param>
-        /// <returns>the offset from the HtmlElement to the Browser showing it</returns>
-        public Point getOffset(HtmlElement el)
-        {
-            //get element pos
-            Point pos = new Point(el.OffsetRectangle.Left, el.OffsetRectangle.Top);
-
-            //get the parents pos
-            HtmlElement tempEl = el.OffsetParent;
-            while (tempEl != null)
-            {
-                pos.X += tempEl.OffsetRectangle.Left;
-                pos.Y += tempEl.OffsetRectangle.Top;
-                tempEl = tempEl.OffsetParent;
-            }
-
-            return pos;
-        }
-
-        public Point getDomOffset(HtmlElement el)
-        {
-            //get element pos
-            Point pos = new Point(((IHTMLElement)el.DomElement).offsetLeft, ((IHTMLElement)el.DomElement).offsetTop);
-
-            //get the parents pos
-            HtmlElement tempEl = el.OffsetParent;
-            while (tempEl != null)
-            {
-                pos.X += ((IHTMLElement)el.DomElement).offsetLeft;
-                pos.Y += ((IHTMLElement)el.DomElement).offsetTop;
-                tempEl = tempEl.OffsetParent;
-            }
-
-            return pos;
-        }
-
-        public void shutDownWebserver()
+        
+        private void shutDownWebserver()
         {
             Websites.Listener.Server.Close();
             if (!webServerThread.Join(1000)) // try to wait for it...
@@ -2396,6 +2298,9 @@ namespace ARdevKit.Controller.EditorController
             Websites = null;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void Dispose()
         {
             //this listener keeps calling disposed Previewcontroller, so it must be released

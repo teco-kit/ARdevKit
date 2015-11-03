@@ -78,10 +78,16 @@ namespace ARdevKit.Model.Project
         ///
         /// <param name="positioningMode"> The position. </param>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-
         public HtmlPositioning(PositioningModes positioningMode)
         {
             this.positioningMode = positioningMode;
+        }
+
+        public HtmlPositioning(int left, int top)
+        {
+            positioningMode = PositioningModes.ABSOLUTE;
+            Left = left;
+            Top = top;
         }
     }
 }
